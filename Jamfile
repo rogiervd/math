@@ -1,0 +1,8 @@
+project /math ;
+
+# Declare target /math//math as a header-only library.
+alias math : : : :
+    <include>include
+    <cxxflags>"-std=c++0x"
+    ;
+

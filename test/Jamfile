@@ -1,0 +1,32 @@
+import testing ;
+
+project
+    : requirements
+    <library>/boost/test//boost_unit_test_framework
+    <library>/math//math
+    <warnings-as-errors>on
+
+## Note on optimisations through GCC command line settings.
+## Most of these settings turn out to only make the baseline "a+b" worse.
+## I got confused by this for a bit.
+# This causes errors:
+#      <toolset>gcc:<cxxflags>"-ffast-math"
+# This causes only errors in the handling of signed zeros:
+#      <toolset>gcc:<cxxflags>"-fassociative-math -fno-signed-zeros -fno-trapping-math"
+# It may still be useful to make sure the tests work well under
+# "-fno-signed-zeros".
+
+# -ffinite-math-only actually does make things faster, but this is not something
+# we want.
+# I think.
+# We need to use -inf as 0.
+#      <toolset>gcc:<cxxflags>"-ffinite-math-only"
+
+# Don't use this! Valgrind 3.7.0 has imperfect floating-point simulation:
+# http://valgrind.org/docs/manual/manual-core.html#manual-core.limits
+#      <testing.launcher>"valgrind --leak-check=full --error-exitcode=1"
+#      <testing.launcher>"valgrind --error-exitcode=1"
+    ;
+
+alias "math-tests" : math ;
+
