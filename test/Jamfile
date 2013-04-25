@@ -22,10 +22,7 @@ project
 # We need to use -inf as 0.
 #      <toolset>gcc:<cxxflags>"-ffinite-math-only"
 
-# Don't use this! Valgrind 3.7.0 has imperfect floating-point simulation:
-# http://valgrind.org/docs/manual/manual-core.html#manual-core.limits
-#      <testing.launcher>"valgrind --leak-check=full --error-exitcode=1"
-#      <testing.launcher>"valgrind --error-exitcode=1"
+      <testing.launcher>"valgrind --leak-check=full --error-exitcode=1"
     ;
 
 alias "math-tests" : math ;

@@ -45,6 +45,7 @@ bypass explicit error handling in favour of leaving this to the hardware.
 
 #include <iostream>
 #include <type_traits>
+#include <string>
 
 #include <boost/mpl/assert.hpp>
 #include <boost/mpl/not.hpp>
@@ -52,6 +53,26 @@ bypass explicit error handling in favour of leaving this to the hardware.
 #include "math/log-float.hpp"
 
 BOOST_AUTO_TEST_SUITE(test_suite_log_float)
+
+/**
+Check for a command line option --no-long-double, and return false iff it is
+found.
+This is useful to switch off checking with long double under Valgrind.
+Valgrind 3.7.0 uses double-precision computations for long double.
+http://valgrind.org/docs/manual/manual-core.html#manual-core.limits
+*/
+bool enable_long_double() {
+    for (int argument_index = 1;
+        argument_index <boost::unit_test::framework::master_test_suite().argc;
+        ++ argument_index)
+    {
+        std::string argument = boost::unit_test::framework::master_test_suite()
+            .argv [argument_index];
+        if (argument == "--no-long-double")
+            return false;
+    }
+    return true;
+}
 
 // **** Test domain error handling ****
 // Force a domain error.
@@ -827,15 +848,18 @@ template <typename RealType, class Policy>
 BOOST_AUTO_TEST_CASE (test_log_float_unary) {
     test_both_log_float_unary_impl <float, policy0>();
     test_both_log_float_unary_impl <double, policy0>();
-    test_both_log_float_unary_impl <long double, policy0>();
+    if (enable_long_double())
+        test_both_log_float_unary_impl <long double, policy0>();
 
     test_both_log_float_unary_impl <float, policy1>();
     test_both_log_float_unary_impl <double, policy1>();
-    test_both_log_float_unary_impl <long double, policy1>();
+    if (enable_long_double())
+        test_both_log_float_unary_impl <long double, policy1>();
 
     test_both_log_float_unary_impl <float, policy2>();
     test_both_log_float_unary_impl <double, policy2>();
-    test_both_log_float_unary_impl <long double, policy2>();
+    if (enable_long_double())
+        test_both_log_float_unary_impl <long double, policy2>();
 }
 
 // **** Test binary operations ****
@@ -1124,15 +1148,18 @@ template <typename RealType, class Policy>
 BOOST_AUTO_TEST_CASE (test_log_float_binary_exact) {
     test_log_float_binary_exact_impl <float, policy0>();
     test_log_float_binary_exact_impl <double, policy0>();
-    test_log_float_binary_exact_impl <long double, policy0>();
+    if (enable_long_double())
+        test_log_float_binary_exact_impl <long double, policy0>();
 
     test_log_float_binary_exact_impl <float, policy1>();
     test_log_float_binary_exact_impl <double, policy1>();
-    test_log_float_binary_exact_impl <long double, policy1>();
+    if (enable_long_double())
+        test_log_float_binary_exact_impl <long double, policy1>();
 
     test_log_float_binary_exact_impl <float, policy2>();
     test_log_float_binary_exact_impl <double, policy2>();
-    test_log_float_binary_exact_impl <long double, policy2>();
+    if (enable_long_double())
+        test_log_float_binary_exact_impl <long double, policy2>();
 }
 
 // ** Test binary operations on non-corner cases (approximate)
@@ -1291,9 +1318,23 @@ template <typename RealType, class Policy>
             example[0], math::as_exponent());
         math::log_float <RealType, Policy> right (
             example[1], math::as_exponent());
-//        std::cout << "" << RealType (left) << " + " << RealType (right);
+
+/*        std::cout << "" << left << " + " << right;
+        try {
+            std::cout << " (i.e. " << RealType (left) << " + "
+                << RealType (right) << ")";
+        } catch (std::exception &) {}*/
+
         math::log_float <RealType, Policy> result = left + right;
-//        std::cout << " = " << RealType (result) << "?" << std::endl;
+
+/*        std::cout << " = " << result;
+        try {
+            std::cout << " (i.e. " << RealType (result) << ")";
+        } catch (std::exception &) {}
+        std::cout << "?" << std::endl;
+        std::cout << "Should be " << example [2] << " and " << example [3]
+            << " (in " << typeid (RealType).name() << ")"
+            << std::endl;*/
 
         RealType error =
             log_float_addition_error (result, example [2], example [3])
@@ -1435,6 +1476,7 @@ template <typename RealType, class Policy>
         error_eps = error / std::numeric_limits <RealType>::epsilon();
 //        std::cout << "Error: " << error << " = "
 //            << error_eps << " eps." << std::endl;
+//        std::cout << "Type: " << typeid (RealType).name() << std::endl;
         BOOST_CHECK (error_eps < 6);
 
         math::signed_log_float <RealType, Policy> times_result_signed;
@@ -1546,15 +1588,18 @@ template <typename RealType, class Policy>
 BOOST_AUTO_TEST_CASE (test_log_float_binary_approximate) {
     test_log_float_binary_approximate_arithmetic <float, policy0> ();
     test_log_float_binary_approximate_arithmetic <double, policy0> ();
-    test_log_float_binary_approximate_arithmetic <long double, policy0> ();
+    if (enable_long_double())
+        test_log_float_binary_approximate_arithmetic <long double, policy0> ();
 
     test_log_float_binary_approximate_arithmetic <float, policy1> ();
     test_log_float_binary_approximate_arithmetic <double, policy1> ();
-    test_log_float_binary_approximate_arithmetic <long double, policy1> ();
+    if (enable_long_double())
+        test_log_float_binary_approximate_arithmetic <long double, policy1> ();
 
     test_log_float_binary_approximate_arithmetic <float, policy2> ();
     test_log_float_binary_approximate_arithmetic <double, policy2> ();
-    test_log_float_binary_approximate_arithmetic <long double, policy2> ();
+    if (enable_long_double())
+        test_log_float_binary_approximate_arithmetic <long double, policy2> ();
 }
 
 // **** Test functions that mimic the ones from <cmath> ****
@@ -1661,15 +1706,18 @@ template <typename RealType, class Policy>
 BOOST_AUTO_TEST_CASE (test_log_float_functions) {
     test_log_float_functions_impl <float, policy0>();
     test_log_float_functions_impl <double, policy0>();
-    test_log_float_functions_impl <long double, policy0>();
+    if (enable_long_double())
+        test_log_float_functions_impl <long double, policy0>();
 
     test_log_float_functions_impl <float, policy1>();
     test_log_float_functions_impl <double, policy1>();
-    test_log_float_functions_impl <long double, policy1>();
+    if (enable_long_double())
+        test_log_float_functions_impl <long double, policy1>();
 
     test_log_float_functions_impl <float, policy2>();
     test_log_float_functions_impl <double, policy2>();
-    test_log_float_functions_impl <long double, policy2>();
+    if (enable_long_double())
+        test_log_float_functions_impl <long double, policy2>();
 }
 
 // **** Test conversion and interaction ****
@@ -1750,9 +1798,11 @@ void test_log_float_conversion() {
         BOOST_CHECK_EQUAL (swp0.sign(), +1);
         BOOST_CHECK_EQUAL (swp0.exponent(), 0.);
         // Different ExponentType
-        math::signed_log_float <long double, policy1> swp2 (swp0);
-        BOOST_CHECK_EQUAL (swp2.sign(), +1);
-        BOOST_CHECK_EQUAL (swp2.exponent(), 0.);
+        if (enable_long_double()) {
+            math::signed_log_float <long double, policy1> swp2 (swp0);
+            BOOST_CHECK_EQUAL (swp2.sign(), +1);
+            BOOST_CHECK_EQUAL (swp2.exponent(), 0.);
+        }
     }
 
     // *** Conversion from ints
@@ -1837,7 +1887,7 @@ void test_log_float_operator_scalar() {
         BOOST_CHECK (!zero);
     }
 
-    {
+    if (enable_long_double()) {
         auto zero = w - 1.l;
         BOOST_MPL_ASSERT ((std::is_same <
             decltype (zero), math::signed_log_float <long double, policy1> >));
@@ -1851,7 +1901,7 @@ void test_log_float_operator_scalar() {
     }
 
     w = 3;
-    {
+    if (enable_long_double()) {
         auto nine = 3.l * w;
         BOOST_MPL_ASSERT ((std::is_same <
             decltype (nine), math::signed_log_float <long double, policy1> >));
