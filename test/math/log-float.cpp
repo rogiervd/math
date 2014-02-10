@@ -55,7 +55,7 @@ bypass explicit error handling in favour of leaving this to the hardware.
 BOOST_AUTO_TEST_SUITE(test_suite_log_float)
 
 /**
-Check for a command line option --no-long-double, and return false iff it is
+Check for a command line option --with-long-double, and return true iff it is
 found.
 This is useful to switch off checking with long double under Valgrind.
 Valgrind 3.7.0 uses double-precision computations for long double.
@@ -68,10 +68,10 @@ bool enable_long_double() {
     {
         std::string argument = boost::unit_test::framework::master_test_suite()
             .argv [argument_index];
-        if (argument == "--no-long-double")
-            return false;
+        if (argument == "--with-long-double")
+            return true;
     }
-    return true;
+    return false;
 }
 
 // **** Test domain error handling ****
