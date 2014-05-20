@@ -99,11 +99,11 @@ namespace math { namespace detail {
     inline int sign (
         log_float_base <signed_log_float <ExponentType, Policy>, ExponentType>
             const & w)
-    { return w.this_()->sign(); }
+    { return w.sign(); }
 
     template <typename Wide, typename ExponentType>
     inline ExponentType exponent (log_float_base <Wide, ExponentType> const & w)
-    { return w.this_()->exponent(); }
+    { return w.exponent(); }
 
 }} // namespace math::detail
 

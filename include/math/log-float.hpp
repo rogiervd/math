@@ -33,6 +33,7 @@ Define the log_float and signed_log_float classes.
 #include <algorithm>
 // For std::pair and std::tie
 #include <utility>
+#include <type_traits>
 
 #include <boost/utility/enable_if.hpp>
 
@@ -122,9 +123,6 @@ namespace math {
 
         /// Copy-construct.
         log_float (log_float const & other) = default;
-
-        /// Move-construct.
-//        log_float (log_float && other) = default;
 
         /// Generalised copy construction with the same policy: implicit.
         template <typename OtherExponentType>
@@ -258,11 +256,6 @@ namespace math {
         : exponent_ (other.exponent()), sign_ (other.sign())
         { assert (sign_ == -1 || sign_ == +1); }
 
-        /// Move-construct.
-        /*signed_log_float (signed_log_float && other)
-        : exponent_ (other.exponent()), sign_ (other.sign())
-        { assert (sign_ == -1 || sign_ == +1); }*/
-
         /// Generalised copy construction with the same policy: implicit.
         template <typename OtherExponentType>
             signed_log_float (
@@ -300,11 +293,11 @@ namespace math {
         }
 
         /// Multiply with another log_float or signed_log_float in place.
-        template <class LogFloat, typename OtherExponentType>
-            typename boost::enable_if <boost::is_same <typename
-                LogFloat::policy_type, Policy>, signed_log_float &>::type
-        operator *= (detail::log_float_base <LogFloat, OtherExponentType>
-            const & other)
+        template <class LogFloat, typename OtherExponentType, class Enable =
+            typename boost::enable_if <std::is_same <typename
+                LogFloat::policy_type, Policy>>::type>
+        signed_log_float & operator *= (
+            detail::log_float_base <LogFloat, OtherExponentType> const & other)
         {
             this->exponent_ = detail::multiply_log_float (
                 this->exponent_, detail::exponent (other), Policy());
@@ -313,11 +306,11 @@ namespace math {
         }
 
         /// Divide by another log_float or signed_log_float in place.
-        template <class LogFloat, typename OtherExponentType>
-            typename boost::enable_if <boost::is_same <typename
-                LogFloat::policy_type, Policy>, signed_log_float &>::type
-        operator /= (detail::log_float_base <LogFloat, OtherExponentType>
-            const & other)
+        template <class LogFloat, typename OtherExponentType, class Enable =
+            typename boost::enable_if <std::is_same <typename
+                LogFloat::policy_type, Policy>>::type>
+        signed_log_float & operator /= (
+            detail::log_float_base <LogFloat, OtherExponentType> const & other)
         {
             this->exponent_ = detail::divide_log_float (
                 this->exponent_, detail::exponent (other), Policy());
@@ -326,11 +319,11 @@ namespace math {
         }
 
         /// Add another log_float or signed_log_float in place.
-        template <class LogFloat, typename OtherExponentType>
-            typename boost::enable_if <boost::is_same <typename
-                LogFloat::policy_type, Policy>, signed_log_float &>::type
-        operator += (detail::log_float_base <LogFloat, OtherExponentType>
-            const & other)
+        template <class LogFloat, typename OtherExponentType, class Enable =
+            typename boost::enable_if <std::is_same <typename
+                LogFloat::policy_type, Policy>>::type>
+        signed_log_float & operator += (
+            detail::log_float_base <LogFloat, OtherExponentType> const & other)
         {
             std::tie (this->exponent_, this->sign_)
                 = detail::add_signed_log_float (this->exponent_, this->sign_,
@@ -339,11 +332,11 @@ namespace math {
         }
 
         /// Subtract another log_float or signed_log_float in place.
-        template <class LogFloat, typename OtherExponentType>
-            typename boost::enable_if <boost::is_same <typename
-                LogFloat::policy_type, Policy>, signed_log_float &>::type
-        operator -= (detail::log_float_base <LogFloat, OtherExponentType>
-            const & other)
+        template <class LogFloat, typename OtherExponentType, class Enable =
+            typename boost::enable_if <std::is_same <typename
+                LogFloat::policy_type, Policy>>::type>
+        signed_log_float & operator -= (
+            detail::log_float_base <LogFloat, OtherExponentType> const & other)
         {
             std::tie (this->exponent_, this->sign_) =
                 detail::add_signed_log_float (
@@ -374,7 +367,7 @@ namespace math {
                 detail::sign (right) * detail::exponent (right);
         } else {
             // (-0 < +0) = false.
-            if (!*left.this_() && !*right.this_())
+            if (!left && !right)
                 return false;
             else if (isnan (detail::exponent (left))
                     || isnan (detail::exponent (right)))
@@ -398,7 +391,7 @@ namespace math {
             return detail::sign (left) * detail::exponent (left) >
                 detail::sign (right) * detail::exponent (right);
         } else {
-            if (!*left.this_() && !*right.this_())
+            if (!left && !right)
                 return false;
             else if (isnan (detail::exponent (left))
                     || isnan (detail::exponent (right)))
@@ -421,7 +414,7 @@ namespace math {
             return detail::sign (left) * detail::exponent (left) <=
                 detail::sign (right) * detail::exponent (right);
         } else {
-            if (!*left.this_() && !*right.this_())
+            if (!left && !right)
                 return true;
             else if (isnan (detail::exponent (left))
                     || isnan (detail::exponent (right)))
@@ -444,7 +437,7 @@ namespace math {
             return detail::sign (left) * detail::exponent (left) >=
                 detail::sign (right) * detail::exponent (right);
         } else {
-            if (!*left.this_() && !*right.this_())
+            if (!left && !right)
                 return true;
             else if (isnan (detail::exponent (left))
                     || isnan (detail::exponent (right)))
@@ -466,7 +459,7 @@ namespace math {
         if (detail::sign (left) == detail::sign (right)) {
             return detail::exponent (left) == detail::exponent (right);
         } else {
-            return !*left.this_() && !*right.this_();
+            return !left && !right;
         }
     }
 
@@ -482,17 +475,17 @@ namespace math {
         if (detail::sign (left) == detail::sign (right)) {
             return detail::exponent (left) != detail::exponent (right);
         } else {
-            return *left.this_() || *right.this_();
+            return left || right;
         }
     }
 
     /* Comparison between log_float and normal scalar. */
     /// \cond DONT_DOCUMENT
-#define MATH_WIDE_DEFINE_COMPARISON(operation) \
-    template <class LogFloat, typename Exponent, typename Scalar> \
-    inline typename boost::enable_if_c < \
-        std::numeric_limits <Scalar>::is_specialized, bool>::type \
-    operator operation ( \
+#define MATH_LOG_FLOAT_DEFINE_COMPARISON(operation) \
+    template <class LogFloat, typename Exponent, typename Scalar, class Enable \
+        = typename boost::enable_if_c < \
+            std::numeric_limits <Scalar>::is_specialized>::type> \
+    inline bool operator operation ( \
         detail::log_float_base <LogFloat, Exponent> const & left, \
         Scalar const & right) \
     { \
@@ -502,10 +495,10 @@ namespace math {
         return left operation converted_right; \
     } \
     \
-    template <class LogFloat, typename Exponent, typename Scalar> \
-    inline typename boost::enable_if_c < \
-        std::numeric_limits <Scalar>::is_specialized, bool>::type \
-    operator operation (Scalar const & left, \
+    template <class LogFloat, typename Exponent, typename Scalar, class Enable \
+        = typename boost::enable_if_c < \
+            std::numeric_limits <Scalar>::is_specialized>::type> \
+    inline bool operator operation (Scalar const & left, \
         detail::log_float_base <LogFloat, Exponent> const & right) \
     { \
         typedef typename promote_args <Exponent, Scalar>::type result_float; \
@@ -514,14 +507,14 @@ namespace math {
         return converted_left operation right; \
     }
 
-    MATH_WIDE_DEFINE_COMPARISON( < )
-    MATH_WIDE_DEFINE_COMPARISON( <= )
-    MATH_WIDE_DEFINE_COMPARISON( > )
-    MATH_WIDE_DEFINE_COMPARISON( >= )
-    MATH_WIDE_DEFINE_COMPARISON( == )
-    MATH_WIDE_DEFINE_COMPARISON( != )
+    MATH_LOG_FLOAT_DEFINE_COMPARISON( < )
+    MATH_LOG_FLOAT_DEFINE_COMPARISON( <= )
+    MATH_LOG_FLOAT_DEFINE_COMPARISON( > )
+    MATH_LOG_FLOAT_DEFINE_COMPARISON( >= )
+    MATH_LOG_FLOAT_DEFINE_COMPARISON( == )
+    MATH_LOG_FLOAT_DEFINE_COMPARISON( != )
 
-#undef MATH_WIDE_DEFINE_COMPARISON
+#undef MATH_LOG_FLOAT_DEFINE_COMPARISON
     /// \endcond
 
     /**
@@ -545,12 +538,13 @@ namespace math {
     The result is always signed, and therefore of type signed_log_float.
     */
     template <class LogFloatLeft, typename ExponentLeft,
-        class LogFloatRight, typename ExponentRight>
-    inline typename boost::enable_if <boost::is_same <
-        typename LogFloatLeft::policy_type,
-        typename LogFloatRight::policy_type>,
-        signed_log_float <typename promote_args <ExponentLeft, ExponentLeft
-            >::type, typename LogFloatLeft::policy_type>>::type
+        class LogFloatRight, typename ExponentRight, class Enable =
+        typename boost::enable_if <std::is_same <
+            typename LogFloatLeft::policy_type,
+            typename LogFloatRight::policy_type>>::type>
+    inline signed_log_float <
+        typename promote_args <ExponentLeft, ExponentLeft>::type,
+        typename LogFloatLeft::policy_type>
     operator * (
         detail::log_float_base <LogFloatLeft, ExponentLeft> const & left,
         detail::log_float_base <LogFloatRight, ExponentRight> const & right)
@@ -585,13 +579,13 @@ namespace math {
     The result is always signed, and therefore of type signed_log_float.
     */
     template <class LogFloatLeft, typename ExponentLeft,
-        class LogFloatRight, typename ExponentRight>
-    inline typename boost::enable_if <boost::is_same <typename
-        LogFloatLeft::policy_type, typename LogFloatRight::policy_type>,
-        signed_log_float <
-            typename promote_args <ExponentLeft, ExponentLeft>::type,
-            typename LogFloatLeft::policy_type>
-        >::type
+        class LogFloatRight, typename ExponentRight, class Enable =
+        typename boost::enable_if <std::is_same <
+            typename LogFloatLeft::policy_type,
+            typename LogFloatRight::policy_type>>::type>
+    inline signed_log_float <
+        typename promote_args <ExponentLeft, ExponentLeft>::type,
+        typename LogFloatLeft::policy_type>
     operator / (
         detail::log_float_base <LogFloatLeft, ExponentLeft> const & left,
         detail::log_float_base <LogFloatRight, ExponentRight> const & right)
@@ -626,13 +620,13 @@ namespace math {
     The result is always signed, and therefore of type signed_log_float.
     */
     template <class LogFloatLeft, typename ExponentLeft,
-        class LogFloatRight, typename ExponentRight>
-    inline typename boost::enable_if <boost::is_same <
-            typename LogFloatLeft::policy_type,
-            typename LogFloatRight::policy_type>,
-        signed_log_float <typename promote_args <ExponentLeft, ExponentLeft
-            >::type, typename LogFloatLeft::policy_type>
-        >::type
+        class LogFloatRight, typename ExponentRight, class Enable =
+            typename boost::enable_if <std::is_same <
+                typename LogFloatLeft::policy_type,
+                typename LogFloatRight::policy_type>>::type>
+    inline signed_log_float <
+        typename promote_args <ExponentLeft, ExponentLeft>::type,
+        typename LogFloatLeft::policy_type>
     operator + (
         detail::log_float_base <LogFloatLeft, ExponentLeft> const & left,
         detail::log_float_base <LogFloatRight, ExponentRight> const & right)
@@ -652,14 +646,13 @@ namespace math {
     The result is always signed, and therefore of type signed_log_float.
     */
     template <class LogFloatLeft, typename ExponentLeft,
-        class LogFloatRight, typename ExponentRight>
-    inline typename boost::enable_if <boost::is_same <
-            typename LogFloatLeft::policy_type,
-            typename LogFloatRight::policy_type>,
-        signed_log_float <
-            typename promote_args <ExponentLeft, ExponentLeft>::type,
-            typename LogFloatLeft::policy_type>
-        >::type
+        class LogFloatRight, typename ExponentRight, class Enable =
+            typename boost::enable_if <std::is_same <
+                typename LogFloatLeft::policy_type,
+                typename LogFloatRight::policy_type>>::type>
+    inline signed_log_float <
+        typename promote_args <ExponentLeft, ExponentLeft>::type,
+        typename LogFloatLeft::policy_type>
     operator - (
         detail::log_float_base <LogFloatLeft, ExponentLeft> const & left,
         detail::log_float_base <LogFloatRight, ExponentRight> const & right)
@@ -690,13 +683,13 @@ namespace math {
 
     /* Interaction between log_float and normal scalar. */
     /// \cond DONT_DOCUMENT
-#define MATH_WIDE_DEFINE_BINARY_OPERATION(operation) \
-    template <class LogFloat, typename Exponent, typename Scalar> \
-    inline typename boost::enable_if_c < \
-        std::numeric_limits <Scalar>::is_specialized, \
-        signed_log_float <typename promote_args <Exponent, Scalar>::type, \
-            typename LogFloat::policy_type> \
-    >::type operator operation ( \
+#define MATH_LOG_FLOAT_DEFINE_BINARY_OPERATION(operation) \
+    template <class LogFloat, typename Exponent, typename Scalar, class Enable \
+        = typename boost::enable_if_c < \
+            std::numeric_limits <Scalar>::is_specialized>::type> \
+    inline signed_log_float <typename promote_args <Exponent, Scalar>::type, \
+        typename LogFloat::policy_type> \
+    operator operation ( \
         detail::log_float_base <LogFloat, Exponent> const & left, \
         Scalar const & right) \
     { \
@@ -706,12 +699,12 @@ namespace math {
         return left operation converted_right; \
     } \
     \
-    template <class LogFloat, typename Exponent, typename Scalar> \
-    inline typename boost::enable_if_c < \
-        std::numeric_limits <Scalar>::is_specialized, \
-        signed_log_float <typename promote_args <Exponent, Scalar>::type, \
-            typename LogFloat::policy_type> \
-    >::type operator operation ( \
+    template <class LogFloat, typename Exponent, typename Scalar, class Enable \
+        = typename boost::enable_if_c < \
+            std::numeric_limits <Scalar>::is_specialized>::type> \
+    inline signed_log_float <typename promote_args <Exponent, Scalar>::type, \
+        typename LogFloat::policy_type> \
+    operator operation ( \
         Scalar const & left, \
         detail::log_float_base <LogFloat, Exponent> const & right) \
     { \
@@ -721,31 +714,29 @@ namespace math {
         return converted_left operation right; \
     }
 
-    MATH_WIDE_DEFINE_BINARY_OPERATION( + )
-    MATH_WIDE_DEFINE_BINARY_OPERATION( - )
-    MATH_WIDE_DEFINE_BINARY_OPERATION( / )
-    MATH_WIDE_DEFINE_BINARY_OPERATION( * )
+    MATH_LOG_FLOAT_DEFINE_BINARY_OPERATION( + )
+    MATH_LOG_FLOAT_DEFINE_BINARY_OPERATION( - )
+    MATH_LOG_FLOAT_DEFINE_BINARY_OPERATION( / )
+    MATH_LOG_FLOAT_DEFINE_BINARY_OPERATION( * )
 
-#undef MATH_WIDE_DEFINE_BINARY_OPERATION
+#undef MATH_LOG_FLOAT_DEFINE_BINARY_OPERATION
 
-#define MATH_WIDE_DEFINE_ASSIGNMENT_OPERATION(operation) \
-    template <class LogFloat, typename Exponent, typename Other> \
-        inline typename boost::enable_if_c < \
-            std::numeric_limits <Other>::is_specialized, \
-            LogFloat & \
-        >::type \
-    operator operation ( \
+#define MATH_LOG_FLOAT_DEFINE_ASSIGNMENT_OPERATION(operation) \
+    template <class LogFloat, typename Exponent, typename Other, class Enable \
+        = typename boost::enable_if_c < \
+            std::numeric_limits <Other>::is_specialized>::type> \
+    inline LogFloat & operator operation ( \
         detail::log_float_base <LogFloat, Exponent> & w, Other const & other) \
     { \
         return (*w.this_()) operation LogFloat (other); \
     }
 
-    MATH_WIDE_DEFINE_ASSIGNMENT_OPERATION( += )
-    MATH_WIDE_DEFINE_ASSIGNMENT_OPERATION( *= )
-    MATH_WIDE_DEFINE_ASSIGNMENT_OPERATION( /= )
-    MATH_WIDE_DEFINE_ASSIGNMENT_OPERATION( -= )
+    MATH_LOG_FLOAT_DEFINE_ASSIGNMENT_OPERATION( += )
+    MATH_LOG_FLOAT_DEFINE_ASSIGNMENT_OPERATION( *= )
+    MATH_LOG_FLOAT_DEFINE_ASSIGNMENT_OPERATION( /= )
+    MATH_LOG_FLOAT_DEFINE_ASSIGNMENT_OPERATION( -= )
 
-#undef MATH_WIDE_DEFINE_ASSIGNMENT_OPERATION
+#undef MATH_LOG_FLOAT_DEFINE_ASSIGNMENT_OPERATION
     /// \endcond
 
     /**
@@ -793,10 +784,10 @@ namespace math {
     value.
     Hence the spelling "exp_".
     */
-    template <typename Exponent>
-        inline typename boost::enable_if <
-            detail::valid_exponent_type <Exponent>, log_float <Exponent>
-        >::type exp_ (Exponent const & d)
+    template <typename Exponent, typename Enable =
+        typename boost::enable_if <
+            detail::valid_exponent_type <Exponent>>::type>
+    inline log_float <Exponent> exp_ (Exponent const & d)
     {
         return log_float <Exponent> (d, as_exponent());
     }
