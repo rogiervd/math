@@ -39,6 +39,9 @@ namespace math {
     using boost::math::isnan;
     using boost::math::isinf;
 
+    /**
+    Tag class to indicate that an argument is meant as an exponent.
+    */
     class as_exponent {};
 
     template <class ExponentType = double, class Policy = policy<> >

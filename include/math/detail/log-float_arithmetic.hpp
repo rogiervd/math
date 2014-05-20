@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/** \file
+/** \internal \file
 Arithmetic operations on values stored as logarithms.
 These also take Boost.Math policies with regard to error handling into account.
 */
@@ -41,7 +41,7 @@ namespace math { namespace detail {
     /*
     std::log1p gives exactly the behaviour we need: log1p (-1) should
     evaluate to -infinity, which indicates a stored value of 0.
-    A policy could be used with boost::math::log1p, but is is slower.
+    A policy could be used with boost::math::log1p, but this is slower.
     */
     using std::log1p;
     using std::exp;

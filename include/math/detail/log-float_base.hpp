@@ -24,13 +24,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace math { namespace detail {
 
+    /**
+    Base class for both log_float and signed_log_float.
+    */
     template <class Implementation, typename ExponentType> struct log_float_base
     {
+        /// \internal
         Implementation * this_()
         { return static_cast <Implementation *> (this); }
+        /// \internal
         Implementation const * this_() const
         { return static_cast <Implementation const *> (this); }
-
+        /// \internal
         ExponentType exponent() const { return this_()->exponent(); }
 
         int sign() const { return this_()->sign(); }
@@ -38,7 +43,8 @@ namespace math { namespace detail {
         // Things that are the same between log_float and signed_log_float.
         /**
         \return the value as a double.
-        \note This may underflow or overflow.
+        \note This may underflow or overflow, with the behaviour specified by
+        the \c Policy.
         */
         ExponentType get() const {
             typedef typename Implementation::policy_type policy_type;
@@ -60,9 +66,10 @@ namespace math { namespace detail {
             return sign() * result;
         }
 
-        /* Only available from gcc 4.5.
+        /**
         \return the value as a double.
-        \note This may underflow or overflow.
+        \note This may underflow or overflow, with the behaviour specified by
+        the \c Policy.
         */
         explicit operator ExponentType() const { return this->get(); }
 

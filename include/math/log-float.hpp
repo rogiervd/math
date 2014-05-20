@@ -1,5 +1,5 @@
 /*
-Copyright 2012, 2013 Rogier van Dalen.
+Copyright 2012, 2013, 2014 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Mathematical tools library for C++.
 
@@ -15,6 +15,10 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+/** \file
+Define the log_float and signed_log_float classes.
 */
 
 #ifndef MATH_LOG_FLOAT_HPP_INCLUDED
@@ -47,7 +51,7 @@ namespace math {
         };
     }   // namespace detail
 
-    /**
+    /** \brief
     A non-negative number that can be very close to zero or very large.
     It is stored as the logarithm of its value.
 
@@ -56,7 +60,7 @@ namespace math {
     This class, on the other hand, uses a significand fixed to 1, and a
     floating-point exponent, Exponent.
 
-    To store the value 0, -infinity is used.
+    To store the value 0, \f$ -\infty \f$ is used.
 
     To store a number that can be positive or negative, see signed_log_float.
     It is possible to interact with signed_log_float.
@@ -69,22 +73,33 @@ namespace math {
     compatible and need to be converted explicitly first.
 
     Some free functions that are available for floating-point numbers are
-    provided: exp, log, pow, sqrt.
-    exp_ is a shorthand that constructs a log_float<>.
+    provided: exp(),  log(), pow(),  sqrt().
+    exp_() is a shorthand that constructs a log_float from a float.
 
-    However, functions that use a break-down in integer and fractional parts
-    are not available, nor are trigonometric functions.
+    Unlike for floating-point numbers, functions that use a break-down in
+    integer and fractional parts are not available, nor are trigonometric
+    functions.
+
+    \tparam Exponent The type to use to hold the exponent.
+    \tparam Policy The Boost.Math policy that defines behaviour under domain
+    errors, underflow errors, and overflow errors.
+
+    \sa signed_log_float
     */
     template <class Exponent, class Policy> class log_float
     : public detail::log_float_base <log_float <Exponent, Policy>, Exponent>
     {
         Exponent exponent_;
     public:
+        /// \brief The type of the underlying exponent.
         typedef Exponent exponent_type;
+        /// \brief The error policy.
         typedef Policy policy_type;
 
+        /// \cond DONT_DOCUMENT
         static_assert (detail::valid_exponent_type <Exponent>::value,
             "log_float cannot be instantiated with this type.");
+        /// \endcond
 
         /// Construct with the value 0.
         log_float() : exponent_ (-std::numeric_limits<Exponent>::infinity()) {}
@@ -146,6 +161,7 @@ namespace math {
         /// \return The sign of the value (always +1 for log_float).
         constexpr int sign() const { return +1; }
 
+        /// Multiply with another log_float in place.
         template <typename OtherExponentType>
             log_float & operator *= (
                 const log_float <OtherExponentType, Policy> & other)
@@ -154,6 +170,8 @@ namespace math {
                 this->exponent_, other.exponent(), Policy());
             return *this;
         }
+
+        /// Divide by another log_float in place.
         template <typename OtherExponentType>
             log_float & operator /= (
                 const log_float <OtherExponentType, Policy> & other)
@@ -163,6 +181,7 @@ namespace math {
             return *this;
         }
 
+        /// Add another log_float in place.
         template <typename OtherExponentType>
             log_float & operator += (
                 const log_float <OtherExponentType, Policy> & other)
@@ -179,10 +198,17 @@ namespace math {
         */
     };
 
-    /**
-    Generalisation of log_float<> that can contain negative values too.
+    /** \brief
+    Generalisation of log_float that can contain negative values too.
+
     It stores the logarithm of the absolute value of the contained number, and,
     separately, its sign.
+
+    \tparam Exponent The type to use to hold the exponent.
+    \tparam Policy The Boost.Math policy that defines behaviour under domain
+    errors, underflow errors, and overflow errors.
+
+    \sa log_float
     */
     template <class Exponent, class Policy> class signed_log_float
     : public detail::log_float_base <
@@ -192,11 +218,15 @@ namespace math {
         // Either -1 or +1.
         int sign_;
     public:
+        /// \brief The type of the underlying exponent.
         typedef Exponent exponent_type;
+        /// \brief The error policy.
         typedef Policy policy_type;
 
+        /// \cond DONT_DOCUMENT
         static_assert (detail::valid_exponent_type <Exponent>::value,
             "signed_log_float cannot be instantiated with this type.");
+        /// \endcond
 
         /// Construct with value 0.
         signed_log_float()
@@ -269,6 +299,7 @@ namespace math {
             return sign_;
         }
 
+        /// Multiply with another log_float or signed_log_float in place.
         template <class LogFloat, typename OtherExponentType>
             typename boost::enable_if <boost::is_same <typename
                 LogFloat::policy_type, Policy>, signed_log_float &>::type
@@ -281,6 +312,7 @@ namespace math {
             return *this;
         }
 
+        /// Divide by another log_float or signed_log_float in place.
         template <class LogFloat, typename OtherExponentType>
             typename boost::enable_if <boost::is_same <typename
                 LogFloat::policy_type, Policy>, signed_log_float &>::type
@@ -293,6 +325,7 @@ namespace math {
             return *this;
         }
 
+        /// Add another log_float or signed_log_float in place.
         template <class LogFloat, typename OtherExponentType>
             typename boost::enable_if <boost::is_same <typename
                 LogFloat::policy_type, Policy>, signed_log_float &>::type
@@ -305,6 +338,7 @@ namespace math {
             return *this;
         }
 
+        /// Subtract another log_float or signed_log_float in place.
         template <class LogFloat, typename OtherExponentType>
             typename boost::enable_if <boost::is_same <typename
                 LogFloat::policy_type, Policy>, signed_log_float &>::type
@@ -320,6 +354,11 @@ namespace math {
 
     };
 
+    /**
+    Compare two objects of type log_float or signed_log_float.
+    \param left The left-hand side argument
+    \param right The right-hand side argument
+    */
     template <class LogFloatLeft, typename ExponentTypeLeft,
         class LogFloatRight, typename ExponentTypeRight>
     inline bool operator < (
@@ -346,6 +385,9 @@ namespace math {
         }
     }
 
+    /**
+    Compare two objects of type log_float or signed_log_float.
+    */
     template <class LogFloatLeft, typename ExponentTypeLeft,
         class LogFloatRight, typename ExponentTypeRight>
     inline bool operator > (
@@ -366,6 +408,9 @@ namespace math {
         }
     }
 
+    /**
+    Compare two objects of type log_float or signed_log_float.
+    */
     template <class LogFloatLeft, typename ExponentTypeLeft,
         class LogFloatRight, typename ExponentTypeRight>
     inline bool operator <= (
@@ -386,6 +431,9 @@ namespace math {
         }
     }
 
+    /**
+    Compare two objects of type log_float or signed_log_float.
+    */
     template <class LogFloatLeft, typename ExponentTypeLeft,
         class LogFloatRight, typename ExponentTypeRight>
     inline bool operator >= (
@@ -406,6 +454,9 @@ namespace math {
         }
     }
 
+    /**
+    Compare two objects of type log_float or signed_log_float.
+    */
     template <class LogFloatLeft, typename ExponentTypeLeft,
         class LogFloatRight, typename ExponentTypeRight>
     inline bool operator == (
@@ -419,6 +470,9 @@ namespace math {
         }
     }
 
+    /**
+    Compare two objects of type log_float or signed_log_float.
+    */
     template <class LogFloatLeft, typename ExponentTypeLeft,
         class LogFloatRight, typename ExponentTypeRight>
     inline bool operator != (
@@ -432,7 +486,8 @@ namespace math {
         }
     }
 
-    /*** Comparison between log_float and normal scalar. ***/
+    /* Comparison between log_float and normal scalar. */
+    /// \cond DONT_DOCUMENT
 #define MATH_WIDE_DEFINE_COMPARISON(operation) \
     template <class LogFloat, typename Exponent, typename Scalar> \
     inline typename boost::enable_if_c < \
@@ -467,6 +522,7 @@ namespace math {
     MATH_WIDE_DEFINE_COMPARISON( != )
 
 #undef MATH_WIDE_DEFINE_COMPARISON
+    /// \endcond
 
     /**
     Multiply two values represented as log_float.
@@ -632,7 +688,8 @@ namespace math {
             operand.exponent(), -operand.sign(), as_exponent());
     }
 
-    /*** Interaction between log_float and normal scalar. ***/
+    /* Interaction between log_float and normal scalar. */
+    /// \cond DONT_DOCUMENT
 #define MATH_WIDE_DEFINE_BINARY_OPERATION(operation) \
     template <class LogFloat, typename Exponent, typename Scalar> \
     inline typename boost::enable_if_c < \
@@ -689,8 +746,10 @@ namespace math {
     MATH_WIDE_DEFINE_ASSIGNMENT_OPERATION( -= )
 
 #undef MATH_WIDE_DEFINE_ASSIGNMENT_OPERATION
+    /// \endcond
 
     /**
+    Take a log_float to a power.
     This only takes a log_float, not a signed_log_float, so that this function
     is well-defined.
     */
@@ -728,11 +787,11 @@ namespace math {
     }
 
     /**
-    Construct a log_float<> instance from a value, using it as the value that is
+    Construct a log_float instance from a value, using it as the value that is
     stored.
     This can be seen as a lazy implementation of computing the exponent of the
     value.
-    Therefore, the spelling "exp_" is offered for this functionality.
+    Hence the spelling "exp_".
     */
     template <typename Exponent>
         inline typename boost::enable_if <
@@ -743,8 +802,8 @@ namespace math {
     }
 
     /**
-    \return The logarithm of the value contained in a log_float<>.
-        Since log_float<> stores the contained value as a logarithm, this
+    \return The logarithm of the value contained in a log_float.
+        Since log_float stores the contained value as a logarithm, this
         function is trivial.
     */
     template <typename Exponent, class Policy>
@@ -752,8 +811,8 @@ namespace math {
     { return p.exponent(); }
 
     /**
-    Exponentiate a log_float<> or signed_log_float<>.
-    The result is always positive, so it is a log_float<>.
+    Exponentiate a log_float or signed_log_float.
+    The result is always positive, so it is a log_float.
     */
     template <typename LogFloat, class Exponent>
         inline log_float <Exponent, typename LogFloat::policy_type>
@@ -767,6 +826,11 @@ namespace math {
             w.sign() * exp (w.exponent()), as_exponent());
     }
 
+    /**
+    \brief Compute the square root
+    \return the square root of a log_float.
+    This involves merely dividing the exponent by 2.
+    */
     template <typename Exponent, class Policy>
         inline log_float <Exponent, Policy> sqrt (
             log_float <Exponent, Policy> const & p)
