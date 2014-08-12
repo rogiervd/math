@@ -7,15 +7,14 @@ alias "math-tests" :
     #   http://valgrind.org/docs/manual/manual-core.html#manual-core.limits
 
     # With long double, without Valgrind.
-    [ run log-float.cpp : --with-long-double :
+    [ run test-log-float.cpp : --with-long-double :
         # Remove the attribute; must be character-for-character the same as the
         # attribute that is added in ../Jamfile
         : -<testing.launcher>"valgrind --leak-check=full --error-exitcode=1"
-        : log-float-no_valgrind ]
+        : test-log-float-no_valgrind ]
 
     # Without long double, with Valgrind (implied by run_glob below).
-    # [ run log-float.cpp ]
+    # [ run test-log-float.cpp ]
 
     [ run_glob *.cpp ]
     ;
-
