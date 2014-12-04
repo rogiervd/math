@@ -122,7 +122,11 @@ namespace math {
         log_float (Exponent e, as_exponent) : exponent_ (e) {}
 
         /// Copy-construct.
-        log_float (log_float const & other) = default;
+        log_float (log_float const & other)
+        /// \cond DONT_DOCUMENT
+        = default
+        /// \endcond
+        ;
 
         /// Generalised copy construction with the same policy: implicit.
         template <typename OtherExponentType>
