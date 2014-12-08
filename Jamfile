@@ -1,4 +1,10 @@
-project /math ;
+project /math :
+    requirements
+    <library>/meta//meta
+    <library>/utility//utility
+    <library>/rime//rime
+    <library>/range//range
+    ;
 
 # Declare target /math//math as a header-only library.
 alias math : : : :
