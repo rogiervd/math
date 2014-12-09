@@ -1259,7 +1259,7 @@ Before calling this, check whether the following are defined correctly:
 - has <callable::identity (Magma, Operation)>.
 - has <callable::annihilator (Magma, Operation)>.
 - has <math::callable::invert <left/right/either, Operation> (Magma)>.
-- has <math::callable::reverse <Operation> (Magma)>.
+- has <math::callable::reverse \<Operation> (Magma)>.
 - is::commutative <Magma, Operation>.
 - is::associative <Magma, Operation>
 - is::idempotent <Magma, Operation>.

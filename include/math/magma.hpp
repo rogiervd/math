@@ -104,7 +104,7 @@ struct right;
 
 /** \struct opposite_direction
 Reverse a direction type.
-<c>opposite_direction \<math::left>::type</c> is \c math::right and vice versa.
+<c>opposite_direction<math::left>::type</c> is \c math::right and vice versa.
 */
 template <class Direction> struct opposite_direction;
 
@@ -881,7 +881,7 @@ namespace operation {
 
     /**
     Implement to return the inverse of a value with respect to an operation.
-    That is, <c> operation (invert (a), a) == identity <T> (operation)</c>.
+    That is, <c> operation (invert (a), a) == identity<T> (operation)</c>.
     */
     template <class MagmaTag, class Direction, class Operation,
         class Enable = void>
@@ -1134,6 +1134,8 @@ or as the first argument.
     The callable type that represents the operation.
 \param operation (optional if \a Operation is given as a template argument)
     A callable that represents the operation.
+\param magma
+    The value under consideration.
 */
 template <class Operation, class Magma> inline
     auto is_annihilator (Operation const & operation, Magma const & magma)
@@ -1468,13 +1470,13 @@ The operation can be given as a type argument, or as a value argument.
 \param magma The value to be inverted.
 */
 template <class Operation, class Magma>
-    inline auto reverse (Magma const & magma)
-RETURNS (callable::reverse <Operation>() (magma));
+    inline auto reverse (Operation const & operation, Magma const & magma)
+RETURNS (callable::reverse<>() (operation, magma));
 
 /// \cond DONT_DOCUMENT
 template <class Operation, class Magma>
-    inline auto reverse (Operation const & operation, Magma const & magma)
-RETURNS (callable::reverse<>() (operation, magma));
+    inline auto reverse (Magma const & magma)
+RETURNS (callable::reverse <Operation>() (magma));
 /// \endcond
 
 /**

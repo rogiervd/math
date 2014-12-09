@@ -74,7 +74,7 @@ namespace operation {
         };
 
         /**
-        Compare two tuples for equality, using is_annihilator <Operation> first.
+        Compare two tuples for equality, using is_annihilator \<Operation> first.
         If both arguments are annihilators, compare equal.
         If either is an annihilator, compare unequal.
         Otherwise, forward to \a NormalEquality().

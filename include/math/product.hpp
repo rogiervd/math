@@ -148,7 +148,7 @@ public:
     which is explicitly convertible and not implicitly convertible.
     This constructor is explicit.
     \param other The product to copy.
-    \param dummy
+    \internal \param dummy
         A dummy argument to distinguish this constructor from the implicit one.
     */
     template <class ... OtherComponents>
