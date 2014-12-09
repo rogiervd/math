@@ -18,10 +18,16 @@ Parts of this library are
     This sublibrary makes it possible to turn any class into a magma, and provides a number of predefined ones.
     For example, standard floating-point number types, and :ref:`log-float`, are defined as magmas.
 
+3.  :ref:`alphabet`
+    A class that represents a finite collection of symbols.
+    Internally, small objects (like ints) are used to tell the symbols apart.
+    There can be normal (run-time) symbols, and special (compile-time) symbols.
+
 .. toctree::
     :maxdepth: 2
 
     log_float.rst
     magma.rst
+    alphabet.rst
 
 .. _Boost.Math: http://www.boost.org/libs/math/
