@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef MATH_DETAIL_LOG_FLOAT_FWD_HPP
 #define MATH_DETAIL_LOG_FLOAT_FWD_HPP
 
-#include <limits>
+#include <type_traits>
 
 #include <boost/math/policies/policy.hpp>
 #include <boost/math/policies/error_handling.hpp>
@@ -48,6 +48,28 @@ namespace math {
         class log_float;
     template <class ExponentType = double, class Policy = policy<> >
         class signed_log_float;
+
+    /**
+    Compile-time constant that evaluates to \c true iff \a Type is a log_float
+    or a signed_log_float (with or without reference- and cv-qualification).
+    */
+    template <class Type> struct is_log_float : std::false_type {};
+
+    template <class Type> struct is_log_float <Type &>
+    : is_log_float <Type> {};
+    template <class Type> struct is_log_float <Type &&>
+    : is_log_float <Type> {};
+    template <class Type> struct is_log_float <Type const>
+    : is_log_float <Type> {};
+    template <class Type> struct is_log_float <Type volatile>
+    : is_log_float <Type> {};
+
+    template <class ExponentType, class Policy>
+        struct is_log_float <log_float <ExponentType, Policy>>
+    : std::true_type {};
+    template <class ExponentType, class Policy>
+        struct is_log_float <signed_log_float <ExponentType, Policy>>
+    : std::true_type {};
 
 } // namespace math
 

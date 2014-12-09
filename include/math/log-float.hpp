@@ -40,6 +40,7 @@ Define the log_float and signed_log_float classes.
 #include "detail/log-float_fwd.hpp"
 #include "detail/log-float_base.hpp"
 #include "detail/log-float_arithmetic.hpp"
+#include "detail/log-float_numeric_limits.hpp"
 
 namespace math {
 
@@ -488,7 +489,8 @@ namespace math {
 #define MATH_LOG_FLOAT_DEFINE_COMPARISON(operation) \
     template <class LogFloat, typename Exponent, typename Scalar, class Enable \
         = typename boost::enable_if_c < \
-            std::numeric_limits <Scalar>::is_specialized>::type> \
+            std::numeric_limits <Scalar>::is_specialized \
+            && !is_log_float <Scalar>::value>::type> \
     inline bool operator operation ( \
         detail::log_float_base <LogFloat, Exponent> const & left, \
         Scalar const & right) \
@@ -501,7 +503,8 @@ namespace math {
     \
     template <class LogFloat, typename Exponent, typename Scalar, class Enable \
         = typename boost::enable_if_c < \
-            std::numeric_limits <Scalar>::is_specialized>::type> \
+            std::numeric_limits <Scalar>::is_specialized \
+            && !is_log_float <Scalar>::value>::type> \
     inline bool operator operation (Scalar const & left, \
         detail::log_float_base <LogFloat, Exponent> const & right) \
     { \
@@ -690,7 +693,8 @@ namespace math {
 #define MATH_LOG_FLOAT_DEFINE_BINARY_OPERATION(operation) \
     template <class LogFloat, typename Exponent, typename Scalar, class Enable \
         = typename boost::enable_if_c < \
-            std::numeric_limits <Scalar>::is_specialized>::type> \
+            std::numeric_limits <Scalar>::is_specialized \
+            && !is_log_float <Scalar>::value>::type> \
     inline signed_log_float <typename promote_args <Exponent, Scalar>::type, \
         typename LogFloat::policy_type> \
     operator operation ( \
@@ -705,7 +709,8 @@ namespace math {
     \
     template <class LogFloat, typename Exponent, typename Scalar, class Enable \
         = typename boost::enable_if_c < \
-            std::numeric_limits <Scalar>::is_specialized>::type> \
+            std::numeric_limits <Scalar>::is_specialized \
+            && !is_log_float <Scalar>::value>::type> \
     inline signed_log_float <typename promote_args <Exponent, Scalar>::type, \
         typename LogFloat::policy_type> \
     operator operation ( \
@@ -728,7 +733,8 @@ namespace math {
 #define MATH_LOG_FLOAT_DEFINE_ASSIGNMENT_OPERATION(operation) \
     template <class LogFloat, typename Exponent, typename Other, class Enable \
         = typename boost::enable_if_c < \
-            std::numeric_limits <Other>::is_specialized>::type> \
+            std::numeric_limits <Other>::is_specialized \
+            && !is_log_float <Other>::value>::type> \
     inline LogFloat & operator operation ( \
         detail::log_float_base <LogFloat, Exponent> & w, Other const & other) \
     { \

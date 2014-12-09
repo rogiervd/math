@@ -845,6 +845,23 @@ template <typename RealType, class Policy>
     test_signed_log_float_unary_impl <RealType, Policy>();
 }
 
+BOOST_AUTO_TEST_CASE (test_is_log_float) {
+    BOOST_MPL_ASSERT ((math::is_log_float <math::log_float <float>>));
+    BOOST_MPL_ASSERT ((math::is_log_float <math::log_float <double> &>));
+    // log_float on int can't be used; but is_log_float is defined for it.
+    BOOST_MPL_ASSERT ((math::is_log_float <math::log_float <int> const>));
+
+    BOOST_MPL_ASSERT ((math::is_log_float <math::log_float <float, policy0>>));
+    BOOST_MPL_ASSERT ((math::is_log_float <math::log_float <double, policy1>>));
+    BOOST_MPL_ASSERT ((math::is_log_float <math::log_float <int, policy2> &&>));
+
+    BOOST_MPL_ASSERT_NOT ((math::is_log_float <void>));
+    BOOST_MPL_ASSERT_NOT ((math::is_log_float <int>));
+    BOOST_MPL_ASSERT_NOT ((math::is_log_float <float>));
+    BOOST_MPL_ASSERT_NOT ((math::is_log_float <double>));
+    BOOST_MPL_ASSERT_NOT ((math::is_log_float <policy0>));
+}
+
 BOOST_AUTO_TEST_CASE (test_log_float_unary) {
     test_both_log_float_unary_impl <float, policy0>();
     test_both_log_float_unary_impl <double, policy0>();
