@@ -911,6 +911,8 @@ namespace check_detail {
                 examples);
         }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wuninitialized"
         // One example: check is_member, operation, identity, invert, reverse.
         template <class Example1>
             void operator() (Operation operation, Examples const & examples,
@@ -929,9 +931,9 @@ namespace check_detail {
                 auto const & approximately_equal = rime::if_ (
                     has <callable::approximately_equal (Magma, Magma)>(),
                     math::approximately_equal, math::equal);
-                auto example1_copy (example1);
+                Example1 example1_copy = example1;
                 static_assert (has <callable::equal (
-                    decltype (example1), decltype (example1))>::value, "");
+                    decltype (example1_copy), decltype (example1))>::value, "");
                 BOOST_CHECK (example1_copy == example1);
                 BOOST_CHECK (! (example1_copy != example1));
                 BOOST_CHECK (equal (example1_copy, example1));
@@ -983,6 +985,7 @@ namespace check_detail {
                     ref (operation), ref (examples), ref (example1), _1),
                 examples);
         }
+#pragma GCC diagnostic pop
 
         template <class Example1, class Example2>
             void operator() (Operation operation, Examples const & examples,
