@@ -6,6 +6,9 @@ project
     <library>/math//math
     <warnings-as-errors>on
     <c++-template-depth>1024
+    # The line above does not seem to have any effect on a newer Boost,
+    # so be explicit:
+    <toolset>clang:<cxxflags>"-ftemplate-depth-1024"
 
 ## Note on optimisations through GCC command line settings.
 ## Most of these settings turn out to only make the baseline "a+b" worse.
