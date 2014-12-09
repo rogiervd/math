@@ -59,7 +59,6 @@ template <class LogFloat, class Underlying> void check_limits() {
     // min.
     {
         auto min = limits::min();
-        std::cout << typeid (Underlying).name() << " " << min << std::endl;
         BOOST_CHECK (min > 0);
         BOOST_CHECK_EQUAL (min.exponent(), limits_underlying::lowest());
     }
