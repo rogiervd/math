@@ -911,8 +911,6 @@ namespace check_detail {
                 examples);
         }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wuninitialized"
         // One example: check is_member, operation, identity, invert, reverse.
         template <class Example1>
             void operator() (Operation operation, Examples const & examples,
@@ -985,7 +983,6 @@ namespace check_detail {
                     ref (operation), ref (examples), ref (example1), _1),
                 examples);
         }
-#pragma GCC diagnostic pop
 
         template <class Example1, class Example2>
             void operator() (Operation operation, Examples const & examples,

@@ -26,6 +26,17 @@ compiling takes a lot less memory and time.
 #ifndef MATH_TEST_MATH_TEST_SEQUENCE_TESTS_SLOW_HPP_INCLUDED
 #define MATH_TEST_MATH_TEST_SEQUENCE_TESTS_SLOW_HPP_INCLUDED
 
+// Workaround for incorrect warnings on GCC 4.6 and 4.8.
+// The warnings occur in check_magma.hpp and only for optimized builds.
+#if defined __GNUC__
+#   if (__GNUC__ == 4 && __GNUC_MINOR__ == 8)
+#       pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#   endif
+#   if (__GNUC__ == 4 && __GNUC_MINOR__ == 6)
+#       pragma GCC diagnostic ignored "-Wuninitialized"
+#   endif
+#endif
+
 #include "math/sequence.hpp"
 
 #include <string>
