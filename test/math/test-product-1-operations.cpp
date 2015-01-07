@@ -42,6 +42,33 @@ template <class Inverses> void test_product_spot_check_without_inverses() {
     typedef math::product <math::over <float, math::sequence <char>>, Inverses>
         product;
 
+    // Construction.
+    {
+        product p (1.5f, math::sequence <char> (std::string ("!")));
+        BOOST_CHECK_EQUAL (range::first (p.components()), 1.5f);
+        BOOST_CHECK_EQUAL (
+            range::first (range::second (p.components()).symbols()), '!');
+
+        // Use make_product.
+        auto p2 = math::make_product <Inverses> (
+            2.5f, math::sequence <char> (std::string ("?")));
+
+        static_assert (std::is_same <decltype (p2), product>::value, "");
+        BOOST_CHECK_EQUAL (range::first (p2.components()), 2.5f);
+        BOOST_CHECK_EQUAL (
+            range::first (range::second (p2.components()).symbols()), '?');
+
+        // Use make_product_over.
+        range::tuple <float, math::sequence <char>> components (
+            4.5f, math::sequence <char> (std::string ("~")));
+        auto p3 = math::make_product_over <Inverses> (components);
+
+        static_assert (std::is_same <decltype (p3), product>::value, "");
+        BOOST_CHECK_EQUAL (range::first (p3.components()), 4.5f);
+        BOOST_CHECK_EQUAL (
+            range::first (range::second (p3.components()).symbols()), '~');
+    }
+
     // is_member.
     {
         product not_a_member (math::non_member <float>(),

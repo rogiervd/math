@@ -39,6 +39,7 @@ Define a Cartesian product of magmas.
 
 #include "range/core.hpp"
 #include "range/tuple.hpp"
+#include "range/call_unpack.hpp"
 #include "range/equal.hpp"
 #include "range/less_lexicographical.hpp"
 #include "range/transform.hpp"
@@ -177,11 +178,23 @@ namespace callable {
         { return product <over <Components ...>, Inverses> (components ...); }
     };
 
+    template <class Inverses> struct make_product_over {
+        template <class Components>
+            auto operator() (Components && components) const
+        RETURNS (range::call_unpack (
+            make_product <Inverses>(), std::forward <Components> (components)));
+    };
+
 } // namespace callable
 
 template <class Inverses, class ... Components>
     inline auto make_product (Components const & ... components)
 RETURNS (callable::make_product <Inverses>() (components ...));
+
+template <class Inverses, class Components>
+    inline auto make_product_over (Components && components)
+RETURNS (callable::make_product_over <Inverses>() (
+    std::forward <Components> (components)));
 
 namespace product_detail {
 
