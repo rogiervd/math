@@ -37,6 +37,7 @@ the two values according to a lexicographical ordering.
 #include "utility/type_sequence_traits.hpp"
 
 #include "range/tuple.hpp"
+#include "range/call_unpack.hpp"
 #include "range/equal.hpp"
 #include "range/less_lexicographical.hpp"
 #include "range/transform.hpp"
@@ -226,15 +227,22 @@ namespace callable {
     struct make_lexicographical {
         template <class ... Components>
             lexicographical <over <Components ...>> operator() (
-                Components const & ... components)
+                Components const & ... components) const
         { return lexicographical <over <Components ...>> (components ...); }
+    };
+
+    struct make_lexicographical_over {
+        template <class Components>
+            auto operator() (Components && components) const
+        RETURNS (range::call_unpack (
+            make_lexicographical(), std::forward <Components> (components)));
     };
 
 } // namespace callable
 
-template <class ... Components> inline lexicographical <over <Components ...>>
-    make_lexicographical (Components const & ... components)
-{ return lexicographical <over <Components ...>> (components ...); }
+static auto constexpr make_lexicographical = callable::make_lexicographical();
+static auto constexpr make_lexicographical_over
+    = callable::make_lexicographical_over();
 
 namespace detail {
 

@@ -37,6 +37,9 @@ Test lexicographical.hpp.
 
 #include "./make_lexicographical.hpp"
 
+using range::first;
+using range::second;
+
 BOOST_AUTO_TEST_SUITE (test_suite_lexicographical)
 
 BOOST_AUTO_TEST_CASE (test_lexicographical_static) {
@@ -128,8 +131,30 @@ BOOST_AUTO_TEST_CASE (test_lexicographical_spot) {
     std::string d = "d";
 
     lexicographical ab4 = make_lexicographical (4, ab);
+    BOOST_CHECK_EQUAL (first (ab4.components()).value(), 4.f);
+    BOOST_CHECK_EQUAL (first (second (ab4.components()).symbols()), 'a');
+    BOOST_CHECK_EQUAL (second (second (ab4.components()).symbols()), 'b');
+
     lexicographical c7 = make_lexicographical (7, c);
     lexicographical abc11 = make_lexicographical (11, abc);
+
+    {
+        auto ab4_2 = math::make_lexicographical (
+            math::cost <float> (4), math::sequence <char> (std::string ("ab")));
+        static_assert (
+            std::is_same <decltype (ab4_2), lexicographical>::value, "");
+
+        BOOST_CHECK (ab4_2 == ab4);
+    }
+    {
+        auto components = range::make_tuple (
+            math::cost <float> (4), math::sequence <char> (std::string ("ab")));
+        auto ab4_2 = math::make_lexicographical_over (components);
+        static_assert (
+            std::is_same <decltype (ab4_2), lexicographical>::value, "");
+
+        BOOST_CHECK (ab4_2 == ab4);
+    }
 
     BOOST_CHECK_EQUAL (ab4 * c7, abc11);
     BOOST_CHECK_EQUAL (ab4 * math::one <lexicographical>(), ab4);
