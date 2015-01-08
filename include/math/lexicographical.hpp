@@ -191,12 +191,12 @@ public:
     This constructor is implicit.
     \param other The lexicographical to copy.
     */
-    template <class ... OtherComponents, class Enable = typename
-        boost::enable_if <utility::are_convertible <
+    template <class ... OtherComponents>
+    lexicographical (lexicographical <over <OtherComponents ...>> const & other,
+        typename boost::enable_if <utility::are_convertible <
             meta::vector <OtherComponents const & ...>,
             meta::vector <Components ...>>
-        >::type>
-    lexicographical (lexicographical <over <OtherComponents ...>> const & other)
+        >::type * = 0)
     : components_ (other.components()) {}
 
     /**
