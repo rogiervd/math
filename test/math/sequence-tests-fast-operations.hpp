@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Mathematical tools library for C++.
 
@@ -128,6 +128,12 @@ template <class Direction> void test_construction() {
 #define CHECK_PLUS_TYPE(left_type, right_type, result_type) \
     CHECK_OPERATOR_TYPE (math::callable::plus, \
         left_type, right_type, result_type)
+
+#define CHECK_PICK_TYPE(condition_type, left_type, right_type, result_type) \
+    BOOST_MPL_ASSERT ((std::is_same < \
+        typename std::decay <typename math::result_of < \
+            math::callable::pick (condition_type, left_type, right_type) \
+            >::type>::type, result_type>))
 
 #define CHECK_CHOOSE_TYPE(left_type, right_type, result_type) \
     CHECK_OPERATOR_TYPE (math::callable::choose, \
@@ -831,6 +837,81 @@ template <class Direction>
     check (r_abc, r_abc, r_abc);
 }
 
+/**
+Test basic return type of "pick".
+Apart from selecting the return type, the implementation is trivial, so the
+implementation is only spot-checked.
+*/
+template <class Direction> void test_pick() {
+    typedef math::sequence <char, Direction> sequence;
+    typedef math::empty_sequence <char, Direction> empty;
+    typedef math::single_sequence <char, Direction> single;
+    typedef math::optional_sequence <char, Direction> optional;
+    typedef math::sequence_annihilator <char, Direction> annihilator;
+
+    typedef std::true_type true_t;
+    typedef rime::false_type false_t;
+
+    // Run-time condition.
+    CHECK_PICK_TYPE (bool, empty, empty, empty);
+    CHECK_PICK_TYPE (bool, empty, single, optional);
+    CHECK_PICK_TYPE (bool, empty, optional, optional);
+    CHECK_PICK_TYPE (bool, empty, sequence, sequence);
+    CHECK_PICK_TYPE (bool, empty, annihilator, sequence);
+
+    CHECK_PICK_TYPE (bool, single, empty, optional);
+    CHECK_PICK_TYPE (bool, single, single, single);
+    CHECK_PICK_TYPE (bool, single, optional, optional);
+    CHECK_PICK_TYPE (bool, single, sequence, sequence);
+    CHECK_PICK_TYPE (bool, single, annihilator, sequence);
+
+    CHECK_PICK_TYPE (bool, optional, empty, optional);
+    CHECK_PICK_TYPE (bool, optional, single, optional);
+    CHECK_PICK_TYPE (bool, optional, optional, optional);
+    CHECK_PICK_TYPE (bool, optional, sequence, sequence);
+    CHECK_PICK_TYPE (bool, optional, annihilator, sequence);
+
+    CHECK_PICK_TYPE (bool, sequence, empty, sequence);
+    CHECK_PICK_TYPE (bool, sequence, single, sequence);
+    CHECK_PICK_TYPE (bool, sequence, optional, sequence);
+    CHECK_PICK_TYPE (bool, sequence, sequence, sequence);
+    CHECK_PICK_TYPE (bool, sequence, annihilator, sequence);
+
+    CHECK_PICK_TYPE (bool, annihilator, empty, sequence);
+    CHECK_PICK_TYPE (bool, annihilator, single, sequence);
+    CHECK_PICK_TYPE (bool, annihilator, optional, sequence);
+    CHECK_PICK_TYPE (bool, annihilator, sequence, sequence);
+    CHECK_PICK_TYPE (bool, annihilator, annihilator, annihilator);
+
+    // Compile-time types: pick left or right. Spot tests.
+    CHECK_PICK_TYPE (true_t, empty, empty, empty);
+    CHECK_PICK_TYPE (false_t, optional, empty, empty);
+    CHECK_PICK_TYPE (true_t, empty, single, empty);
+    CHECK_PICK_TYPE (false_t, optional, single, single);
+    CHECK_PICK_TYPE (true_t, empty, sequence, empty);
+    CHECK_PICK_TYPE (false_t, single, optional, optional);
+    CHECK_PICK_TYPE (true_t, empty, sequence, empty);
+    CHECK_PICK_TYPE (false_t, empty, sequence, sequence);
+    CHECK_PICK_TYPE (true_t, empty, single, empty);
+    CHECK_PICK_TYPE (false_t, sequence, annihilator, annihilator);
+
+    // Run-time behaviour: spot checks.
+    auto pick = math::pick;
+    sequence abc (std::string ("abc"));
+    single a ('a');
+
+    BOOST_CHECK_EQUAL (pick (true, empty(), abc), empty());
+    BOOST_CHECK_EQUAL (pick (false, empty(), abc), abc);
+
+    BOOST_CHECK_EQUAL (pick (true_t(), empty(), abc), empty());
+    BOOST_CHECK_EQUAL (pick (false_t(), empty(), abc), abc);
+
+    BOOST_CHECK_EQUAL (pick (true, empty(), a), empty());
+    BOOST_CHECK_EQUAL (pick (false, empty(), a), a);
+
+    BOOST_CHECK_EQUAL (pick (true_t(), empty(), a), empty());
+    BOOST_CHECK_EQUAL (pick (false_t(), empty(), a), a);
+}
 
 /**
 Test basic properties of choose.

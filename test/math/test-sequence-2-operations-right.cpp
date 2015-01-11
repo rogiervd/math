@@ -37,6 +37,7 @@ BOOST_AUTO_TEST_CASE (test_sequence) {
     test_comparison <math::right> ("ba", "cba");
     test_times <math::right> ();
     test_plus <math::right> ("ba", "cba");
+    test_pick <math::right>();
     test_choose <math::right> ("ba", "cba");
     test_divide <math::right> ("ba", "cba", "cb");
 }

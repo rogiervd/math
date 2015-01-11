@@ -27,6 +27,7 @@ Binary operations:
 
 ..  There seems to be no role ":cpp:variable:"!
 
+*   :cpp:type:`math::pick`: return one value or the other, depending on a condition.
 *   :cpp:type:`math::choose`: return the most preferable of two values.
 *   :cpp:type:`math::times`: multiply two values.
 *   :cpp:type:`math::plus`: add two values.
@@ -84,6 +85,8 @@ Compile-time helpers
 .. doxygenstruct:: math::magma_tag
 .. doxygenstruct:: math::is_magma
 
+.. doxygenstruct:: math::merge_magma
+
 Operations on magmas
 ^^^^^^^^^^^^^^^^^^^^
 
@@ -116,6 +119,7 @@ Producing a value
 Binary operations
 """""""""""""""""
 
+.. doxygenvariable:: math::pick
 .. doxygenvariable:: math::choose
 .. doxygenvariable:: math::times
 .. doxygenvariable:: math::plus

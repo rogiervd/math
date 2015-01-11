@@ -1,5 +1,5 @@
 /*
-Copyright 2013, 2014 Rogier van Dalen.
+Copyright 2013-2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Mathematical tools library for C++.
 
@@ -33,6 +33,7 @@ Produce:
 - one
 
 Binary operations:
+- pick
 - choose
 - times
 - plus
@@ -139,6 +140,7 @@ namespace apply {
     template <class ... Arguments> struct compare;
     template <class ... Arguments> struct order;
 
+    template <class ... Arguments> struct pick;
     template <class ... Arguments> struct choose;
     template <class ... Arguments> struct times;
     template <class ... Arguments> struct plus;
@@ -255,6 +257,7 @@ namespace callable {
     template <class Operation> struct order
     : generic <apply::order, Operation> {};
 
+    struct pick : generic <apply::pick> {};
     struct choose : generic <apply::choose> {};
     struct times : generic <apply::times> {};
     struct plus : generic <apply::plus> {};
@@ -785,6 +788,17 @@ namespace operation {
     };
 
     /**
+    Return \a magma1 iff \a condition is true, and \a magma2 otherwise.
+
+    It is not normally necessary to specialise this.
+    The default implementation uses \c operation::unify_types to unify the
+    return type if necessary.
+    \internal
+    This is implemented lower down.
+    */
+    template <class MagmaTag, class Enable = void> struct pick;
+
+    /**
     Take two arguments and select the left one if order (left, right) returns
     true, and the right one otherwise.
 
@@ -1042,6 +1056,10 @@ namespace apply {
         typename magma_tag_all <Magma1, Magma2>::type,
         typename std::decay <Operation>::type> {};
 
+    template <class Condition, class Magma1, class Magma2>
+        struct pick <Condition, Magma1, Magma2>
+    : operation::pick <typename magma_tag_all <Magma1, Magma2>::type> {};
+
     // Binary operations.
 #define MATH_MAGMA_DEFINE_BINARY_OPERATION(operation_name) \
     template <class Magma1, class Magma2> \
@@ -1282,6 +1300,47 @@ template <class Operation, class Magma1, class Magma2> inline auto
     order (Magma1 && magma1, Magma2 && magma2)
 RETURNS (callable::order <Operation>() (
     std::forward <Magma1> (magma1), std::forward <Magma2> (magma2)));
+
+/** \brief
+Rime merge policy for magmas.
+
+If you would like to return one value or another based on a run-time or
+compile-time condition, then say
+\code
+rime::if_ <merge_magma> (condition, magma1, magma2)
+\endcode
+
+This will automatically return the correctly general type.
+
+This wraps operation::unify_type to form a metafunction implementing a Rime
+merge policy.
+If Left and Right are the same type, then it is returned unchanged.
+Otherwise, some conversion is necessary, so operation::unify_type is called with
+the decayed types to find the common type.
+
+\todo If Left and Right are reference types and unify_type returns a
+common base, it might be best to return a reference, and prevent an
+additional copy.
+*/
+struct merge_magma {
+    template <class Left, class Right> struct apply
+    : operation::unify_type <typename magma_tag_all <Left, Right>::type,
+        typename std::decay <Left>::type,
+        typename std::decay <Right>::type> {};
+
+    template <class Type> struct apply <Type, Type>
+    { typedef Type type; };
+};
+
+/**
+\return \a magma1 iff \a condition is true; \a magma2 otherwise.
+When necessary, this selects a return type that is general enough to represent
+either argument.
+\param condition A boolean, which can be a compile-time or a run-time value.
+\param magma1
+\param magma2
+*/
+static const auto pick = callable::pick();
 
 /**
 \return The most preferable out of \a magma1 and \a magma2.
@@ -1605,32 +1664,20 @@ namespace operation {
         is_annihilator_detail::equal_annihilator <MagmaTag, Operation>,
         rime::callable::always_default <rime::false_type>>::type {};
 
+    template <class MagmaTag, class Enable> struct pick {
+        template <class Condition, class Left, class Right>
+        auto operator() (Condition condition, Left && left, Right && right)
+            const
+        RETURNS (rime::if_ <math::merge_magma> (condition,
+            std::forward <Left> (left), std::forward <Right> (right)));
+    };
+
     template <class Order> struct choose_by_order
     : associative, commutative, path_operation
     {
-        /**
-        Wrap unify_type to form a metafunction implementing a Rime merge policy.
-        If Left and Right are the same type, then it is returned unchanged.
-        Otherwise, some conversion is necessary, so unify_type is called with
-        the decayed types to find the common type.
-        \todo If Left and Right are reference types and unify_type returns a
-        common base, it might be best to return a reference, and prevent an
-        additional copy.
-        */
-        struct merge_types {
-            template <class Left, class Right> struct apply
-            : operation::unify_type <
-                typename math::magma_tag_all <Left, Right>::type,
-                typename std::decay <Left>::type,
-                typename std::decay <Right>::type> {};
-
-            template <class Type> struct apply <Type, Type>
-            { typedef Type type; };
-        };
-
         template <class Left, class Right>
         auto operator() (Left && left, Right && right) const
-        RETURNS (rime::if_ <merge_types> (Order() (left, right),
+        RETURNS (::math::pick (Order() (left, right),
             std::forward <Left> (left), std::forward <Right> (right)));
     };
 

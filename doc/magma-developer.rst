@@ -104,6 +104,7 @@ Consider implementing each of the following operations:
 .. doxygenstruct:: math::operation::identity
 .. doxygenstruct:: math::operation::annihilator
 
+.. doxygenstruct:: math::operation::pick
 .. doxygenstruct:: math::operation::choose
 .. doxygenstruct:: math::operation::times
 .. doxygenstruct:: math::operation::plus

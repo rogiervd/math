@@ -133,6 +133,17 @@ template <class Type, class Examples>
     BOOST_CHECK_EQUAL (math::compare (a, b), true);
     BOOST_CHECK_EQUAL (math::compare (b, a), false);
 
+    static_assert (has <callable::pick (bool, Type, Type)>::value, "");
+    static_assert (
+        has <callable::pick (rime::true_type, Type, Type)>::value, "");
+    static_assert (
+        has <callable::pick (std::false_type, Type, Type)>::value, "");
+
+    BOOST_CHECK_EQUAL (math::pick (true, a, b), a);
+    BOOST_CHECK_EQUAL (math::pick (false, a, b), b);
+    BOOST_CHECK_EQUAL (math::pick (std::true_type(), b, a), b);
+    BOOST_CHECK_EQUAL (math::pick (rime::false_, b, a), a);
+
     BOOST_MPL_ASSERT_NOT ((has <callable::choose (Type, Type)>));
 
     BOOST_MPL_ASSERT ((has <callable::times (Type, Type)>));
