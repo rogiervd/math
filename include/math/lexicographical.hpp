@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Mathematical tools library for C++.
 
@@ -32,7 +32,7 @@ the two values according to a lexicographical ordering.
 #include <boost/utility/enable_if.hpp>
 
 #include "meta/vector.hpp"
-#include "meta/all.hpp"
+#include "meta/all_of_c.hpp"
 
 #include "utility/type_sequence_traits.hpp"
 
@@ -133,22 +133,22 @@ private:
     typedef typename meta::first <component_types>::type first_component_type;
     typedef typename meta::drop <component_types>::type rest_component_type;
 
-    static_assert (meta::all <meta::vector <std::is_same <
-            Components, typename std::decay <Components>::type> ...>>::value,
+    static_assert (meta::all_of_c <std::is_same <Components,
+            typename std::decay <Components>::type>::value ...>::value,
         "The components may not be cv- or reference-qualified.");
 
-    static_assert (meta::all <meta::vector <
-        has <callable::order <callable::choose> (Components, Components)> ...
-        >>::value, "All components must have an ordered 'choose'.");
+    static_assert (meta::all_of_c <has <callable::order <callable::choose> (
+            Components, Components)>::value...>::value,
+        "All components must have an ordered 'choose'.");
 
-    static_assert (meta::all <meta::vector <
-            is::monoid <callable::times, Components> ...>>::value,
+    static_assert (meta::all_of_c <
+            is::monoid <callable::times, Components>::value ...>::value,
         "All components must be monoids over 'times'.");
-    static_assert (meta::all <meta::vector <
-            is::monoid <callable::choose, Components> ...>>::value,
+    static_assert (meta::all_of_c <
+            is::monoid <callable::choose, Components>::value ...>::value,
         "All components must be monoids over 'choose'.");
-    static_assert (meta::all <meta::vector <
-            is::commutative <callable::choose, Components> ...>>::value,
+    static_assert (meta::all_of_c <
+            is::commutative <callable::choose, Components>::value ...>::value,
         "For all components, 'choose' must be commutative.");
 
 public:
@@ -162,8 +162,8 @@ public:
     : boost::mpl::and_ <
         is::semiring <Direction,
             callable::times, callable::choose, first_component_type>,
-        meta::all <meta::vector <is::distributive <Direction,
-            callable::times, callable::choose, Components> ...>>
+        meta::all_of_c <is::distributive <Direction,
+            callable::times, callable::choose, Components>::value ...>
     > {};
 
     static_assert (is_semiring <left>::value || is_semiring <right>::value,
@@ -382,11 +382,11 @@ namespace operation {
         struct is_semiring <
             lexicographical_tag <over <FirstComponentTag, ComponentTags ...>>,
                 Direction, callable::times, callable::choose>
-    : meta::all <meta::vector <
+    : meta::all_of_c <
         is_semiring <FirstComponentTag,
-            Direction, callable::times, callable::choose>,
+            Direction, callable::times, callable::choose>::value,
         is_distributive <ComponentTags,
-            Direction, callable::times, callable::choose> ...>> {};
+            Direction, callable::times, callable::choose>::value ...> {};
 
     template <class ComponentTags, class Direction> struct is_semiring <
         lexicographical_tag <ComponentTags>,

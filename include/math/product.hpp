@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Mathematical tools library for C++.
 
@@ -30,7 +30,7 @@ Define a Cartesian product of magmas.
 #include <boost/utility/enable_if.hpp>
 
 #include "meta/vector.hpp"
-#include "meta/all.hpp"
+#include "meta/all_of_c.hpp"
 
 #include "utility/returns.hpp"
 #include "utility/type_sequence_traits.hpp"
@@ -110,7 +110,7 @@ public:
     typedef range::tuple <Components ...> components_type;
     typedef Inverse inverse_specification;
 
-    static_assert (meta::all <meta::vector <is_magma <Components> ...>>::value,
+    static_assert (meta::all_of_c <is_magma <Components>::value ...>::value,
         "Not all components passed to math::product are magmas.");
 
 private:
@@ -262,8 +262,8 @@ namespace operation {
     // compare.
     template <class ... ComponentTags>
         struct compare <product_tag <over <ComponentTags ...>, with_inverse<>>,
-            typename boost::enable_if <meta::all <meta::vector <
-                is_implemented <compare <ComponentTags>> ...>>>::type>
+            typename boost::enable_if <meta::all_of_c <
+                is_implemented <compare <ComponentTags>>::value ...>>::type>
     : tuple_helper::compare_components <math::callable::compare> {};
 
     // With inverse: annihilators go at the end.
@@ -271,8 +271,8 @@ namespace operation {
         struct compare <product_tag <over <ComponentTags ...>,
             with_inverse <Operation>>,
             typename boost::enable_if <boost::mpl::and_ <
-                meta::all <meta::vector <
-                    is_implemented <compare <ComponentTags>> ...>>,
+                meta::all_of_c <
+                    is_implemented <compare <ComponentTags>>::value ...>,
                 // Only instantiate this if the Operation is not void.
                 // GCC 4.6 requires this, or it won't realise the the
                 // specialisation above is better.
@@ -306,9 +306,9 @@ namespace operation {
     // (otherwise, what value to pick for the other components?)
     template <class ... Tags, class Inverses, class Operation>
         struct annihilator <product_tag <over <Tags ...>, Inverses>, Operation,
-        typename boost::enable_if <meta::all <meta::vector <
-            is_implemented <annihilator <Tags, Operation>> ...
-        >>>::type>
+        typename boost::enable_if <meta::all_of_c <
+            is_implemented <annihilator <Tags, Operation>>::value ...
+        >>::type>
     : tuple_helper::nullary_operation <callable::make_product <Inverses>,
         meta::vector <annihilator <Tags, Operation> ...>> {};
 
@@ -334,8 +334,8 @@ namespace operation {
             class Direction, class Operation1, class Operation2>
         struct is_semiring <product_tag <over <Tags ...>, Inverses>, Direction,
             Operation1, Operation2>
-    : meta::all <meta::vector <
-        is_semiring <Tags, Direction, Operation1, Operation2> ...>> {};
+    : meta::all_of_c <
+        is_semiring <Tags, Direction, Operation1, Operation2>::value ...> {};
 
     // ... except when the product is empty.
     template <class Inverses, class Direction,
@@ -348,8 +348,9 @@ namespace operation {
             class Direction, class Operation1, class Operation2>
         struct is_distributive <product_tag <over <Tags ...>, Inverses>,
             Direction, Operation1, Operation2>
-    : meta::all <meta::vector <
-        is_distributive <Tags, Direction, Operation1, Operation2> ...>> {};
+    : meta::all_of_c <
+        is_distributive <Tags, Direction, Operation1, Operation2>::value ...>
+    {};
 
     template <class ... Tags,
             class ... Components1, class ... Components2, class Inverses>

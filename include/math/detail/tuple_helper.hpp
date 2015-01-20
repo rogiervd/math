@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Mathematical tools library for C++.
 
@@ -33,6 +33,8 @@ Define helpers for magmas that consist of other magmas.
 
 #include "meta/vector.hpp"
 #include "meta/count.hpp"
+#include "meta/all_of_c.hpp"
+#include "meta/any_of_c.hpp"
 
 #include "range/core.hpp"
 #include "range/equal.hpp"
@@ -147,10 +149,10 @@ namespace operation {
 
         template <class Reassemble, class ... Operations>
             struct nullary_operation <Reassemble, meta::vector <Operations ...>,
-                typename boost::enable_if <meta::all <meta::vector <
-                    is_implemented <Operations> ...>>>::type>
+                typename boost::enable_if <meta::all_of_c <
+                    is_implemented <Operations>::value ...>>::type>
         : approximate_if <
-            meta::any <meta::vector <is_approximate <Operations> ...>>>
+            meta::any_of_c <is_approximate <Operations>::value ...>>
         {
             auto operator() () const
             RETURNS (Reassemble() (Operations()() ...));
@@ -183,10 +185,10 @@ namespace operation {
         template <class Reassemble, class ... Operations, class ... Indices>
             struct unary_operation <Reassemble,
                 meta::vector <Operations ...>, meta::vector <Indices ...>,
-                typename boost::enable_if <meta::all <meta::vector <
-                    is_implemented <Operations> ...>>>::type>
+                typename boost::enable_if <meta::all_of_c <
+                    is_implemented <Operations>::value ...>>::type>
         : approximate_if <
-            meta::any <meta::vector <is_approximate <Operations> ...>>>
+            meta::any_of_c <is_approximate <Operations>::value ...>>
         {
         private:
             // GCC 4.6 crashes if this is a static function instead of a class.
@@ -241,18 +243,18 @@ namespace operation {
         template <class Reassemble, class ... Operations, class ... Indices>
             struct binary_operation <Reassemble,
                 meta::vector <Operations ...>, meta::vector <Indices ...>,
-                typename boost::enable_if <meta::all <meta::vector <
-                    is_implemented <Operations> ...>>>::type>
+                typename boost::enable_if <meta::all_of_c <
+                    is_implemented <Operations>::value ...>>::type>
         : approximate_if <
-            meta::any <meta::vector <is_approximate <Operations> ...>>>,
+            meta::any_of_c <is_approximate <Operations>::value ...>>,
         associative_if <
-            meta::all <meta::vector <is_associative <Operations> ...>>>,
+            meta::all_of_c <is_associative <Operations>::value ...>>,
         commutative_if <
-            meta::all <meta::vector <is_commutative <Operations> ...>>>,
+            meta::all_of_c <is_commutative <Operations>::value ...>>,
         idempotent_if <
-            meta::all <meta::vector <is_idempotent <Operations> ...>>>,
+            meta::all_of_c <is_idempotent <Operations>::value ...>>,
         path_operation_if <
-            meta::all <meta::vector <is_path_operation <Operations> ...>>>
+            meta::all_of_c <is_path_operation <Operations>::value ...>>
         {
         private:
             // GCC 4.6 crashes if this is a static function instead of a class.
@@ -289,10 +291,9 @@ namespace operation {
 
         template <class ... ComponentTags>
             class print_components <meta::vector <ComponentTags ...>, typename
-                boost::enable_if <
-                    meta::all <meta::vector <
-                        is_implemented <operation::print <ComponentTags>> ...>>
-                >::type>
+                boost::enable_if <meta::all_of_c <
+                    is_implemented <operation::print <ComponentTags>>::value ...
+                >>::type>
         {
             // Known to be empty.
             template <class Stream, class Components, class Enable = typename

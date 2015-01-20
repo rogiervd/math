@@ -1,5 +1,5 @@
 /*
-Copyright 2013, 2014 Rogier van Dalen.
+Copyright 2013-2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Mathematical tools library for C++.
 
@@ -33,7 +33,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/mpl/bool.hpp>
 #include <boost/utility/enable_if.hpp>
 
-#include "meta/any.hpp"
+#include "meta/any_of.hpp"
 #include "meta/transform.hpp"
 #include "meta/vector.hpp"
 
@@ -330,7 +330,7 @@ namespace check_detail {
         bool check_equality (Result1 const & result1, Result2 const & result2,
             char const * message)
     {
-        typedef typename meta::any <meta::transform <
+        typedef typename meta::any_of <meta::transform <
                 is::approximate <boost::mpl::_1>, Operations
             >>::type check_approximate;
         static_assert ((!check_approximate::value) ||
