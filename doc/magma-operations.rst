@@ -86,6 +86,7 @@ Compile-time helpers
 .. doxygenstruct:: math::is_magma
 
 .. doxygenstruct:: math::merge_magma
+.. doxygenstruct:: math::generalise_type
 
 Operations on magmas
 ^^^^^^^^^^^^^^^^^^^^
