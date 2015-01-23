@@ -30,6 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/mpl/pair.hpp>
 
 #include <boost/bimap.hpp>
+#include <boost/functional/hash_fwd.hpp>
 
 #include "utility/returns.hpp"
 
@@ -137,6 +138,14 @@ public:
 Represent a symbol from an alphabet with an integer.
 There is usually no reason to explicitly use this class; \a alphabet will
 normally produce objects of this class.
+
+This class has all comparison operators.
+The ordering is not meaningful: all it does is provide a strict weak ordering
+(which corresponds to the strict weak ordering on the underlying id's).
+There is no relation to the ordering of the normal symbols.
+
+This class also supports boost::hash.
+
 \tparam Value
     The integer type that the symbol is mapped to.
     This type can also be a compile-time constant (normally rime::constant),
@@ -198,15 +207,49 @@ an object of that type.
 */
 template <class Type> struct symbol_type_tag {};
 
+// Equal.
 template <class Value1, class Value2, class Tag>
     inline auto operator == (dense_symbol <Value1, Tag> const & symbol1,
         dense_symbol <Value2, Tag> const & symbol2)
 RETURNS (symbol1.id() == symbol2.id());
 
+// Not equal.
 template <class Value1, class Value2, class Tag>
     inline auto operator != (dense_symbol <Value1, Tag> const & symbol1,
         dense_symbol <Value2, Tag> const & symbol2)
 RETURNS (symbol1.id() != symbol2.id());
+
+// Less.
+template <class Value1, class Value2, class Tag>
+    inline auto operator < (dense_symbol <Value1, Tag> const & symbol1,
+        dense_symbol <Value2, Tag> const & symbol2)
+RETURNS (symbol1.id() < symbol2.id());
+
+// Less or equal.
+template <class Value1, class Value2, class Tag>
+    inline auto operator <= (dense_symbol <Value1, Tag> const & symbol1,
+        dense_symbol <Value2, Tag> const & symbol2)
+RETURNS (symbol1.id() <= symbol2.id());
+
+// Greater.
+template <class Value1, class Value2, class Tag>
+    inline auto operator > (dense_symbol <Value1, Tag> const & symbol1,
+        dense_symbol <Value2, Tag> const & symbol2)
+RETURNS (symbol1.id() > symbol2.id());
+
+// Greater than or equal.
+template <class Value1, class Value2, class Tag>
+    inline auto operator >= (dense_symbol <Value1, Tag> const & symbol1,
+        dense_symbol <Value2, Tag> const & symbol2)
+RETURNS (symbol1.id() >= symbol2.id());
+
+// Compute hash for boost::hash.
+template <class Value, class Tag>
+    inline std::size_t hash_value (dense_symbol <Value, Tag> const & symbol)
+{
+    boost::hash <typename rime::value <Value>::type> hasher;
+    return hasher (symbol.id());
+}
 
 namespace detail {
 

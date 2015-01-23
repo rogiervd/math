@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 
 #include <boost/mpl/assert.hpp>
+#include <boost/functional/hash.hpp>
 
 #define CHECK_CONSTANT(expression) \
     BOOST_MPL_ASSERT ((rime::equal_constant <decltype (expression), \
@@ -66,6 +67,39 @@ struct rho {
     { return rime::true_; }
 };
 
+template <class Symbol1, class Symbol2> inline
+    void check_comparison (Symbol1 const & symbol1, Symbol2 const & symbol2)
+{
+    if (symbol1 == symbol2) {
+        BOOST_CHECK (!(symbol1 != symbol2));
+
+        BOOST_CHECK_EQUAL (boost::hash <Symbol1>() (symbol1),
+            boost::hash <Symbol2>() (symbol2));
+
+        BOOST_CHECK (!(symbol1 < symbol2));
+        BOOST_CHECK (symbol1 <= symbol2);
+        BOOST_CHECK (!(symbol1 > symbol2));
+        BOOST_CHECK (symbol1 >= symbol2);
+    } else {
+        BOOST_CHECK (symbol1 != symbol2);
+
+        // The hashes are not guaranteed to be unequal, but it is very unlikely
+        // that they are not.
+        BOOST_CHECK (boost::hash <Symbol1>() (symbol1)
+            != boost::hash <Symbol2>() (symbol2));
+
+        if (symbol1 < symbol2) {
+            BOOST_CHECK (symbol1 <= symbol2);
+            BOOST_CHECK (!(symbol1 > symbol2));
+            BOOST_CHECK (!(symbol1 >= symbol2));
+        } else {
+            BOOST_CHECK (!(symbol1 <= symbol2));
+            BOOST_CHECK (symbol1 > symbol2);
+            BOOST_CHECK (symbol1 >= symbol2);
+        }
+    }
+}
+
 BOOST_AUTO_TEST_CASE (test_math_alphabet) {
     // Reserve room for only 2 normal and two special symbols, so that overflow
     // detection can be tested.
@@ -83,7 +117,7 @@ BOOST_AUTO_TEST_CASE (test_math_alphabet) {
     auto test_symbol_2 = alphabet.add_symbol ("test");
     BOOST_CHECK (!alphabet.is_special_symbol (test_symbol_2));
     BOOST_CHECK (test_symbol == test_symbol_2);
-    BOOST_CHECK (!(test_symbol != test_symbol_2));
+    check_comparison (test_symbol, test_symbol_2);
     BOOST_CHECK_EQUAL (alphabet.get_symbol <std::string> (test_symbol_2),
         "test");
 
@@ -91,7 +125,7 @@ BOOST_AUTO_TEST_CASE (test_math_alphabet) {
     BOOST_CHECK (!alphabet.is_special_symbol (hello_symbol));
     BOOST_CHECK_EQUAL (hello_symbol.id(), 1);
     BOOST_CHECK (test_symbol != hello_symbol);
-    BOOST_CHECK (!(test_symbol == hello_symbol));
+    check_comparison (test_symbol, hello_symbol);
     BOOST_CHECK_EQUAL (alphabet.get_symbol <std::string> (hello_symbol),
         "hello");
 
@@ -270,14 +304,18 @@ BOOST_AUTO_TEST_CASE (test_math_alphabet_default) {
 
     BOOST_CHECK (symbol == dense_hello);
     BOOST_CHECK_EQUAL (symbol.id(), dense_hello.id());
+    check_comparison (symbol, dense_hello);
 
     symbol = alphabet2.get_dense (empty());
     auto dense_empty = alphabet2.get_dense (empty());
     BOOST_CHECK (symbol == dense_empty);
     BOOST_CHECK_EQUAL (symbol.id(), dense_empty.id());
+    check_comparison (symbol, dense_empty);
 
     BOOST_CHECK (symbol != dense_hello);
+    check_comparison (symbol, dense_hello);
     BOOST_CHECK (dense_empty != dense_hello);
+    check_comparison (dense_empty, dense_hello);
 
     // Add symbols to original alphabet and they should go into alphabet2 as
     // well.
