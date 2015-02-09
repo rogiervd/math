@@ -915,7 +915,8 @@ template <class Direction> void test_pick() {
 
 /**
 Test basic properties of choose.
-This is supposed to compute the longest common prefix/suffix, from Direction.
+This should pick the shortest of the two sequences, or if hey have the same
+length, compare them lexicographically from Direction.
 The parameters are potentially reversed, so that directionality can be tested.
 */
 template <class Direction>
@@ -937,19 +938,19 @@ template <class Direction>
     CHECK_CHOOSE_TYPE (single_sequence, empty_sequence, empty_sequence);
     CHECK_CHOOSE_TYPE (single_sequence, single_sequence, single_sequence);
     CHECK_CHOOSE_TYPE (single_sequence, optional_sequence, optional_sequence);
-    CHECK_CHOOSE_TYPE (single_sequence, sequence, sequence);
+    CHECK_CHOOSE_TYPE (single_sequence, sequence, optional_sequence);
     CHECK_CHOOSE_TYPE (single_sequence, sequence_annihilator, single_sequence);
 
     CHECK_CHOOSE_TYPE (optional_sequence, empty_sequence, empty_sequence);
     CHECK_CHOOSE_TYPE (optional_sequence, single_sequence, optional_sequence);
     CHECK_CHOOSE_TYPE (optional_sequence, optional_sequence, optional_sequence);
-    CHECK_CHOOSE_TYPE (optional_sequence, sequence, sequence);
+    CHECK_CHOOSE_TYPE (optional_sequence, sequence, optional_sequence);
     CHECK_CHOOSE_TYPE (optional_sequence, sequence_annihilator,
         optional_sequence);
 
     CHECK_CHOOSE_TYPE (sequence, empty_sequence, empty_sequence);
-    CHECK_CHOOSE_TYPE (sequence, single_sequence, sequence);
-    CHECK_CHOOSE_TYPE (sequence, optional_sequence, sequence);
+    CHECK_CHOOSE_TYPE (sequence, single_sequence, optional_sequence);
+    CHECK_CHOOSE_TYPE (sequence, optional_sequence, optional_sequence);
     CHECK_CHOOSE_TYPE (sequence, sequence, sequence);
     CHECK_CHOOSE_TYPE (sequence, sequence_annihilator, sequence);
 
@@ -967,6 +968,8 @@ template <class Direction>
     empty_sequence empty;
     single_sequence a ('a');
     single_sequence b ('b');
+    sequence ab (std::string ("ab"));
+    sequence abc (std::string ("abc"));
     sequence r_ab (ab_);
     sequence r_abc (abc_);
 
@@ -982,21 +985,25 @@ template <class Direction>
     check (a, empty, empty);
     check (a, a, a);
     check (a, b, a);
+    check (a, ab, a);
+    check (a, abc, a);
     check (a, r_ab, a);
     check (a, r_abc, a);
     check (r_ab, r_abc, r_ab);
+    check (r_ab, abc, r_ab);
+    check (ab, r_abc, ab);
     check (a, annihilator, a);
 
     check (r_ab, empty, empty);
     check (r_ab, a, a);
-    check (r_ab, b, r_ab);
+    check (r_ab, b, b);
     check (r_ab, r_ab, r_ab);
-    check (r_ab, r_abc, r_ab);
+    check (r_ab, abc, r_ab);
     check (r_ab, annihilator, r_ab);
 
     check (r_abc, empty, empty);
     check (r_abc, a, a);
-    check (r_abc, b, r_abc);
+    check (r_abc, b, b);
     check (r_abc, r_ab, r_ab);
     check (r_abc, r_abc, r_abc);
     check (r_abc, annihilator, r_abc);

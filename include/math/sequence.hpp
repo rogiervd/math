@@ -64,8 +64,11 @@ suffix (if \a Direction is \ref right).
 a prefix (or suffix) of the dividend.
 
 \ref compare implements a strict weak ordering by sorting elements
-lexicographically from \c Direction.
-\ref choose uses this ordering.
+lexicographically from \a Direction.
+\ref choose picks the shortest sequence first, and uses lexicographical order
+from \a Direction as a tie-breaker.
+This makes the sequence a semiring with \ref times and \ref choose in both
+directions, whatever the value of \a Direction
 
 \sa math::empty_sequence, math::single_sequence, math::optional_sequence,
 math::sequence_annihilator
@@ -544,10 +547,170 @@ namespace operation {
 
     /* Operations. */
 
-    // Use "compare" for choose.
+    /**
+    To make this a semiring with "choose" and "times", the order for "choose"
+    prefers shorter sequences and uses a lexicographical comparison as a
+    tie-breaker.
+    */
     template <class Symbol, class Direction>
         struct order <sequence_tag <Symbol, Direction>, callable::choose>
-    : compare <sequence_tag <Symbol, Direction>> {};
+    {
+        typedef typename sequence_detail::range_direction <Direction>::type
+            range_direction;
+
+        typedef empty_sequence <Symbol, Direction> empty;
+        typedef single_sequence <Symbol, Direction> single;
+        typedef optional_sequence <Symbol, Direction> optional;
+        typedef sequence <Symbol, Direction> sequence_type;
+        typedef sequence_annihilator <Symbol, Direction> annihilator;
+
+        // Left is empty_sequence.
+        rime::false_type operator() (
+            empty const & left, empty const & right) const
+        { return rime::false_; }
+
+        rime::true_type operator() (
+            empty const & left, single const & right) const
+        { return rime::true_; }
+
+        bool operator() (empty const & left, optional const & right) const
+        { return !right.empty(); }
+
+        rime::true_type operator() (
+            empty const & left, annihilator const & right) const
+        { return rime::true_; }
+
+        bool operator() (empty const & left, sequence_type const & right) const
+        { return right.is_annihilator() || !right.empty(); }
+
+        // Left is single_sequence.
+        rime::false_type operator() (
+            single const & left, empty const & right) const
+        { return rime::false_; }
+
+        bool operator() (single const & left, single const & right) const
+        { return left.symbol() < right.symbol(); }
+
+        bool operator() (single const & left, optional const & right) const {
+            if (right.empty())
+                return false;
+            else
+                return left.symbol() < right.symbol();
+        }
+
+        rime::true_type operator() (
+            single const & left, annihilator const & right) const
+        { return rime::true_; }
+
+        bool operator() (single const & left, sequence_type const & right) const
+        {
+            if (right.is_annihilator())
+                return true;
+            if (right.empty())
+                return false;
+            if (range::size (right.symbols()) == 1)
+                return left.symbol()
+                    < range::first (range_direction(), right.symbols());
+            return true;
+        }
+
+        // Left is optional_sequence.
+
+        rime::false_type operator() (
+            optional const & left, empty const & right) const
+        { return rime::false_; }
+
+        bool operator() (optional const & left, single const & right) const {
+            if (left.empty())
+                return true;
+            else
+                return left.symbol() < right.symbol();
+        }
+
+        bool operator() (optional const & left, optional const & right) const {
+            if (left.empty())
+                return !right.empty();
+            if (right.empty())
+                return false;
+            return left.symbol() < right.symbol();
+        }
+
+        rime::true_type operator() (
+            optional const & left, annihilator const & right) const
+        { return rime::true_; }
+
+        bool operator() (optional const & left, sequence_type const & right)
+            const
+        {
+            if (right.is_annihilator())
+                return true;
+            if (left.empty())
+                return !right.empty();
+            if (right.empty())
+                return false;
+            if (range::size (right.symbols()) == 1)
+                return left.symbol()
+                    < range::first (range_direction(), right.symbols());
+            return true;
+        }
+
+        // Left is an annihilator.
+        template <class Sequence>
+        rime::false_type operator() (
+            annihilator const & left, Sequence const & right) const
+        { return rime::false_; }
+
+        // Left is a sequence.
+        bool operator() (sequence_type const & left, empty const & right) const
+        { return !left.is_annihilator() && left.empty(); }
+
+        bool operator() (sequence_type const & left, single const & right) const
+        {
+            if (left.is_annihilator())
+                return false;
+            if (left.empty())
+                return true;
+            if (range::size (left.symbols()) == 1)
+                return range::first (range_direction(), left.symbols())
+                    < right.symbol();
+            return false;
+        }
+
+        bool operator() (sequence_type const & left, optional const & right)
+            const
+        {
+            if (left.is_annihilator())
+                return false;
+            if (left.empty())
+                return !right.empty();
+            if (right.empty())
+                return false;
+            if (range::size (left.symbols()) == 1)
+                return range::first (range_direction(), left.symbols())
+                    < right.symbol();
+            return false;
+        }
+
+        rime::false_type operator() (
+            sequence_type const & left, annihilator const & right) const
+        { return rime::false_; }
+
+        bool operator() (
+            sequence_type const & left, sequence_type const & right) const
+        {
+            if (left.is_annihilator())
+                return false;
+            if (right.is_annihilator())
+                return true;
+            auto && left_symbols = left.symbols();
+            auto && right_symbols = right.symbols();
+            if (range::size (left_symbols) < range::size (right_symbols))
+                return true;
+            if (range::size (right_symbols) < range::size (left_symbols))
+                return false;
+            return range::less_lexicographical (left_symbols, right_symbols);
+        }
+    };
 
     // Even though "order" is defined, this overrides the default implementation
     // to get the types right.
@@ -555,34 +718,121 @@ namespace operation {
         struct choose <sequence_tag <Symbol, Direction>>
     : associative, commutative, path_operation
     {
-        // It is necessary to explicitly override the case where we know that
-        // the resulting sequence will be empty, because the type might as well
-        // reflect that.
-        typedef empty_sequence <Symbol, Direction> empty_sequence_type;
-        typedef optional_sequence <Symbol, Direction> optional_sequence_type;
+        typedef typename sequence_detail::range_direction <Direction>::type
+            range_direction;
 
-        // empty_sequence as first argument: always return empty sequence.
-        template <class Sequence> empty_sequence_type operator() (
-            empty_sequence_type const &, Sequence const &) const
-        { return empty_sequence_type(); }
+        typedef empty_sequence <Symbol, Direction> empty;
+        typedef single_sequence <Symbol, Direction> single;
+        typedef optional_sequence <Symbol, Direction> optional;
+        typedef sequence <Symbol, Direction> sequence_type;
+        typedef sequence_annihilator <Symbol, Direction> annihilator;
 
-        typedef choose_by_order <order <sequence_tag <Symbol, Direction>,
-            callable::choose>> standard_implementation;
+        struct implementation {
+            // One argument is known to be an annihilator.
+            template <class Sequence> Sequence operator() (
+                annihilator const &, Sequence const & right,
+                utility::overload_order <1> *) const
+            { return right; }
 
-        // Otherwise: forward to standard_implementation.
-        template <class Sequence1, class Sequence2, class Enable = typename
-            utility::disable_if_same_or_derived <empty_sequence_type, Sequence1
-                >::type>
-        auto operator() (
-            Sequence1 && sequence1, Sequence2 && sequence2) const
-        RETURNS (standard_implementation() (sequence1, sequence2));
+            template <class Sequence> Sequence operator() (
+                Sequence const & left, annihilator const &,
+                utility::overload_order <2> *) const
+            { return left; }
+
+            // One argument is known-empty.
+            template <class Right> empty operator() (
+                empty const &, Right const &,
+                utility::overload_order <3> *) const
+            { return empty(); }
+
+            template <class Left> empty operator() (
+                Left const &, empty const &,
+                utility::overload_order <4> *) const
+            { return empty(); }
+
+            // One argument is known-single.
+            single operator() (single const & left, single const & right,
+                utility::overload_order <5> *) const
+            {
+                if (left.symbol() < right.symbol())
+                    return left;
+                else
+                    return right;
+            }
+
+            // Case where one argument is at most one symbol long.
+            template <class Short, class Long> optional when_short (
+                Short const & s, Long const & l) const
+            {
+                if (l.is_annihilator())
+                    return s;
+                if (s.empty() || l.empty())
+                    return optional();
+                if (!range::empty (range::drop (range_direction(),
+                        l.symbols())))
+                    // l is more than one symbol long.
+                    return s;
+                if (s.symbol() < range::first (range_direction(), l.symbols()))
+                    return s;
+                else
+                    return optional (l);
+            }
+
+            // One argument is an optional_sequence.
+            template <class Sequence> optional operator() (
+                optional const & left, Sequence const & right,
+                utility::overload_order <6> *) const
+            { return when_short (left, right); }
+
+            template <class Sequence> optional operator() (
+                Sequence const & left, optional const & right,
+                utility::overload_order <7> *) const
+            { return when_short (right, left); }
+
+            // One argument is an single_sequence.
+            template <class Sequence> optional operator() (
+                single const & left, Sequence const & right,
+                utility::overload_order <6> *) const
+            { return when_short (left, right); }
+
+            template <class Sequence> optional operator() (
+                Sequence const & left, single const & right,
+                utility::overload_order <7> *) const
+            { return when_short (right, left); }
+
+            // Both are sequences.
+            sequence_type operator() (
+                sequence_type const & left, sequence_type const & right,
+                utility::overload_order <8> *) const
+            {
+                if (left.is_annihilator())
+                    return right;
+                if (right.is_annihilator())
+                    return left;
+                auto left_size = range::size (left.symbols());
+                auto right_size = range::size (right.symbols());
+                if (left_size < right_size)
+                    return left;
+                if (right_size < left_size)
+                    return right;
+                if (range::less_lexicographical (
+                        left.symbols(), right.symbols()))
+                    return left;
+                else
+                    return right;
+            }
+        };
+
+        template <class Left, class Right> auto operator() (
+            Left const & left, Right const & right) const
+        RETURNS (implementation() (left, right, utility::pick_overload()));
     };
 
-    // The direction matches the direction of the sequence:
-    // left and right sequences are left and right semirings over times and
-    // choose.
+    // Since "choose" selects the shortest sequence first, and compares
+    // lexicographically as a tie-breaker, sequences in one direction are
+    // semirings in both directions.
     template <class Symbol, class Direction> struct is_semiring <
-        sequence_tag <Symbol, Direction>, Direction,
+        sequence_tag <Symbol, Direction>, either,
         callable::times, callable::choose>
     : rime::true_type {};
 
@@ -801,7 +1051,7 @@ namespace operation {
                     utility::overload_order <5> * pick) const
             {
                 typedef optional_type result_type;
-                // Annihalator is the additive identity.
+                // Annihilator is the additive identity.
                 if (sequence1.is_annihilator())
                     return result_type (sequence2);
                 if (sequence2.is_annihilator())

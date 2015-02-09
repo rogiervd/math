@@ -55,10 +55,10 @@ BOOST_AUTO_TEST_CASE (test_lexicographical_static) {
     BOOST_MPL_ASSERT ((math::is::distributive <
         math::left, math::callable::times, math::callable::plus,
         lexicographical>));
-    BOOST_MPL_ASSERT_NOT ((math::is::distributive <
+    BOOST_MPL_ASSERT ((math::is::distributive <
         math::right, math::callable::times, math::callable::plus,
         lexicographical>));
-    BOOST_MPL_ASSERT_NOT ((math::is::distributive <
+    BOOST_MPL_ASSERT ((math::is::distributive <
         math::either, math::callable::times, math::callable::plus,
         lexicographical>));
 

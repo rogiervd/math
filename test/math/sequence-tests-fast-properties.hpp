@@ -275,7 +275,8 @@ template <class Direction, class Opposite> void test_sequence_spot() {
         math::is::path_operation <math::callable::plus, sequence>));
 
     // Properties of choose.
-    BOOST_MPL_ASSERT ((math::has <math::callable::choose (sequence, sequence)>));
+    BOOST_MPL_ASSERT ((math::has <
+        math::callable::choose (sequence, sequence)>));
     BOOST_MPL_ASSERT_NOT ((math::is::approximate <
         math::callable::choose (sequence, sequence)>));
     BOOST_MPL_ASSERT ((math::has <
@@ -289,7 +290,8 @@ template <class Direction, class Opposite> void test_sequence_spot() {
     BOOST_MPL_ASSERT ((
         math::is::commutative <math::callable::choose, sequence>));
 
-    BOOST_MPL_ASSERT ((math::is::idempotent <math::callable::choose, sequence>));
+    BOOST_MPL_ASSERT ((
+        math::is::idempotent <math::callable::choose, sequence>));
     BOOST_MPL_ASSERT ((
         math::is::path_operation <math::callable::choose, sequence>));
 
@@ -305,13 +307,37 @@ template <class Direction, class Opposite> void test_sequence_spot() {
     BOOST_MPL_ASSERT ((math::is::throw_if_undefined <
         math::callable::divide <Direction> (sequence, sequence)>));
 
-    // Distributivity.
+    // Distributivity with plus: only in one direction.
     BOOST_MPL_ASSERT_NOT ((math::is::distributive <math::either,
         math::callable::times, math::callable::plus, sequence>));
     BOOST_MPL_ASSERT ((math::is::distributive <Direction,
         math::callable::times, math::callable::plus, sequence>));
     BOOST_MPL_ASSERT_NOT ((math::is::distributive <Opposite,
         math::callable::times, math::callable::plus, sequence>));
+
+    // Distributivity with choose: in either direction.
+    BOOST_MPL_ASSERT ((math::is::distributive <math::either,
+        math::callable::times, math::callable::choose, sequence>));
+    BOOST_MPL_ASSERT ((math::is::distributive <Direction,
+        math::callable::times, math::callable::choose, sequence>));
+    BOOST_MPL_ASSERT ((math::is::distributive <Opposite,
+        math::callable::times, math::callable::choose, sequence>));
+
+    // Semiring with plus: only in one direction.
+    BOOST_MPL_ASSERT_NOT ((math::is::semiring <math::either,
+        math::callable::times, math::callable::plus, sequence>));
+    BOOST_MPL_ASSERT ((math::is::semiring <Direction,
+        math::callable::times, math::callable::plus, sequence>));
+    BOOST_MPL_ASSERT_NOT ((math::is::semiring <Opposite,
+        math::callable::times, math::callable::plus, sequence>));
+
+    // Semiring with choose: in either direction.
+    BOOST_MPL_ASSERT ((math::is::semiring <math::either,
+        math::callable::times, math::callable::choose, sequence>));
+    BOOST_MPL_ASSERT ((math::is::semiring <Direction,
+        math::callable::times, math::callable::choose, sequence>));
+    BOOST_MPL_ASSERT ((math::is::semiring <Opposite,
+        math::callable::times, math::callable::choose, sequence>));
 }
 
 #endif // MATH_TEST_MATH_TEST_SEQUENCE_TESTS_FAST_HPP_INCLUDED
