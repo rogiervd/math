@@ -30,6 +30,7 @@ the two values according to a lexicographical ordering.
 #include <boost/mpl/and.hpp>
 
 #include <boost/utility/enable_if.hpp>
+#include <boost/functional/hash_fwd.hpp>
 
 #include "meta/vector.hpp"
 #include "meta/all_of_c.hpp"
@@ -42,6 +43,7 @@ the two values according to a lexicographical ordering.
 #include "range/less_lexicographical.hpp"
 #include "range/transform.hpp"
 #include "range/all.hpp"
+#include "range/hash_range.hpp"
 
 #include "magma.hpp"
 #include "detail/tuple_helper.hpp"
@@ -100,6 +102,11 @@ explicitly convertible.
 
 It has a member function \c components() which returns the range with the
 components in order.
+
+The lexicographical semiring supports Boost.Hash, if
+\c boost/functional/hash.hpp is included.
+If the hash values of the components of two lexicographical semirings are the
+same, then the hash value of the two semirings will be the same.
 
 \tparam Components
     Type of the form \ref over\<...> with the magmas that should be contained.
@@ -420,6 +427,26 @@ namespace operation {
 } // namespace operation
 
 MATH_MAGMA_GENERATE_OPERATORS (detail::is_lexicographical_tag)
+
+// Boost.Hash support.
+
+namespace lexicographical_detail {
+
+    // Annihilators are treated specially.
+    static std::size_t constexpr annihilator_hash =
+        std::size_t (0xa5e33b35c473015b  & std::size_t (-1));
+
+} // namespace lexicographical_detail
+
+// Without an inverse: just combine the hash values of the components.
+template <class Components>
+    inline std::size_t hash_value (lexicographical <Components> const & l)
+{
+    if (is_annihilator <callable::times> (l))
+        return lexicographical_detail::annihilator_hash;
+    else
+        return range::hash_range (l.components());
+}
 
 } // namespace math
 
