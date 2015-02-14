@@ -1,5 +1,5 @@
 /*
-Copyright 2012, 2013, 2014 Rogier van Dalen.
+Copyright 2012, 2013-2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Mathematical tools library for C++.
 
@@ -36,6 +36,7 @@ Define the log_float and signed_log_float classes.
 #include <type_traits>
 
 #include <boost/utility/enable_if.hpp>
+#include <boost/functional/hash_fwd.hpp>
 
 #include "detail/log-float_fwd.hpp"
 #include "detail/log-float_base.hpp"
@@ -81,6 +82,10 @@ namespace math {
     Unlike for floating-point numbers, functions that use a break-down in
     integer and fractional parts are not available, nor are trigonometric
     functions.
+
+    log_float supports Boost.Hash if \c boost/functional/hash.hpp is included.
+    The hash value for a log_float is the same as the hash value of the
+    signed_log_float with the same value.
 
     \tparam Exponent The type to use to hold the exponent.
     \tparam Policy The Boost.Math policy that defines behaviour under domain
@@ -836,6 +841,20 @@ namespace math {
         inline log_float <Exponent, Policy> sqrt (
             log_float <Exponent, Policy> const & p)
     { return log_float <Exponent, Policy> (p.exponent() / 2, as_exponent()); }
+
+    /** \brief
+    Compute a hash value for a log_float or signed_log_float for use with
+    Boost.Hash.
+    */
+    template <class LogFloat, typename Exponent>
+        inline std::size_t hash_value (
+            const detail::log_float_base <LogFloat, Exponent> & p)
+    {
+        // Make the hash depend on the sign but only if p is not -0.
+        std::size_t seed = (p.sign() == -1 && p) ? 1 : 0;
+        boost::hash_combine (seed, p.exponent());
+        return seed;
+    }
 
     /**
     \todo Test.
