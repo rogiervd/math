@@ -30,6 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/utility/enable_if.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/optional.hpp>
+#include <boost/functional/hash_fwd.hpp>
 
 #include "utility/overload_order.hpp"
 #include "utility/disable_if_same.hpp"
@@ -42,6 +43,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "range/std/container.hpp"
 #include "range/equal.hpp"
 #include "range/less_lexicographical.hpp"
+#include "range/hash_range.hpp"
 
 #include "rime/if.hpp"
 #include "rime/call_if.hpp"
@@ -69,6 +71,11 @@ lexicographically from \a Direction.
 from \a Direction as a tie-breaker.
 This makes the sequence a semiring with \ref times and \ref choose in both
 directions, whatever the value of \a Direction
+
+Sequences support Boost.Hash, if \c boost/functional/hash.hpp is included.
+Sequences of different types that compare equal have the same hash value.
+The details of how the hashes are computed (in what direction, for example) are
+not defined, and likely to change in future versions.
 
 \sa math::empty_sequence, math::single_sequence, math::optional_sequence,
 math::sequence_annihilator
@@ -1448,6 +1455,67 @@ namespace operation {
     { typedef optional_sequence <Symbol, Direction> type; };
 
 } // namespace operation
+
+/*
+Hash support for Boost.Hash.
+This makes all values (even of different types) that compare equal have equal
+hashes.
+This means that an annihilator will always have the same (random) hash.
+Empty sequences have a hash of 0.
+Single-symbol sequences have the hash of the symbol.
+Longer sequences use all symbols for the hash.
+*/
+
+namespace sequence_detail {
+
+    // A random number that will hopefully not come up much.
+    static std::size_t constexpr annihilator_hash =
+        std::size_t (0x84c8fa43d5283350 & std::size_t (-1));
+
+} // sequence_detail
+
+template <class Symbol, class Direction> inline
+    std::size_t hash_value (
+        sequence_annihilator <Symbol, Direction> const & s)
+{ return sequence_detail::annihilator_hash; }
+
+template <class Symbol, class Direction> inline
+    std::size_t hash_value (sequence <Symbol, Direction> const & s)
+{
+    if (s.is_annihilator())
+        return sequence_detail::annihilator_hash;
+    else {
+        // If we just called range::hash_range here, then a one-symbol sequence
+        // would have a different hash to the single_sequence with the same
+        // symbol.
+        // Therefore only use hash_range after the first symbol.
+        if (s.empty())
+            return 0;
+        else {
+            std::size_t seed = boost::hash <Symbol>() (
+                range::first (s.symbols()));
+            range::hash_range (seed, range::drop (s.symbols()));
+            return seed;
+        }
+    }
+}
+
+template <class Symbol, class Direction> inline
+    std::size_t hash_value (empty_sequence <Symbol, Direction> const & s)
+{ return 0; }
+
+template <class Symbol, class Direction> inline
+    std::size_t hash_value (single_sequence <Symbol, Direction> const & s)
+{ return boost::hash <Symbol>() (s.symbol()); }
+
+template <class Symbol, class Direction> inline
+    std::size_t hash_value (optional_sequence <Symbol, Direction> const & s)
+{
+    if (s.empty())
+        return 0;
+    else
+        return boost::hash <Symbol>() (s.symbol().get());
+}
 
 } // namespace math
 
