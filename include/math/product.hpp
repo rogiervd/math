@@ -28,6 +28,7 @@ Define a Cartesian product of magmas.
 #include <boost/mpl/not.hpp>
 
 #include <boost/utility/enable_if.hpp>
+#include <boost/functional/hash_fwd.hpp>
 
 #include "meta/vector.hpp"
 #include "meta/all_of_c.hpp"
@@ -45,6 +46,7 @@ Define a Cartesian product of magmas.
 #include "range/transform.hpp"
 #include "range/any.hpp"
 #include "range/all.hpp"
+#include "range/hash_range.hpp"
 
 #include "magma.hpp"
 #include "detail/tuple_helper.hpp"
@@ -77,6 +79,10 @@ the product.
 Operations on this product are associative, commutative, idempotent,
 distributive, and the product is a semiring, if and only if each of the
 components is.
+
+Products supports Boost.Hash, if \c boost/functional/hash.hpp is included.
+If the hash values of the components of two products are the same, then the hash
+value of the two products will be the same.
 
 \todo This is a heterogeneous tuple. Is that good enough? I think so.
 OpenFst has Power<W,n> and SparsePower<W>, which hold n or a variable number
@@ -398,6 +404,32 @@ namespace operation {
     : tuple_helper::print_components <meta::vector <Tags ...>> {};
 
 } // namespace operation
+
+// Boost.Hash support.
+
+namespace product_detail {
+
+    // Products with inverses need to treat annihilators specially.
+    static std::size_t constexpr annihilator_hash =
+        std::size_t (0xcba51c150183b7f1 & std::size_t (-1));
+
+} // namespace product_detail
+
+// Without an inverse: just combine the hash values of the components.
+template <class Components>
+    inline std::size_t hash_value (
+        product <Components, with_inverse<>> const & p)
+{ return range::hash_range (p.components()); }
+
+// With an inverse: if p is an annihilator, then return a special hash value.
+template <class Components, class Operation>
+    inline std::size_t hash_value (
+        product <Components, with_inverse <Operation>> const & p)
+{
+    if (is_annihilator <Operation> (p))
+        return product_detail::annihilator_hash;
+    return range::hash_range (p.components());
+}
 
 } // namespace math
 
