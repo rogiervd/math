@@ -1,5 +1,5 @@
 /*
-Copyright 2013, 2014 Rogier van Dalen.
+Copyright 2013-2015 Rogier van Dalen.
 
 This file is part of Rogier van Dalen's Mathematical tools library for C++.
 
@@ -26,6 +26,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/mpl/bool.hpp>
 
+#include <boost/functional/hash_fwd.hpp>
+
 #include "magma.hpp"
 
 #include "detail/is_close.hpp"
@@ -42,6 +44,8 @@ has value 0.
 The multiplicative identity has value 1.
 
 Division is only implemented for non-integer types.
+
+This type supports Boost.Hash, if \c boost/functional/hash.hpp is included.
 
 \tparam Type
     Underlying type that represents the value.
@@ -219,6 +223,10 @@ namespace operation {
     };
 
 } // namespace operation
+
+template <class Type>
+    inline std::size_t hash_value (max_semiring <Type> const & m)
+{ return boost::hash <Type>() (m.value()); }
 
 } // namespace math
 

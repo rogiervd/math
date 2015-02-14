@@ -32,6 +32,8 @@ Test max_semiring.hpp.
 
 #include "math/check/check_magma.hpp"
 
+#include "./check_hash.hpp"
+
 BOOST_AUTO_TEST_SUITE (test_suite_max_semiring)
 
 template <class Type> void check_max_semiring_for() {
@@ -82,6 +84,7 @@ template <class Type> void check_max_semiring_for() {
     BOOST_CHECK (semiring (3) == semiring (3));
 
     math::check_equal_on (examples);
+    math::check_hash (examples);
 
     math::check_semiring <semiring, math::either> (
         math::times, math::plus, examples);
