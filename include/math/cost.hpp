@@ -26,6 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <functional>
 
 #include <boost/utility/enable_if.hpp>
+#include <boost/functional/hash_fwd.hpp>
 
 #include "magma.hpp"
 
@@ -38,6 +39,8 @@ Semiring that is helpful to minimise a cost.
 It is also known as the "tropical" semiring.
 
 \ref times adds costs; \ref plus and \ref choose pick the lowest-cost argument.
+
+This type supports Boost.Hash, if \c boost/functional/hash.hpp is included.
 
 \tparam Type
     Arithmetic type that represents the cost.
@@ -77,6 +80,9 @@ public:
     */
     Type const & value() const { return value_; }
 };
+
+template <class Type> inline std::size_t hash_value (cost <Type> const & c)
+{ return boost::hash <Type>() (c.value()); }
 
 namespace detail {
 

@@ -35,6 +35,8 @@ Test cost.hpp.
 
 #include "math/check/check_magma.hpp"
 
+#include "./check_hash.hpp"
+
 BOOST_AUTO_TEST_SUITE (test_suite_cost)
 
 typedef math::cost <double> cost;
@@ -144,6 +146,7 @@ BOOST_AUTO_TEST_CASE (test_cost) {
     examples.push_back (cost (5.));
 
     math::check_equal_on (examples);
+    math::check_hash (examples);
 
     math::check_magma <cost> (math::times, math::plus, examples);
 
