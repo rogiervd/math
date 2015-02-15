@@ -1,9 +1,10 @@
-project /math :
-    requirements
-    <library>/meta//meta
-    <library>/utility//utility
-    <library>/rime//rime
-    <library>/range//range
+project /math
+    : requirements
+      <use>/boost//headers
+      <library>/meta//meta
+      <library>/utility//utility
+      <library>/rime//rime
+      <library>/range//range
     ;
 
 # Declare target /math//math as a header-only library.
@@ -11,4 +12,3 @@ alias math : : : :
     <include>include
     <cxxflags>"-std=c++0x"
     ;
-

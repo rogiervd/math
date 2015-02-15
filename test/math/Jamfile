@@ -1,33 +1,32 @@
 # Test the Mathematical Tools library.
 
-alias "math-tests" :
-    # Log-float:
-    # There is a problem with Valgrind and "long double".
-    # It uses double precision instead, essentially, see:
-    #   http://valgrind.org/docs/manual/manual-core.html#manual-core.limits
+# Log-float:
+# There is a problem with Valgrind and "long double".
+# It uses double precision instead, essentially, see:
+#   http://valgrind.org/docs/manual/manual-core.html#manual-core.limits
 
-    # With long double, without Valgrind.
-    [ run test-log-float.cpp : --with-long-double :
-        # Remove the attribute; must be character-for-character the same as the
-        # attribute that is added in ../Jamfile
-        : -<testing.launcher>"valgrind --leak-check=full --error-exitcode=1"
-        : test-log-float-no_valgrind ]
+# With long double, without Valgrind.
+run test-log-float.cpp : --with-long-double :
+    # Remove the attribute; must be character-for-character the same as the
+    # attribute that is added in ../Jamfile
+    : -<testing.launcher>"valgrind --leak-check=full --error-exitcode=1"
+    : test-log-float-no_valgrind
+	;
 
-    # Without long double, with Valgrind (implied by run_glob below).
-    # [ run test-log-float.cpp ]
+# Without long double, with Valgrind (implied by run_glob below).
+# run test-log-float.cpp ;
 
-    [ run test-alphabet.cpp : :
-        # The flag -ftrapv traps on integer overflow.
-        # This happens for signed integers, not for unsigned integers.
-        # math::alphabet therefore should be careful to convert to unsigned
-        # integers internally.
-        # This checks whether it is.
-        # In older versions of CLang (definitely on 3.0) -ftrapv also traps on
-        # floating-point overflow, which is undesirable.
-        # Therefore, the flag is used for test-alphabet only.
-        : <cxxflags>"-ftrapv"
-        : test-alphabet-ftrapv
-    ]
-
-    [ run_glob *.cpp ]
+run test-alphabet.cpp : :
+    # The flag -ftrapv traps on integer overflow.
+    # This happens for signed integers, not for unsigned integers.
+    # math::alphabet therefore should be careful to convert to unsigned
+    # integers internally.
+    # This checks whether it is.
+    # In older versions of CLang (definitely on 3.0) -ftrapv also traps on
+    # floating-point overflow, which is undesirable.
+    # Therefore, the flag is used for test-alphabet only.
+    : <cxxflags>"-ftrapv"
+    : test-alphabet-ftrapv
     ;
+
+run_glob *.cpp ;
