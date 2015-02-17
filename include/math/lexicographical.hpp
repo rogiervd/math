@@ -42,7 +42,7 @@ the two values according to a lexicographical ordering.
 #include "range/equal.hpp"
 #include "range/less_lexicographical.hpp"
 #include "range/transform.hpp"
-#include "range/all.hpp"
+#include "range/all_of.hpp"
 #include "range/hash_range.hpp"
 
 #include "magma.hpp"
@@ -281,7 +281,7 @@ namespace operation {
     {
         template <class Lexicographical>
             auto operator() (Lexicographical const & l) const
-        RETURNS (range::all (range::transform (
+        RETURNS (range::all_of (range::transform (
             ::math::is_member, l.components())));
     };
 

@@ -44,8 +44,8 @@ Define a Cartesian product of magmas.
 #include "range/equal.hpp"
 #include "range/less_lexicographical.hpp"
 #include "range/transform.hpp"
-#include "range/any.hpp"
-#include "range/all.hpp"
+#include "range/any_of.hpp"
+#include "range/all_of.hpp"
 #include "range/hash_range.hpp"
 
 #include "magma.hpp"
@@ -221,7 +221,7 @@ namespace operation {
         struct is_member <product_tag <Tags, Inverses>>
     {
         template <class Product> auto operator() (Product const & product) const
-        RETURNS (range::all (
+        RETURNS (range::all_of (
             range::transform (math::is_member, product.components())));
     };
 
@@ -237,7 +237,7 @@ namespace operation {
             product_tag <ComponentTags, with_inverse <Operation>>, Operation>
     {
         template <class Product> auto operator() (Product const & product) const
-        RETURNS (range::any (range::transform (
+        RETURNS (range::any_of (range::transform (
             callable::is_annihilator <Operation>(), product.components())));
     };
 
