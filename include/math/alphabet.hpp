@@ -562,8 +562,11 @@ private:
         "Not enough room reserved for special symbols."
         " Please increase special_symbol_headroom.");
 
+public:
+    /// Signed integer type that is used for dense symbols.
     typedef typename detail::int_type_for <
         max_normal_symbol_num + special_symbol_headroom>::type dense_type;
+private:
 
     // Unsigned types are guaranteed to overflow sensibly.
     // (For signed types overflow yields undefined behaviour.)
