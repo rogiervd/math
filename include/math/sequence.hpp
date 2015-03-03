@@ -1461,9 +1461,9 @@ Hash support for Boost.Hash.
 This makes all values (even of different types) that compare equal have equal
 hashes.
 This means that an annihilator will always have the same (random) hash.
-Empty sequences have a hash of 0.
-Single-symbol sequences have the hash of the symbol.
-Longer sequences use all symbols for the hash.
+Empty sequences have a hash value defined by range::hash_range.
+Single-symbol sequences have the hash value of the one symbol.
+Longer sequences use all symbols for the hash value.
 */
 
 namespace sequence_detail {
@@ -1484,25 +1484,14 @@ template <class Symbol, class Direction> inline
 {
     if (s.is_annihilator())
         return sequence_detail::annihilator_hash;
-    else {
-        // If we just called range::hash_range here, then a one-symbol sequence
-        // would have a different hash to the single_sequence with the same
-        // symbol.
-        // Therefore only use hash_range after the first symbol.
-        if (s.empty())
-            return 0;
-        else {
-            std::size_t seed = boost::hash <Symbol>() (
-                range::first (s.symbols()));
-            range::hash_range (seed, range::drop (s.symbols()));
-            return seed;
-        }
-    }
+    else
+        return range::hash_range (s.symbols());
 }
 
 template <class Symbol, class Direction> inline
     std::size_t hash_value (empty_sequence <Symbol, Direction> const & s)
-{ return 0; }
+// Return whatever hash_range returns for empty sequences.
+{ return range::hash_range (s.symbols()); }
 
 template <class Symbol, class Direction> inline
     std::size_t hash_value (single_sequence <Symbol, Direction> const & s)
@@ -1510,12 +1499,7 @@ template <class Symbol, class Direction> inline
 
 template <class Symbol, class Direction> inline
     std::size_t hash_value (optional_sequence <Symbol, Direction> const & s)
-{
-    if (s.empty())
-        return 0;
-    else
-        return boost::hash <Symbol>() (s.symbol().get());
-}
+{ return range::hash_range (s.symbols()); }
 
 } // namespace math
 
