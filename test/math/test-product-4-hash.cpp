@@ -31,7 +31,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "math/cost.hpp"
 #include "math/sequence.hpp"
 
-#include "check_hash.hpp"
+#include "math/check/check_hash.hpp"
 
 BOOST_AUTO_TEST_SUITE (test_suite_product_hash)
 

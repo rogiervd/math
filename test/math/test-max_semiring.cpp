@@ -31,8 +31,7 @@ Test max_semiring.hpp.
 #include "range/std/container.hpp"
 
 #include "math/check/check_magma.hpp"
-
-#include "./check_hash.hpp"
+#include "math/check/check_hash.hpp"
 
 BOOST_AUTO_TEST_SUITE (test_suite_max_semiring)
 

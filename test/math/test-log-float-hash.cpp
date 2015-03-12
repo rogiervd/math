@@ -45,8 +45,9 @@ bypass explicit error handling in favour of leaving this to the hardware.
 
 #include "math/log-float.hpp"
 
-#include "./check_hash.hpp"
 #include "range/std/container.hpp"
+
+#include "math/check/check_hash.hpp"
 
 BOOST_AUTO_TEST_SUITE(test_suite_log_float_hash)
 

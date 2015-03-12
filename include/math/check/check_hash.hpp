@@ -28,8 +28,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "range/core.hpp"
 #include "range/for_each.hpp"
 
-#include "math/magma.hpp"
-
 namespace math {
 
 namespace check_detail {
