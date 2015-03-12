@@ -356,7 +356,9 @@ namespace check_detail {
         {
             auto result1 = operation (left, right);
             auto result2 = operation (right, left);
-            BOOST_CHECK_MESSAGE (result1 == result2, "Not commutative");
+            BOOST_CHECK_MESSAGE (result1 == result2,
+                "Operation not commutative: "
+                << describe_operation (operation));
         }
     };
 
