@@ -154,8 +154,10 @@ namespace operation {
         : approximate_if <
             meta::any_of_c <is_approximate <Operations>::value ...>>
         {
-            auto operator() () const
-            RETURNS (Reassemble() (Operations()() ...));
+            typename std::result_of <Reassemble (
+                typename std::result_of <Operations()>::type ...)>::type
+            operator() () const
+            { return Reassemble() (Operations()() ...); }
         };
 
         /**

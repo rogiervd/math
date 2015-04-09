@@ -1199,8 +1199,10 @@ For floating-point values, NaN is returned.
     A type that is in a magma that the return type should be in.
     Note that the return type is not necesssarily that type.
 */
-template <class Magma> inline auto non_member()
-    RETURNS (callable::non_member <Magma>()());
+template <class Magma> inline
+    typename std::result_of <callable::non_member <Magma>()>::type
+    non_member()
+{ return callable::non_member <Magma>()(); }
 
 /**
 \return The identity with respect to Operation of the same magma as Magma.
@@ -1221,12 +1223,15 @@ return the exact same value.
     A callable that represents the operation.
 */
 template <class Magma, class Operation> inline
-    auto identity (Operation const & operation)
-        RETURNS (callable::identity <Magma>()(operation));
+    typename std::result_of <callable::identity <Magma> (Operation)>::type
+    identity (Operation const & operation)
+{ return callable::identity <Magma>()(operation); }
 
 /// \cond DONT_DOCUMENT
-template <class Magma, class Operation> inline auto identity()
-    RETURNS (callable::identity <Magma, Operation>()());
+template <class Magma, class Operation> inline
+    typename std::result_of <callable::identity <Magma, Operation>()>::type
+    identity()
+{ return callable::identity <Magma, Operation>()(); }
 /// \endcond
 
 /**
@@ -1248,12 +1253,15 @@ return the exact same value.
     A callable that represents the operation.
 */
 template <class Magma, class Operation> inline
-    auto annihilator (Operation const & operation)
-        RETURNS (callable::annihilator <Magma>()(operation));
+    typename std::result_of <callable::annihilator <Magma> (Operation)>::type
+    annihilator (Operation const & operation)
+{ return callable::annihilator <Magma>()(operation); }
 
 /// \cond DONT_DOCUMENT
-template <class Magma, class Operation> inline auto annihilator()
-    RETURNS (callable::annihilator <Magma, Operation>()());
+template <class Magma, class Operation> inline
+    typename std::result_of <callable::annihilator <Magma, Operation>()>::type
+    annihilator()
+{ return callable::annihilator <Magma, Operation>()(); }
 /// \endcond
 
 /**
@@ -1265,8 +1273,10 @@ Equivalent to <c> identity <callable::plus, Magma>()</c>.
     A type that is in a magma that the return type should be in.
     Note that the return type is not necessarily that type.
 */
-template <class Magma> inline auto zero()
-    RETURNS (callable::zero <Magma>()());
+template <class Magma> inline
+    typename std::result_of <callable::zero <Magma>()>::type
+    zero()
+{ return callable::zero <Magma>()(); }
 /**
 \return Generalised one, i.e. the identity with respect to the operation
 math::times.
@@ -1275,8 +1285,10 @@ Equivalent to <c> identity <callable::times, Magma>()</c>.
     A type that is in a magma that the return type should be in.
     Note that the return type is not necessarily that type.
 */
-template <class Magma> inline auto one()
-    RETURNS (callable::one <Magma>()());
+template <class Magma> inline
+    typename std::result_of <callable::one <Magma>()>::type
+    one()
+{ return callable::one <Magma>()(); }
 
 /**
 Return whether \a magma1 comes before \a magma2 in a strict weak ordering.
