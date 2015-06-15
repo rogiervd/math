@@ -219,7 +219,7 @@ namespace operation {
     {
         template <class Product> auto operator() (Product const & product) const
         RETURNS (range::all_of (
-            range::transform (math::is_member, product.components())));
+            range::transform (product.components(), math::is_member)));
     };
 
     // is_annihilator.
@@ -235,7 +235,7 @@ namespace operation {
     {
         template <class Product> auto operator() (Product const & product) const
         RETURNS (range::any_of (range::transform (
-            callable::is_annihilator <Operation>(), product.components())));
+            product.components(), callable::is_annihilator <Operation>())));
     };
 
     // equal.

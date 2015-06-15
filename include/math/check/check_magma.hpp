@@ -867,12 +867,12 @@ namespace check_detail {
 
     template <class Examples> struct check_equal_on {
         void operator() (Examples const & examples) const
-        { range::for_each (bind (ref (*this), ref (examples), _1), examples); }
+        { range::for_each (examples, bind (ref (*this), ref (examples), _1)); }
 
         template <class Example1>
             void operator() (
                 Examples const & examples, Example1 const & example1) const
-        { range::for_each (bind (ref (*this), ref (example1), _1), examples); }
+        { range::for_each (examples, bind (ref (*this), ref (example1), _1)); }
 
         template <class Example1, class Example2>
             void operator() (
@@ -905,9 +905,8 @@ namespace check_detail {
             static_assert (math::has <callable::is_member (Magma)>::value, "");
 
             // Check with each example.
-            range::for_each (bind (ref (*this),
-                    ref (operation), ref (examples), _1),
-                examples);
+            range::for_each (examples, bind (ref (*this),
+                    ref (operation), ref (examples), _1));
         }
 
         // One example: check is_member, operation, identity, invert, reverse.
@@ -978,9 +977,8 @@ namespace check_detail {
 
             // Check with each combination of two examples.
             // _1 will be example2.
-            range::for_each (bind (ref (*this),
-                    ref (operation), ref (examples), ref (example1), _1),
-                examples);
+            range::for_each (examples, bind (ref (*this),
+                    ref (operation), ref (examples), ref (example1), _1));
         }
 
         template <class Example1, class Example2>
@@ -1091,9 +1089,8 @@ namespace check_detail {
             }
 
             // Check with each combination of three examples.
-            range::for_each (bind (ref (*this),
-                    ref (operation), ref (example1), ref (example2), _1),
-                examples);
+            range::for_each (examples, bind (ref (*this),
+                    ref (operation), ref (example1), ref (example2), _1));
         }
 
         template <class Example1, class Example2, class Example3>
@@ -1128,9 +1125,8 @@ namespace check_detail {
             Examples const & examples) const
         {
             // Check with each example.
-            range::for_each (bind (ref (*this),
-                    ref (operation1), ref (operation2), ref (examples), _1),
-                examples);
+            range::for_each (examples, bind (ref (*this),
+                    ref (operation1), ref (operation2), ref (examples), _1));
         }
 
         // One example: check is_member, operation, and identity.
@@ -1139,10 +1135,9 @@ namespace check_detail {
                 Examples const & examples, Example1 const & example1) const
         {
             // Check with each combination of two examples.
-            range::for_each (bind (ref (*this),
+            range::for_each (examples, bind (ref (*this),
                     ref (operation1), ref (operation2), ref (examples),
-                    ref (example1), _1),
-                examples);
+                    ref (example1), _1));
         }
 
         template <class Example1, class Example2>
@@ -1151,10 +1146,9 @@ namespace check_detail {
                 Example1 const & example1, Example2 const & example2) const
         {
             // Check with each combination of three examples.
-            range::for_each (bind (ref (*this),
+            range::for_each (examples, bind (ref (*this),
                     ref (operation1), ref (operation2),
-                    ref (example1), ref (example2), _1),
-                examples);
+                    ref (example1), ref (example2), _1));
         }
 
         template <class Example1, class Example2, class Example3>
@@ -1206,9 +1200,8 @@ namespace check_detail {
                 );
 
             // Check with each example.
-            range::for_each (
-                bind (ref (*this), ref (multiplication), ref (addition), _1),
-                examples);
+            range::for_each (examples,
+                bind (ref (*this), ref (multiplication), ref (addition), _1));
         }
 
         // One example: check that the additive identity is the multiplicative

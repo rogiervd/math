@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -497,8 +497,8 @@ namespace operation {
             template <class Sequence1, class Sequence2> auto operator() (
                 Sequence1 const & sequence1, Sequence2 const & sequence2) const
             RETURNS (range::less_lexicographical (
-                typename sequence_detail::range_direction <Direction>::type(),
-                sequence1.symbols(), sequence2.symbols()));
+                sequence1.symbols(), sequence2.symbols(),
+                typename sequence_detail::range_direction <Direction>::type()));
         };
 
         struct when_first_not_annihilator {
@@ -614,7 +614,7 @@ namespace operation {
                 return false;
             if (range::size (right.symbols()) == 1)
                 return left.symbol()
-                    < range::first (range_direction(), right.symbols());
+                    < range::first (right.symbols(), range_direction());
             return true;
         }
 
@@ -654,7 +654,7 @@ namespace operation {
                 return false;
             if (range::size (right.symbols()) == 1)
                 return left.symbol()
-                    < range::first (range_direction(), right.symbols());
+                    < range::first (right.symbols(), range_direction());
             return true;
         }
 
@@ -675,7 +675,7 @@ namespace operation {
             if (left.empty())
                 return true;
             if (range::size (left.symbols()) == 1)
-                return range::first (range_direction(), left.symbols())
+                return range::first (left.symbols(), range_direction())
                     < right.symbol();
             return false;
         }
@@ -690,7 +690,7 @@ namespace operation {
             if (right.empty())
                 return false;
             if (range::size (left.symbols()) == 1)
-                return range::first (range_direction(), left.symbols())
+                return range::first (left.symbols(), range_direction())
                     < right.symbol();
             return false;
         }
@@ -772,11 +772,11 @@ namespace operation {
                     return s;
                 if (s.empty() || l.empty())
                     return optional();
-                if (!range::empty (range::drop (range_direction(),
-                        l.symbols())))
+                if (!range::empty (range::drop (
+                        l.symbols(), range_direction())))
                     // l is more than one symbol long.
                     return s;
-                if (s.symbol() < range::first (range_direction(), l.symbols()))
+                if (s.symbol() < range::first (l.symbols(), range_direction()))
                     return s;
                 else
                     return optional (l);
@@ -1019,17 +1019,17 @@ namespace operation {
                     return sequence1;
 
                 std::list <Symbol> longest_common_prefix;
-                auto symbols1 = range::view (range::back, sequence1.symbols());
-                auto symbols2 = range::view (range::back, sequence2.symbols());
-                while (!range::empty (range::back, symbols1)
-                    && !range::empty (range::back, symbols2)
-                    && range::first (range::back, symbols1)
-                        == range::first (range::back, symbols2))
+                auto symbols1 = range::view (sequence1.symbols(), range::back);
+                auto symbols2 = range::view (sequence2.symbols(), range::back);
+                while (!range::empty (symbols1, range::back)
+                    && !range::empty (symbols2, range::back)
+                    && range::first (symbols1, range::back)
+                        == range::first (symbols2, range::back))
                 {
                     longest_common_prefix.push_front (
-                        range::first (range::back, symbols1));
-                    symbols1 = range::drop (range::back, symbols1);
-                    symbols2 = range::drop (range::back, symbols2);
+                        range::first (symbols1, range::back));
+                    symbols1 = range::drop (symbols1, range::back);
+                    symbols2 = range::drop (symbols2, range::back);
                 }
                 return sequence <Symbol, right> (longest_common_prefix);
             }
@@ -1044,10 +1044,10 @@ namespace operation {
 
             static Symbol const & first_symbol (
                 sequence <Symbol, left> const & s)
-            { return range::first (range::front, s.symbols()); }
+            { return range::first (s.symbols(), range::front); }
             static Symbol const & first_symbol (
                 sequence <Symbol, right> const & s)
-            { return range::first (range::back, s.symbols()); }
+            { return range::first (s.symbols(), range::back); }
 
             template <class Sequence1, class Sequence2>
                 optional_type operator() (
@@ -1130,16 +1130,16 @@ namespace operation {
                 // at the back for a right division.
                 auto start = typename
                     sequence_detail::range_direction <Direction>::type();
-                auto divisor_symbols = range::view (start, divisor.symbols());
-                auto dividend_symbols = range::view (start, dividend.symbols());
-                while (!range::empty (start, divisor_symbols)) {
-                    if (range::empty (start, dividend_symbols))
+                auto divisor_symbols = range::view (divisor.symbols(), start);
+                auto dividend_symbols = range::view (dividend.symbols(), start);
+                while (!range::empty (divisor_symbols, start)) {
+                    if (range::empty (dividend_symbols, start))
                         throw operation_undefined();
-                    if (range::first (start, dividend_symbols)
-                            != range::first (start, divisor_symbols))
+                    if (range::first (dividend_symbols, start)
+                            != range::first (divisor_symbols, start))
                         throw operation_undefined();
-                    divisor_symbols = range::drop (start, divisor_symbols);
-                    dividend_symbols = range::drop (start, dividend_symbols);
+                    divisor_symbols = range::drop (divisor_symbols, start);
+                    dividend_symbols = range::drop (dividend_symbols, start);
                 }
                 return sequence_type (dividend_symbols);
             }
@@ -1199,7 +1199,7 @@ namespace operation {
 
             Symbol const & first_symbol (sequence <Symbol, right> const & s)
                 const
-            { return range::first (range::back, s.symbols()); }
+            { return range::first (s.symbols(), range::back); }
 
             empty_sequence_type operator() (
                 single_sequence_type const & dividend,
@@ -1289,9 +1289,8 @@ namespace operation {
             std::vector <Symbol> drop_copy (
                 std::vector <Symbol> const & symbols) const
             {
-                auto result_symbols_source = range::drop (typename
-                    sequence_detail::range_direction <Direction>::type(),
-                    symbols);
+                auto result_symbols_source = range::drop (symbols, typename
+                    sequence_detail::range_direction <Direction>::type());
                 return std::vector <Symbol> (
                     result_symbols_source.begin(), result_symbols_source.end());
             }

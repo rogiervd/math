@@ -37,7 +37,7 @@ namespace check_detail {
         void operator() (Examples const & examples) const
         {
             // Check with each example.
-            range::for_each (bind (ref (*this), ref (examples), _1), examples);
+            range::for_each (examples, bind (ref (*this), ref (examples), _1));
         }
 
         template <class Example1>
@@ -45,7 +45,7 @@ namespace check_detail {
                 Examples const & examples, Example1 const & example1) const
         {
             // Check with each example.
-            range::for_each (bind (ref (*this), ref (example1), _1), examples);
+            range::for_each (examples, bind (ref (*this), ref (example1), _1));
         }
 
         template <class Example1, class Example2>
@@ -100,7 +100,7 @@ a different type.
 */
 template <class Target, class Examples>
     inline void check_cast_hash (Examples const & examples)
-{ range::for_each (check_detail::check_cast_hash <Target>(), examples); }
+{ range::for_each (examples, check_detail::check_cast_hash <Target>()); }
 
 } // namespace math
 

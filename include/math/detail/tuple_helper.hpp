@@ -67,9 +67,10 @@ namespace operation {
         template <class Equality> struct equal_components {
             template <class Left, class Right>
                 auto operator() (Left const & left, Right const & right) const
-            RETURNS (range::equal (Equality(),
+            RETURNS (range::equal (
                 get_components <typename magma_tag <Left>::type>() (left),
-                get_components <typename magma_tag <Right>::type>() (right)));
+                get_components <typename magma_tag <Right>::type>() (right),
+                Equality()));
         };
 
         /**
@@ -106,9 +107,10 @@ namespace operation {
         template <class Compare> struct compare_components {
             template <class Left, class Right>
                 auto operator() (Left const & left, Right const & right) const
-            RETURNS (range::less_lexicographical (Compare(),
+            RETURNS (range::less_lexicographical (
                 get_components <typename magma_tag <Left>::type>() (left),
-                get_components <typename magma_tag <Right>::type>() (right)));
+                get_components <typename magma_tag <Right>::type>() (right),
+                Compare()));
         };
 
         /**
@@ -206,7 +208,7 @@ namespace operation {
                 template <class Components>
                     auto operator() (Components const & components) const
                 RETURNS (Reassemble() (
-                    Operations() (range::at (Indices(), components)) ...));
+                    Operations() (range::at (components, Indices())) ...));
             };
 
         public:
@@ -267,8 +269,8 @@ namespace operation {
                         RightComponents const & right_components) const
                 RETURNS (Reassemble() (
                     Operations() (
-                        range::at (Indices(), left_components),
-                        range::at (Indices(), right_components)) ...));
+                        range::at (left_components, Indices()),
+                        range::at (right_components, Indices())) ...));
             };
 
         public:

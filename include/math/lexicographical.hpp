@@ -279,7 +279,7 @@ namespace operation {
         template <class Lexicographical>
             auto operator() (Lexicographical const & l) const
         RETURNS (range::all_of (range::transform (
-            ::math::is_member, l.components())));
+            l.components(), ::math::is_member)));
     };
 
     // is_annihilator.

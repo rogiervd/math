@@ -374,7 +374,7 @@ template <class Direction>
     sequence ab (std::string ("ab"));
     BOOST_CHECK_EQUAL (range::size (ab.symbols()), 2u);
     BOOST_CHECK_EQUAL (range::first (ab.symbols()), 'a');
-    BOOST_CHECK_EQUAL (range::at (1, ab.symbols()), 'b');
+    BOOST_CHECK_EQUAL (range::at (ab.symbols(), 1), 'b');
     sequence ac (std::string ("ac"));
     sequence bc (std::string ("bc"));
     sequence ca (std::string ("ca"));
