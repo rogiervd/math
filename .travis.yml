@@ -42,7 +42,7 @@ script:
     else
       COVERAGE="";
     fi
-  - ./test/bjam_test_in_parent_directory.sh -j2 toolset=${CC} variant=${VARIANT} ${COVERAGE}
+  - ./test/bjam_test_in_parent_directory.sh toolset=${CC} variant=${VARIANT} ${COVERAGE}
 
 after_success:
   # For debug builds, report coverage on coveralls.io.
