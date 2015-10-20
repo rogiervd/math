@@ -27,7 +27,7 @@ limitations under the License.
 #include "range/tuple.hpp"
 #include "range/std/container.hpp"
 
-#include "math/check/check_hash.hpp"
+#include "math/check/report_check_magma_boost_test.hpp"
 
 BOOST_AUTO_TEST_SUITE (test_suite_sequence_hash)
 
@@ -41,7 +41,7 @@ template <class Direction> void check_hash_homogeneous() {
     examples.push_back (sequence (std::string ("abcd")));
     examples.push_back (math::sequence_annihilator <char, Direction>());
 
-    math::check_hash (examples);
+    math::report_check_hash (examples);
 }
 
 template <class Direction> void check_hash_heterogeneous() {
@@ -57,8 +57,8 @@ template <class Direction> void check_hash_heterogeneous() {
         sequence (std::string ("a")),
         sequence (std::string ("abc")));
 
-    math::check_hash (examples);
-    math::check_cast_hash <math::sequence <char, Direction>> (examples);
+    math::report_check_hash (examples);
+    math::report_check_cast_hash <math::sequence <char, Direction>> (examples);
 }
 
 BOOST_AUTO_TEST_CASE (test_hash) {

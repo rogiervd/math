@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -31,22 +31,47 @@ Tests for math::product.
 #include "math/arithmetic_magma.hpp"
 #include "math/cost.hpp"
 #include "math/sequence.hpp"
-#include "math/check/check_magma.hpp"
+
+#include "math/check/report_check_magma_boost_test.hpp"
 
 template <class Inverses> void test_product_homogeneous() {
     // Test the empty product.
     // This is (trivially!) almost a semiring.
-    // However, it cannot have an annihilator.
+    // Its only element is also an annihilator.
     {
         typedef math::product <math::over<>, Inverses> product;
         std::vector <product> examples;
         examples.push_back (product());
 
-        static_assert (!math::has <
-                math::callable::annihilator <product> (math::callable::times)
-            >::value, "An empty product cannot have an annihilator.");
+        math::type_checklist type_checks;
+        math::operation_checklist times_checks;
+        math::operation_checklist plus_checks;
+        math::two_operations_checklist times_plus_checks;
+        math::two_operations_checklist plus_times_checks;
 
-        math::check_magma <product> (math::times, math::plus, examples);
+        // Inversion can't be checked since there is no non-annihilator.
+        times_checks.do_not_check (
+            math::operation_properties::invert_either);
+        times_checks.do_not_check (
+            math::operation_properties::invert_left);
+        times_checks.do_not_check (
+            math::operation_properties::invert_right);
+        times_checks.do_not_check (
+            math::operation_properties::inverse_operator);
+
+        plus_checks.do_not_check (
+            math::operation_properties::invert_either);
+        plus_checks.do_not_check (
+            math::operation_properties::invert_left);
+        plus_checks.do_not_check (
+            math::operation_properties::invert_right);
+        plus_checks.do_not_check (
+            math::operation_properties::inverse_operator);
+
+        math::report_check_magma <product> (
+            math::times, math::plus, examples, examples,
+            type_checks, times_checks, plus_checks,
+            times_plus_checks, plus_times_checks);
     }
 
     // Test homogeneous of (float, sequence).
@@ -64,29 +89,32 @@ template <class Inverses> void test_product_homogeneous() {
         static_assert (utility::is_assignable <
             product &, product &&>::value, "");
 
-        std::vector <product> examples;
-        examples.push_back (product (
+        std::vector <product> unequal_examples;
+        unequal_examples.push_back (product (
             0, math::sequence <char> (std::string (""))));
-        // This is the same for with_inverse <times>.
+        unequal_examples.push_back (product (
+            4, math::sequence <char> (std::string (""))));
+        unequal_examples.push_back (product (
+            2, math::sequence <char> (std::string ("a"))));
+        unequal_examples.push_back (product (
+            5, math::sequence <char> (std::string ("ab"))));
+        unequal_examples.push_back (product (
+            7, math::sequence <char> (std::string ("cba"))));
+        unequal_examples.push_back (product (
+            3, math::sequence <char> (std::string ("aba"))));
+
+        std::vector <product> examples = unequal_examples;
+        // This is the same as (0, "") for with_inverse <times>.
         examples.push_back (product (
             0, math::sequence <char> (std::string ("q"))));
-        examples.push_back (product (
-            4, math::sequence <char> (std::string (""))));
-        examples.push_back (product (
-            2, math::sequence <char> (std::string ("a"))));
-        examples.push_back (product (
-            5, math::sequence <char> (std::string ("ab"))));
-        examples.push_back (product (
-            7, math::sequence <char> (std::string ("cba"))));
-        examples.push_back (product (
-            3, math::sequence <char> (std::string ("aba"))));
+        // Any product with an annihilator compares equal.
         examples.push_back (product (
             0, math::sequence_annihilator <char> ()));
         examples.push_back (product (
             3, math::sequence_annihilator <char> ()));
 
-        math::check_semiring <product, math::left> (
-            math::times, math::plus, examples);
+        math::report_check_semiring <product, math::left> (
+            math::times, math::plus, unequal_examples, examples);
     }
 }
 
@@ -100,6 +128,16 @@ template <class Inverses> void test_product_heterogeneous() {
     typedef math::product <math::over <float, math::sequence <char>>, Inverses>
         product;
     {
+        auto unequal_examples = range::make_tuple (
+            make_product <Inverses> (2.f, math::empty_sequence <char>()),
+            make_product <Inverses> (4.f, math::empty_sequence <char>()),
+            make_product <Inverses> (5.f, math::single_sequence <char> ('A')),
+            make_product <Inverses> (5.f, math::single_sequence <char> ('z')),
+            make_product <Inverses> (1.f,
+                math::sequence <char> (std::string("Az"))),
+            make_product <Inverses> (1.f,
+                math::sequence <char> (std::string("zAz")))
+            );
         auto examples = range::make_tuple (
             make_product <Inverses> (2.f, math::empty_sequence <char>()),
             make_product <Inverses> (4.f, math::empty_sequence <char>()),
@@ -115,8 +153,8 @@ template <class Inverses> void test_product_heterogeneous() {
                 math::sequence <char> (std::string("zAz")))
             );
 
-        math::check_semiring <product, math::left> (
-            math::times, math::plus, examples);
+        math::report_check_semiring <product, math::left> (
+            math::times, math::plus, unequal_examples, examples);
     }
 }
 

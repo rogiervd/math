@@ -23,7 +23,8 @@ limitations under the License.
 #include <boost/functional/hash.hpp>
 
 #include "range/core.hpp"
-#include "range/for_each.hpp"
+#include "range/transform.hpp"
+#include "range/all_of.hpp"
 
 namespace math {
 
@@ -33,44 +34,58 @@ namespace check_detail {
     using std::ref;
     using std::placeholders::_1;
 
-    template <class Examples> struct check_hash {
-        void operator() (Examples const & examples) const
-        {
-            // Check with each example.
-            range::for_each (examples, bind (ref (*this), ref (examples), _1));
-        }
-
-        template <class Example1>
-            void operator() (
-                Examples const & examples, Example1 const & example1) const
-        {
-            // Check with each example.
-            range::for_each (examples, bind (ref (*this), ref (example1), _1));
-        }
-
-        template <class Example1, class Example2>
-            void operator() (
+    struct check_hash_base {
+        template <class ReportHashMismatch, class Example1, class Example2>
+            bool operator() (ReportHashMismatch const & report_hash_mismatch,
                 Example1 const & example1, Example2 const & example2) const
         {
             boost::hash <Example1> hasher1;
             boost::hash <Example2> hasher2;
-            if (example1 == example2) {
-                BOOST_CHECK_EQUAL (hasher1 (example1), hasher2 (example2));
-            } else {
-                BOOST_CHECK (hasher1 (example1) != hasher2 (example2));
+            bool equal = (example1 == example2);
+            bool hash_equal = (hasher1 (example1) == hasher2 (example2));
+            if (equal != hash_equal) {
+                report_hash_mismatch (example1, example2, equal, hash_equal);
+                return false;
             }
+            return true;
         }
+    };
+
+    template <class Examples> struct check_hash : check_hash_base {
+        template <class ReportHashMismatch>
+        bool operator() (ReportHashMismatch const & report_hash_mismatch,
+            Examples const & examples) const
+        {
+            // Check with each example.
+            return range::all_of (
+                range::transform (examples, bind (ref (*this),
+                    ref (report_hash_mismatch), ref (examples), _1)));
+        }
+
+        template <class ReportHashMismatch, class Example1>
+            bool operator() (ReportHashMismatch const & report_hash_mismatch,
+                Examples const & examples, Example1 const & example1) const
+        {
+            // Check with each example.
+            return range::all_of (
+                range::transform (examples, bind (ref (*this),
+                    ref (report_hash_mismatch), ref (example1), _1)));
+        }
+
+        using check_hash_base::operator();
     };
 
     /** \brief
     Check that the hash value for an object is the same as after casting to a
     different type.
     */
-    template <class Target> struct check_cast_hash {
-        template <class Source> void operator() (Source const & s) const
+    template <class General> struct check_cast_hash {
+        template <class ReportHashMismatch, class Specific>
+            bool operator() (ReportHashMismatch const & report_hash_mismatch,
+                Specific const & specific) const
         {
-            std::size_t value = boost::hash <Source>() (s);
-            BOOST_CHECK_EQUAL (value, boost::hash <Target>() (Target (s)));
+            General general (specific);
+            return check_hash_base() (report_hash_mismatch, specific, general);
         }
     };
 
@@ -90,17 +105,32 @@ until the spurious error goes away.
     The examples to test.
     Include in particular values that are different somehow but compare equal.
 */
-template <class Examples> inline void check_hash (Examples const & examples) {
-    check_detail::check_hash <Examples>() (examples);
+template <class ReportHashMismatch, class Examples>
+    inline bool check_hash (
+        ReportHashMismatch const & report_hash_mismatch,
+        Examples const & examples)
+{
+    return check_detail::check_hash <Examples>() (
+        report_hash_mismatch, examples);
 }
 
 /** \brief
 Check that the hash value for a range of objects is the same as after casting to
 a different type.
 */
-template <class Target, class Examples>
-    inline void check_cast_hash (Examples const & examples)
-{ range::for_each (examples, check_detail::check_cast_hash <Target>()); }
+template <class General, class ReportHashMismatch, class Examples>
+    inline bool check_cast_hash (
+        ReportHashMismatch const & report_hash_mismatch,
+        Examples const & examples)
+{
+    using std::bind;
+    using std::ref;
+    using std::placeholders::_1;
+
+    return range::all_of (range::transform (examples,
+        bind (check_detail::check_cast_hash <General>(),
+            ref (report_hash_mismatch), _1)));
+}
 
 } // namespace math
 

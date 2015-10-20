@@ -28,7 +28,7 @@ limitations under the License.
 #include "math/cost.hpp"
 #include "math/sequence.hpp"
 
-#include "math/check/check_hash.hpp"
+#include "math/check/report_check_magma_boost_test.hpp"
 
 BOOST_AUTO_TEST_SUITE (test_suite_product_hash)
 
@@ -44,7 +44,7 @@ template <class Inverse> void check_hash_homogeneous() {
     examples.push_back (product (1, math::cost <double> (4)));
     examples.push_back (product (1, math::zero <math::cost <double>>()));
 
-    math::check_hash (examples);
+    math::report_check_hash (examples);
 }
 
 template <class Direction, class Inverse> void check_hash_heterogeneous() {
@@ -65,8 +65,8 @@ template <class Direction, class Inverse> void check_hash_heterogeneous() {
         optional_product (1, math::optional_sequence <char, Direction> ('a')),
         product (5, math::sequence <char, Direction> (std::string ("abc"))));
 
-    math::check_hash (examples);
-    math::check_cast_hash <product> (examples);
+    math::report_check_hash (examples);
+    math::report_check_cast_hash <product> (examples);
 }
 
 BOOST_AUTO_TEST_CASE (test_hash) {

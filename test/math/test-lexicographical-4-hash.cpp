@@ -28,7 +28,7 @@ limitations under the License.
 #include "math/cost.hpp"
 #include "math/sequence.hpp"
 
-#include "math/check/check_hash.hpp"
+#include "math/check/report_check_magma_boost_test.hpp"
 
 BOOST_AUTO_TEST_SUITE (test_suite_lexicographical_hash)
 
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE (test_hash_homogeneous) {
     examples.push_back (lexicographical (math::cost <double> (0),
         math::sequence <char> (std::string ("bcd"))));
 
-    math::check_hash (examples);
+    math::report_check_hash (examples);
 }
 
 BOOST_AUTO_TEST_CASE (test_hash_heterogeneous) {
@@ -79,8 +79,8 @@ BOOST_AUTO_TEST_CASE (test_hash_heterogeneous) {
         lexicographical (math::cost <float> (5),
             math::sequence <char> (std::string ("abc"))));
 
-    math::check_hash (examples);
-    math::check_cast_hash <lexicographical> (examples);
+    math::report_check_hash (examples);
+    math::report_check_cast_hash <lexicographical> (examples);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

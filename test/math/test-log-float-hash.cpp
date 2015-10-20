@@ -1,5 +1,5 @@
 /*
-Copyright 2012, 2013 Rogier van Dalen.
+Copyright 2012, 2013, 2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ bypass explicit error handling in favour of leaving this to the hardware.
 
 #include "range/std/container.hpp"
 
-#include "math/check/check_hash.hpp"
+#include "math/check/report_check_magma_boost_test.hpp"
 
 BOOST_AUTO_TEST_SUITE(test_suite_log_float_hash)
 
@@ -72,18 +72,18 @@ BOOST_AUTO_TEST_CASE (test_hash) {
     examples.push_back (log_float (
         std::numeric_limits <double>::infinity(), math::as_exponent()));
 
-    math::check_hash (examples);
+    math::report_check_hash (examples);
 
     // Check hash on signed_log_float.
     // For positive values, the hash value should be the same.
-    math::check_cast_hash <signed_log_float> (examples);
+    math::report_check_cast_hash <signed_log_float> (examples);
 
     std::vector <signed_log_float> signed_examples;
     for (log_float example : examples) {
         signed_examples.push_back (example);
         signed_examples.push_back (-example);
     }
-    math::check_hash (signed_examples);
+    math::report_check_hash (signed_examples);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

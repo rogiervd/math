@@ -1,5 +1,5 @@
 /*
-Copyright 2012-2014 Rogier van Dalen.
+Copyright 2012-2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ Tests for arithmetic_magma on reals.
 
 #include "range/std/container.hpp"
 
-#include "math/check/check_magma.hpp"
+#include "math/check/report_check_magma_boost_test.hpp"
 
 /* Produce example values. */
 
@@ -80,7 +80,8 @@ template <class Type> std::vector <Type> get_signed_float_examples() {
 /* Actual tests. */
 
 template <class Type, class Examples>
-    void test_arithmetic_magma_real (Examples const & examples)
+    void test_arithmetic_magma_real (Examples const & examples,
+        bool check_minus = true)
 {
     Type a (3);
     Type b (5);
@@ -259,11 +260,23 @@ template <class Type, class Examples>
         BOOST_CHECK_EQUAL (result, Type (2.5) / Type (5));
     }
 
-    // Check for consistency.
-    math::check_equal_on (examples);
+    math::type_checklist type_checks;
+    math::operation_checklist times_checks;
+    math::operation_checklist plus_checks;
+    math::two_operations_checklist times_plus_checks;
+    math::two_operations_checklist plus_times_checks;
 
-    math::check_semiring <Type, math::either> (
-        math::times, math::plus, examples);
+    if (!check_minus) {
+        plus_checks.do_not_check (math::operation_properties::inverse_either);
+        plus_checks.do_not_check (math::operation_properties::inverse_left);
+        plus_checks.do_not_check (math::operation_properties::inverse_right);
+    }
+
+    // Check for consistency.
+    math::report_check_semiring <Type, math::either> (
+        math::times, math::plus, examples, examples,
+        type_checks, times_checks, plus_checks,
+        times_plus_checks, plus_times_checks);
 }
 
 template <class Type> void test_arithmetic_magma_real_signed() {

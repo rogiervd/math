@@ -34,6 +34,7 @@ Define a Cartesian product of magmas.
 #include "utility/type_sequence_traits.hpp"
 
 #include "rime/core.hpp"
+#include "rime/always.hpp"
 
 #include "range/core.hpp"
 #include "range/tuple.hpp"
@@ -229,14 +230,23 @@ namespace operation {
     If not, then the default implementation (compare component-per-component
     with the result of annihilator()) works.
     */
-    template <class ComponentTags, class Operation>
+    template <class ComponentTag1, class ... ComponentTags, class Operation>
         struct is_annihilator <
-            product_tag <ComponentTags, with_inverse <Operation>>, Operation>
+            product_tag <over <ComponentTag1, ComponentTags ...>,
+                with_inverse <Operation>>, Operation,
+                typename std::enable_if <!std::is_same <Operation, void>::value
+                    >::type>
     {
         template <class Product> auto operator() (Product const & product) const
         RETURNS (range::any_of (range::transform (
             product.components(), callable::is_annihilator <Operation>())));
     };
+    // A product over zero components has only one element, which is always an
+    // annihilator.
+    template <class Operation>
+        struct is_annihilator <product_tag <over<>, with_inverse <Operation>>,
+            Operation>
+    : rime::callable::always_default <rime::true_type> {};
 
     // equal.
     // With no inverse: just compare components.
@@ -305,7 +315,7 @@ namespace operation {
     : tuple_helper::nullary_operation <callable::make_product <Inverses>,
         meta::vector <identity <Tags, Operation> ...>> {};
 
-    // annihilator: implemented if all components have an annihilator...
+    // annihilator: implemented if all components have an annihilator.
     // (otherwise, what value to pick for the other components?)
     template <class ... Tags, class Inverses, class Operation>
         struct annihilator <product_tag <over <Tags ...>, Inverses>, Operation,
@@ -314,11 +324,6 @@ namespace operation {
         >>::type>
     : tuple_helper::nullary_operation <callable::make_product <Inverses>,
         meta::vector <annihilator <Tags, Operation> ...>> {};
-
-    // ... and there is at least one component.
-    template <class Inverses, class Operation>
-        struct annihilator <product_tag <over<>, Inverses>, Operation>
-    : unimplemented {};
 
     /* Binary operations. */
 

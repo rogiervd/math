@@ -1,5 +1,5 @@
 /*
-Copyright 2012-2014 Rogier van Dalen.
+Copyright 2012-2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -23,11 +23,14 @@ Tests for arithmetic_magma.hpp for integer types.
 
 #include "math/arithmetic_magma.hpp"
 
+#include <iostream>
+#include <typeinfo>
+
 #include <boost/mpl/assert.hpp>
 
 #include "range/std/container.hpp"
 
-#include "math/check/check_magma.hpp"
+#include "math/check/report_check_magma_boost_test.hpp"
 
 /* Produce example values. */
 
@@ -57,6 +60,21 @@ Get unsigned integer examples for test.
 For unsigned integers, overflow is defined, so this will yield the minimum and
 maximum values possible.
 */
+template <class Type> std::vector <Type> get_unequal_unsigned_integer_examples()
+{
+    std::vector <Type> examples;
+
+    Type max = std::numeric_limits <Type>::max();
+    examples.push_back (max);
+    examples.push_back (0);
+
+    examples.push_back (1);
+    examples.push_back (3);
+    examples.push_back (5);
+
+    return std::move (examples);
+}
+
 template <class Type> std::vector <Type> get_unsigned_integer_examples() {
     std::vector <Type> examples;
 
@@ -65,13 +83,13 @@ template <class Type> std::vector <Type> get_unsigned_integer_examples() {
     Type max = std::numeric_limits <Type>::max();
     examples.push_back (max);
     examples.push_back (0);
-    examples.push_back (-1);
+    examples.push_back (Type (-1));
 
     examples.push_back (1);
     examples.push_back (3);
     examples.push_back (5);
-    examples.push_back (-3);
-    examples.push_back (-5);
+    examples.push_back (Type (-3));
+    examples.push_back (Type (-5));
 
     return std::move (examples);
 }
@@ -79,7 +97,8 @@ template <class Type> std::vector <Type> get_unsigned_integer_examples() {
 /* Actual tests. */
 
 template <class Type, class Examples>
-    void test_arithmetic_magma_integer (Examples const & examples)
+    void test_arithmetic_magma_integer (Examples const & unequal_examples,
+        Examples const & examples)
 {
     Type a = 3;
     Type b = 5;
@@ -193,8 +212,8 @@ template <class Type, class Examples>
         callable::times, callable::plus, Type>));
 
     // Check for consistency.
-    math::check_semiring <Type, math::either> (
-        math::times, math::plus, examples);
+    math::report_check_semiring <Type, math::either> (math::times, math::plus,
+        unequal_examples, examples);
 }
 
 #endif // MATH_TEST_ARITHMETIC_MAGMA_TESTS_INTEGER_HPP_INCLUDED

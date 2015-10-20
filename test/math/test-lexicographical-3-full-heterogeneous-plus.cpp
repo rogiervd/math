@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ Test lexicographical.hpp with heterogeneous types and \ref plus.
 #include <string>
 #include <vector>
 
-#include "math/check/check_magma.hpp"
+#include "math/check/report_check_magma_boost_test.hpp"
 
 #include "./make_lexicographical.hpp"
 
@@ -43,8 +43,8 @@ BOOST_AUTO_TEST_CASE (test_lexicographical_consistency) {
         make_lexicographical (0, "abc"),
         make_lexicographical (4, "ab"));
 
-    math::check_semiring <lexicographical, math::left> (
-        math::times, math::plus, examples);
+    math::report_check_semiring <lexicographical, math::left> (
+        math::times, math::plus, examples, examples);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

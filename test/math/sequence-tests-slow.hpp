@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ compiling takes a lot less memory and time.
 
 #include "range/tuple.hpp"
 
-#include "math/check/check_magma.hpp"
+#include "math/check/report_check_magma_boost_test.hpp"
 
 // Check for consistency.
 template <class Direction> void test_sequence_homogeneous() {
@@ -57,18 +57,48 @@ template <class Direction> void test_sequence_homogeneous() {
     examples.push_back (sequence (std::string ("abc")));
     examples.push_back (sequence (std::string ("cba")));
 
-    math::check_semiring <sequence, Direction> (
-        math::times, math::plus, examples);
-    math::check_magma <sequence> (math::times, math::choose, examples);
+    math::report_check_semiring <sequence, Direction> (
+        math::times, math::plus, examples, examples);
+    math::report_check_magma <sequence> (math::times, math::choose,
+        examples, examples);
 }
 
 template <class Direction> void test_empty_sequence() {
     typedef math::empty_sequence <char, Direction> sequence;
     std::vector <sequence> examples;
     examples.push_back (math::empty_sequence <char, Direction>());
-    math::check_semiring <sequence, Direction> (
-        math::times, math::plus, examples);
-    math::check_magma <sequence> (math::times, math::choose, examples);
+
+    // It is impossible to check is_annihilator at all, so switch that test off.
+    {
+        math::type_checklist type_checks;
+        math::operation_checklist times_checks;
+        math::operation_checklist plus_checks;
+        math::two_operations_checklist times_plus_checks;
+        math::two_operations_checklist plus_times_checks;
+
+        plus_checks.do_not_check (
+            math::operation_properties::is_annihilator);
+
+        math::report_check_semiring <sequence, Direction> (
+            math::times, math::plus, examples, examples,
+            type_checks, times_checks, plus_checks,
+            times_plus_checks, plus_times_checks);
+    }
+    {
+        math::type_checklist type_checks;
+        math::operation_checklist times_checks;
+        math::operation_checklist plus_checks;
+        math::two_operations_checklist times_plus_checks;
+        math::two_operations_checklist plus_times_checks;
+
+        plus_checks.do_not_check (
+            math::operation_properties::is_annihilator);
+
+        math::report_check_magma <sequence> (
+            math::times, math::choose, examples, examples,
+            type_checks, times_checks, plus_checks,
+            times_plus_checks, plus_times_checks);
+    }
 }
 
 template <class Direction> void test_single_sequence() {
@@ -76,9 +106,10 @@ template <class Direction> void test_single_sequence() {
     std::vector <sequence> examples;
     examples.push_back (math::single_sequence <char, Direction> ('a'));
     examples.push_back (math::single_sequence <char, Direction> ('b'));
-    math::check_semiring <sequence, Direction> (
-        math::times, math::plus, examples);
-    math::check_magma <sequence> (math::times, math::choose, examples);
+    math::report_check_semiring <sequence, Direction> (
+        math::times, math::plus, examples, examples);
+    math::report_check_magma <sequence> (
+        math::times, math::choose, examples, examples);
 }
 
 template <class Direction> void test_optional_sequence() {
@@ -87,18 +118,47 @@ template <class Direction> void test_optional_sequence() {
     examples.push_back (math::optional_sequence <char, Direction>());
     examples.push_back (math::optional_sequence <char, Direction> ('a'));
     examples.push_back (math::optional_sequence <char, Direction> ('b'));
-    math::check_semiring <sequence, Direction> (
-        math::times, math::plus, examples);
-    math::check_magma <sequence> (math::times, math::choose, examples);
+    math::report_check_semiring <sequence, Direction> (
+        math::times, math::plus, examples, examples);
+    math::report_check_magma <sequence> (
+        math::times, math::choose, examples, examples);
 }
 
 template <class Direction> void test_sequence_annihilator() {
     typedef math::sequence_annihilator <char, Direction> sequence;
     std::vector <sequence> examples;
     examples.push_back (math::sequence_annihilator <char, Direction>());
-    math::check_semiring <sequence, Direction> (
-        math::times, math::plus, examples);
-    math::check_magma <sequence> (math::times, math::choose, examples);
+    // The annihilator is not an additive annihilator so switch that test off.
+    {
+        math::type_checklist type_checks;
+        math::operation_checklist times_checks;
+        math::operation_checklist plus_checks;
+        math::two_operations_checklist times_plus_checks;
+        math::two_operations_checklist plus_times_checks;
+
+        plus_checks.do_not_check (
+            math::operation_properties::is_annihilator);
+
+        math::report_check_semiring <sequence, Direction> (
+            math::times, math::plus, examples, examples,
+            type_checks, times_checks, plus_checks,
+            times_plus_checks, plus_times_checks);
+    }
+    {
+        math::type_checklist type_checks;
+        math::operation_checklist times_checks;
+        math::operation_checklist plus_checks;
+        math::two_operations_checklist times_plus_checks;
+        math::two_operations_checklist plus_times_checks;
+
+        plus_checks.do_not_check (
+            math::operation_properties::is_annihilator);
+
+        math::report_check_magma <sequence> (
+            math::times, math::choose, examples, examples,
+            type_checks, times_checks, plus_checks,
+            times_plus_checks, plus_times_checks);
+    }
 }
 
 /* Heterogeneous tests. */
@@ -109,19 +169,24 @@ template <class Direction> void test_sequence_annihilator() {
 
 // Sequences form a semiring with plus.
 template <class Direction> struct check_plus {
-    template <class Examples> void operator() (Examples const & examples) const
+    template <class UnequalExamples, class Examples>
+        void operator() (UnequalExamples const & unequal_examples,
+            Examples const & examples) const
     {
-        math::check_semiring <math::sequence <char, Direction>, Direction> (
-            math::times, math::plus, examples);
+        math::report_check_semiring <
+                math::sequence <char, Direction>, Direction> (
+            math::times, math::plus, unequal_examples, examples);
     }
 };
 
 // Sequences form a not-quitesemiring with choose.
 template <class Direction> struct check_choose {
-    template <class Examples> void operator() (Examples const & examples) const
+    template <class UnequalExamples, class Examples>
+        void operator() (UnequalExamples const & unequal_examples,
+            Examples const & examples) const
     {
-        math::check_magma <math::sequence <char, Direction>> (
-            math::times, math::choose, examples);
+        math::report_check_magma <math::sequence <char, Direction>> (
+            math::times, math::choose, unequal_examples, examples);
     }
 };
 
@@ -138,6 +203,13 @@ template <class Direction, class Check>
     // over 2GB.
     // typedef math::sequence_annihilator <char, Direction> annihilator;
 
+    auto unequal_examples = range::make_tuple (
+        empty_sequence(),
+        single_sequence ('a'), single_sequence ('b'),
+        optional_sequence ('c'),
+        sequence (std::string ("d")), sequence (std::string ("ab")),
+        sequence (std::string ("abc")), sequence (std::string ("cde")));
+
     auto examples = range::make_tuple (
         empty_sequence(),
         single_sequence ('a'), single_sequence ('b'),
@@ -146,7 +218,7 @@ template <class Direction, class Check>
         sequence (std::string ("b")), sequence (std::string ("ab")),
         sequence (std::string ("cab")), sequence (std::string ("cde")));
 
-    check (examples);
+    check (unequal_examples, examples);
 }
 
 #endif // MATH_TEST_MATH_TEST_SEQUENCE_TESTS_SLOW_HPP_INCLUDED

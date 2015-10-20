@@ -1,5 +1,5 @@
 /*
-Copyright 2012, 2013 Rogier van Dalen.
+Copyright 2012, 2013, 2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -28,9 +28,12 @@ Test arithmetic_magma.hpp, and, in the process, magma.hpp.
 BOOST_AUTO_TEST_SUITE (test_suite_arithmetic_magma_long)
 
 BOOST_AUTO_TEST_CASE (test_arithmetic_magma_integers) {
-    test_arithmetic_magma_integer <long> (get_signed_integer_examples <long>());
-    test_arithmetic_magma_integer <unsigned long long> (
-        get_unsigned_integer_examples <unsigned long long>());
+    test_arithmetic_magma_integer <long> (
+        get_signed_integer_examples <long>(),
+        get_signed_integer_examples <long>());
+    test_arithmetic_magma_integer <unsigned long> (
+        get_unequal_unsigned_integer_examples <unsigned long>(),
+        get_unsigned_integer_examples <unsigned long>());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

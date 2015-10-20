@@ -1,5 +1,5 @@
 /*
-Copyright 2014 Rogier van Dalen.
+Copyright 2014, 2015 Rogier van Dalen.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -27,8 +27,7 @@ Test max_semiring.hpp.
 
 #include "range/std/container.hpp"
 
-#include "math/check/check_magma.hpp"
-#include "math/check/check_hash.hpp"
+#include "math/check/report_check_magma_boost_test.hpp"
 
 BOOST_AUTO_TEST_SUITE (test_suite_max_semiring)
 
@@ -79,13 +78,12 @@ template <class Type> void check_max_semiring_for() {
 
     BOOST_CHECK (semiring (3) == semiring (3));
 
-    math::check_equal_on (examples);
-    math::check_hash (examples);
+    math::report_check_hash (examples);
 
-    math::check_semiring <semiring, math::either> (
-        math::times, math::plus, examples);
-    math::check_semiring <semiring, math::either> (
-        math::times, math::choose, examples);
+    math::report_check_semiring <semiring, math::either> (
+        math::times, math::plus, examples, examples);
+    math::report_check_semiring <semiring, math::either> (
+        math::times, math::choose, examples, examples);
 }
 
 BOOST_AUTO_TEST_CASE (test_max_semiring_complete) {
