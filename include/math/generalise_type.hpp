@@ -39,7 +39,7 @@ namespace detail {
         struct generalise_type_once <
             meta::vector <FirstOperation, Operations ...>, Magma>
     {
-        typedef typename std::result_of <FirstOperation (Magma, Magma)>::type
+        typedef typename std::invoke_result <FirstOperation, Magma, Magma>::type
             operation_result_type;
         typedef typename merge_magma::apply <Magma, operation_result_type>::type
             next_type;
