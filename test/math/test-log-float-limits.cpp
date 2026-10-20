@@ -19,7 +19,7 @@ Test std::numeric_limits <log_float <...>>.
 */
 
 #define BOOST_TEST_MODULE log_float_limits
-#include "../boost_unit_test.hpp"
+#include <boost/test/unit_test.hpp>
 
 #include "math/log-float.hpp"
 

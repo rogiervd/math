@@ -19,7 +19,7 @@ Test code samples from the documentation.
 */
 
 #define BOOST_TEST_MODULE test_code_samples
-#include "../boost_unit_test.hpp"
+#include <boost/test/unit_test.hpp>
 
 #include <vector>
 
