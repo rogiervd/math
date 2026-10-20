@@ -126,20 +126,20 @@ template <class Type, class Examples>
 
     BOOST_MPL_ASSERT ((has <callable::identity <Type, callable::plus>()>));
     BOOST_MPL_ASSERT ((has <callable::identity <Type> (callable::plus)>));
-    BOOST_CHECK_EQUAL ((math::identity <Type, callable::plus>()), 0);
-    BOOST_CHECK_EQUAL ((math::identity <Type> (math::plus)), 0);
+    BOOST_CHECK_EQUAL ((math::identity <Type, callable::plus>()), Type (0));
+    BOOST_CHECK_EQUAL ((math::identity <Type> (math::plus)), Type (0));
 
     BOOST_MPL_ASSERT ((has <callable::identity <Type, callable::times>()>));
-    BOOST_CHECK_EQUAL ((math::identity <Type, callable::times>()), 1);
-    BOOST_CHECK_EQUAL ((math::identity <Type> (math::times)), 1);
+    BOOST_CHECK_EQUAL ((math::identity <Type, callable::times>()), Type (1));
+    BOOST_CHECK_EQUAL ((math::identity <Type> (math::times)), Type (1));
 
     BOOST_MPL_ASSERT_NOT ((
         has <callable::annihilator <Type, callable::plus>()>));
     BOOST_MPL_ASSERT ((has <callable::annihilator <Type, callable::times>()>));
-    BOOST_CHECK_EQUAL ((math::annihilator <Type, callable::times>()), 0);
+    BOOST_CHECK_EQUAL ((math::annihilator <Type, callable::times>()), Type (0));
 
-    BOOST_CHECK_EQUAL (math::zero <Type>(), 0);
-    BOOST_CHECK_EQUAL (math::one <Type>(), 1);
+    BOOST_CHECK_EQUAL (math::zero <Type>(), Type (0));
+    BOOST_CHECK_EQUAL (math::one <Type>(), Type (1));
 
     // Operations.
     BOOST_MPL_ASSERT ((has <callable::compare (Type, Type)>));
@@ -165,12 +165,12 @@ template <class Type, class Examples>
     BOOST_MPL_ASSERT ((has <callable::times (Type, Type)>));
     BOOST_MPL_ASSERT_NOT ((math::is::approximate <
         callable::times (Type, Type)>));
-    BOOST_CHECK_EQUAL (math::times (a, b), 15);
+    BOOST_CHECK_EQUAL (math::times (a, b), Type (15));
 
     BOOST_MPL_ASSERT ((has <callable::plus (Type, Type)>));
     BOOST_MPL_ASSERT_NOT ((
         math::is::approximate <callable::plus (Type, Type)>));
-    BOOST_CHECK_EQUAL (math::plus (a, b), 8);
+    BOOST_CHECK_EQUAL (math::plus (a, b), Type (8));
 
     BOOST_MPL_ASSERT_NOT ((has <callable::divide<> (Type, Type)>));
     BOOST_MPL_ASSERT_NOT ((has <callable::divide <math::left> (Type, Type)>));
