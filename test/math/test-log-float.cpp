@@ -37,8 +37,8 @@ bypass explicit error handling in favour of leaving this to the hardware.
 #define BOOST_TEST_MODULE log_float
 #include "../boost_unit_test.hpp"
 
-#include <boost/test/floating_point_comparison.hpp>
-#include <boost/math/tools/test.hpp>
+#include <boost/test/tools/floating_point_comparison.hpp>
+#include <boost/math/special_functions/relative_difference.hpp>
 
 #include <iostream>
 #include <type_traits>
@@ -1188,13 +1188,13 @@ template <typename Result, typename RealType>
         // normal domain.
         // The relative error can be very large close to 1!
         using std::abs;
-        return boost::math::tools::relative_error (
+        return boost::math::relative_difference (
             abs (RealType (result)), reference);
     } else {
         // Otherwise, compare in the log-domain
 //        std::cout << "   Comparing " << result.exponent()
 //            << " and " << log_reference << std::endl;
-        return boost::math::tools::relative_error (
+        return boost::math::relative_difference (
             result.exponent(), log_reference);
     }
 }
@@ -1485,7 +1485,7 @@ template <typename RealType, class Policy>
         math::log_float <RealType, Policy> times_result = left * right;
 //        std::cout << " = " << times_result << "?" << std::endl;
 
-        error = boost::math::tools::relative_error (
+        error = boost::math::relative_difference (
             times_result.exponent(), example [2]);
         error_eps = error / std::numeric_limits <RealType>::epsilon();
 //        std::cout << "Error: " << error << " = "
@@ -1544,7 +1544,7 @@ template <typename RealType, class Policy>
         math::log_float <RealType, Policy> divide_result = left / right;
 //        std::cout << " = " << divide_result << "?" << std::endl;
 
-        error = boost::math::tools::relative_error (
+        error = boost::math::relative_difference (
             divide_result.exponent(), example [3]);
         error_eps = error / std::numeric_limits <RealType>::epsilon();
 //        std::cout << "Error: " << error << " = "
