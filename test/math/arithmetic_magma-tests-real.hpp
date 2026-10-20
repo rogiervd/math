@@ -23,8 +23,7 @@ Tests for arithmetic_magma on reals.
 
 #include "math/arithmetic_magma.hpp"
 
-#include <boost/test/floating_point_comparison.hpp>
-#include <boost/math/tools/test.hpp>
+#include <boost/test/tools/floating_point_comparison.hpp>
 #include <boost/math/special_functions/next.hpp>
 
 #include <boost/mpl/assert.hpp>

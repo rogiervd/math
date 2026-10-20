@@ -21,8 +21,7 @@ Test cost.hpp.
 #define BOOST_TEST_MODULE test_cost
 #include "utility/test/boost_unit_test.hpp"
 
-#include <boost/test/floating_point_comparison.hpp>
-#include <boost/math/tools/test.hpp>
+#include <boost/test/tools/floating_point_comparison.hpp>
 
 #include "math/cost.hpp"
 
