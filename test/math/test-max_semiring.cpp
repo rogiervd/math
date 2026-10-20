@@ -25,7 +25,7 @@ Test max_semiring.hpp.
 
 #include <boost/mpl/assert.hpp>
 
-#include "range/std/container.hpp"
+#include "range/std/vector.hpp"
 
 #include "math/check/report_check_magma_boost_test.hpp"
 

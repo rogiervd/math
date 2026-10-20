@@ -29,6 +29,8 @@ Tests for math::product.
 
 #include <boost/mpl/assert.hpp>
 
+#include "range/std/string.hpp"
+
 #include "math/arithmetic_magma.hpp"
 #include "math/cost.hpp"
 #include "math/sequence.hpp"

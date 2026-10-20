@@ -29,7 +29,7 @@ Test lexicographical.hpp with an example: the Viterbi semiring.
 
 #include <boost/mpl/assert.hpp>
 
-#include "range/std/container.hpp"
+#include "range/std/string.hpp"
 
 #include "math/max_semiring.hpp"
 #include "math/sequence.hpp"
