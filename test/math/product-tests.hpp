@@ -24,6 +24,7 @@ Tests for math::product.
 #include "math/product.hpp"
 
 #include <string>
+#include <type_traits>
 #include <vector>
 
 #include <boost/mpl/assert.hpp>
@@ -83,10 +84,10 @@ template <class Inverses> void test_product_homogeneous() {
                 math::callable::annihilator <product> (math::callable::times)
             >::value, "An empty product cannot have an annihilator.");
 
-        static_assert (utility::is_assignable <
+        static_assert (std::is_assignable <
             typename product::components_type &,
             typename product::components_type &&>::value, "");
-        static_assert (utility::is_assignable <
+        static_assert (std::is_assignable <
             product &, product &&>::value, "");
 
         std::vector <product> unequal_examples;
