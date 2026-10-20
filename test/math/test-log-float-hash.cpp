@@ -35,7 +35,7 @@ bypass explicit error handling in favour of leaving this to the hardware.
 */
 
 #define BOOST_TEST_MODULE log_float_hash
-#include "../boost_unit_test.hpp"
+#include <boost/test/unit_test.hpp>
 
 #include <boost/test/tools/floating_point_comparison.hpp>
 

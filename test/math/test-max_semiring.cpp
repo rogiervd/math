@@ -19,7 +19,7 @@ Test max_semiring.hpp.
 */
 
 #define BOOST_TEST_MODULE test_max_semiring
-#include "utility/test/boost_unit_test.hpp"
+#include <boost/test/unit_test.hpp>
 
 #include "math/max_semiring.hpp"
 
