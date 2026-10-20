@@ -22,7 +22,7 @@ limitations under the License.
 #include <boost/functional/hash.hpp>
 
 #include "range/tuple.hpp"
-#include "range/std/container.hpp"
+#include "range/std/string.hpp"
 
 #include "math/arithmetic_magma.hpp"
 #include "math/cost.hpp"

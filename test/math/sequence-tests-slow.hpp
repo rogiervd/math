@@ -38,6 +38,9 @@ compiling takes a lot less memory and time.
 
 #include <string>
 
+#include "range/std/string.hpp"
+#include "range/std/list.hpp"
+
 #include "range/tuple.hpp"
 
 #include "math/check/report_check_magma_boost_test.hpp"

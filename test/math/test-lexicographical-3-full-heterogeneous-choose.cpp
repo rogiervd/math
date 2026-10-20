@@ -26,6 +26,8 @@ Test lexicographical.hpp with heterogeneous types and \ref choose.
 #include <string>
 #include <vector>
 
+#include "range/std/string.hpp"
+
 #include "math/check/report_check_magma_boost_test.hpp"
 
 #include "./make_lexicographical.hpp"

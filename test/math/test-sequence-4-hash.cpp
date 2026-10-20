@@ -25,7 +25,8 @@ limitations under the License.
 #include <boost/functional/hash.hpp>
 
 #include "range/tuple.hpp"
-#include "range/std/container.hpp"
+#include "range/std/string.hpp"
+#include "range/std/vector.hpp"
 
 #include "math/check/report_check_magma_boost_test.hpp"
 
