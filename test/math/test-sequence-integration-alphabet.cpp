@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE (test_sequence_alphabet) {
     BOOST_CHECK (math::plus (sequence1, sequence2) == empty_sequence);
 
     auto sequence12 = sequence1 * sequence2;
-    BOOST_CHECK_EQUAL (range::size (sequence12.symbols()), 2);
+    BOOST_CHECK_EQUAL (range::size (sequence12.symbols()), 2u);
     BOOST_CHECK (range::first (sequence12.symbols()) == symbol1);
     BOOST_CHECK (range::second (sequence12.symbols()) == symbol2);
 }
