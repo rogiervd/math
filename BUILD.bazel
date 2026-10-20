@@ -1,0 +1,44 @@
+# SPDX-FileCopyrightText: Copyright 2026 Rogier van Dalen
+#
+# SPDX-License-Identifier: Apache-2.0
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+# The main target that should be used by other modules that want to depend on
+# this library.
+cc_library(
+    name = "math",
+    hdrs = glob([
+        "include/math/*.hpp",
+        "include/math/detail/*.hpp",
+        "include/math/check/*.hpp",
+    ]),
+    # Allow each header to be compiled on its own, to check that it includes
+    # everything it needs, by passing Bazel --process_headers_in_dependencies.
+    features = ["parse_headers"],
+    include_prefix = "",
+    # The prefix to be stripped from the include path.
+    strip_include_prefix = "include/",
+    visibility = ["//visibility:public"],
+    # Dependencies of this library.
+    deps = [
+        "@boost.bimap",
+        "@boost.format",
+        "@boost.functional",
+        "@boost.math",
+        "@boost.mpl",
+        "@boost.units",
+        "@boost.utility",
+        "@meta",
+        "@range",
+        "@rime",
+        "@utility",
+    ],
+)
+
+# All include files, for Doxygen to generate documentation from.
+filegroup(
+    name = "doc_sources",
+    srcs = glob(["include/math/**"]),
+    visibility = ["//documentation:__pkg__"],
+)

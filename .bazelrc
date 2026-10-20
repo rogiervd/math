@@ -1,0 +1,101 @@
+# SPDX-FileCopyrightText: Copyright 2024-2026 Rogier van Dalen
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# Use bzlmod (Bazel Modules) for dependency handling.
+common --enable_bzlmod
+
+common --registry https://raw.githubusercontent.com/rogiervd/bazel-registry/main
+
+# The standard Bazel registry (this gets removed when entries are added
+# explicitly so it needs to be added back explicitly).
+common --registry https://bcr.bazel.build/
+
+# Arguments for C++ builds.
+# All warnings are switched on and generate errors.
+# The flags differ between GCC/Clang and MSVC, so pick them based on the host
+# operating system: lines with build:linux, build:macos, or build:windows are
+# used automatically on that operating system.
+common --enable_platform_specific_config
+
+build:linux --cxxopt=-std=c++17
+build:linux --cxxopt=-Werror
+build:linux --cxxopt=-Wall
+
+build:macos --cxxopt=-std=c++17
+build:macos --cxxopt=-Werror
+build:macos --cxxopt=-Wall
+
+# Windows uses MSVC (cl.exe) by default, or clang-cl with --config=clang-cl.
+# Both take MSVC-style flags.
+build:windows --cxxopt=/std:c++17
+# Pass include paths of dependencies with /external:I, and do not report
+# warnings in those headers.
+build:windows --features=external_include_paths
+# Switch on warnings and make them errors, for this project's own source files
+# only, not for dependencies.
+# Bazel applies these options if either the source file's path or its label
+# matches, so exclude both the path (external/...) and the label
+# (@@<repository>+//...) of files in dependencies.
+build:windows --per_file_copt=.*,-^external/,-[+]//@/W4,/WX
+
+# Compiler selection.
+# These use the C++ toolchain that rules_cc auto-configures from the compiler
+# found on the system.
+#   bazel ... --config=gcc
+#   bazel ... --config=clang
+build:gcc --repo_env=CC=gcc
+
+build:clang --repo_env=CC=clang
+
+# On Windows:
+#   bazel ... --config=msvc
+#   bazel ... --config=clang-cl
+# clang-cl must be installed; rules_cc looks for it in BAZEL_LLVM or the
+# default LLVM installation directory.
+build:msvc --extra_toolchains=@local_config_cc//:cc-toolchain-x64_windows
+
+build:clang-cl --extra_toolchains=@local_config_cc//:cc-toolchain-x64_windows-clang-cl
+build:clang-cl --extra_execution_platforms=//tool:windows_clang_cl
+
+# Configuration for builds with address sanitiser.
+# This can be selected with
+#   bazel ... --config asan
+build:asan --strip=never
+# Options: https://github.com/google/sanitizers/wiki/AddressSanitizer
+build:asan --copt -fsanitize=address
+build:asan --linkopt -fsanitize=address
+# If this is too slow, -O1 may be a good tradeoff.
+build:asan --copt -O0
+# Nicer stack traces
+build:asan --copt -fno-omit-frame-pointer
+
+# Configuration for builds with the Undefined Behavior Sanitizer.
+# These flags have been found by trying ones mentioned at
+# https://github.com/bazelbuild/bazel/issues/11122
+# until it runs on GitHub.
+# This can be selected with
+#   bazel ... --config ubsan
+# Is this useful? --copt -Og
+build:ubsan --strip=never
+build:ubsan --copt -fsanitize=undefined
+build:ubsan --linkopt -fsanitize=undefined
+build:ubsan --copt -fno-omit-frame-pointer
+build:ubsan --linkopt -fsanitize-link-c++-runtime
+
+# Settings for generating code coverage for tests.
+coverage --instrumentation_filter='-googletest'
+coverage --combined_report=lcov
+
+# On macOS, this should be run with (from
+# <https://github.com/bazelbuild/bazel/issues/14970#issuecomment-1894565761>)
+
+# LLVM_PROFDATA=`xcrun -f llvm-profdata`
+# LLVM_COV=`xcrun -f llvm-cov`
+
+# bazel coverage //test/... \
+#     --experimental_generate_llvm_lcov \
+#     --test_env=COVERAGE_GCOV_PATH=${LLVM_PROFDATA} \
+#     --test_env=LLVM_COV=${LLVM_COV} \
+#     --copt=-ffile-compilation-dir=. \
+#     --nocache_test_results
