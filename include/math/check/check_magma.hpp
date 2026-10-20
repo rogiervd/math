@@ -818,7 +818,7 @@ namespace check_detail {
             has <callable::approximately_equal (Result1, Result2)>::value,
             "If the computation is approximate, then approximately_equal must "
             "be implemented so the result can be checked.");
-        auto const & equality = rime::if_ (check_approximate(),
+        auto const equality = rime::if_ (check_approximate(),
             math::approximately_equal, math::equal);
         bool is_equal = equality (result1, result2);
         if (is_equal)
