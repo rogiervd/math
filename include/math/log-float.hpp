@@ -847,9 +847,11 @@ namespace math {
         inline std::size_t hash_value (
             const detail::log_float_base <LogFloat, Exponent> & p)
     {
-        // Make the hash depend on the sign but only if p is not -0.
-        std::size_t seed = (p.sign() == -1 && p) ? 1 : 0;
+        std::size_t seed = 0;
         boost::hash_combine (seed, p.exponent());
+        // Make the hash depend on the sign but only if p is not -0.
+        if (p.sign() == -1 && p)
+            boost::hash_combine (seed, 1);
         return seed;
     }
 
