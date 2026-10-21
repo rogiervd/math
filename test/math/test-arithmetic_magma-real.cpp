@@ -26,16 +26,15 @@ This performs tests on floating-point numbers.
 
 #include "arithmetic_magma-tests-real.hpp"
 
-BOOST_AUTO_TEST_SUITE (test_suite_arithmetic_magma)
+BOOST_AUTO_TEST_SUITE(test_suite_arithmetic_magma)
 
-BOOST_AUTO_TEST_CASE (test_arithmetic_magma_floating_point) {
-    test_arithmetic_magma_real <float> (
-        get_signed_float_examples <float>());
-    test_arithmetic_magma_real_signed <float>();
+BOOST_AUTO_TEST_CASE(test_arithmetic_magma_floating_point)
+{
+    test_arithmetic_magma_real<float>(get_signed_float_examples<float>());
+    test_arithmetic_magma_real_signed<float>();
 
-    test_arithmetic_magma_real <double> (
-        get_signed_float_examples <double>());
-    test_arithmetic_magma_real_signed <double>();
+    test_arithmetic_magma_real<double>(get_signed_float_examples<double>());
+    test_arithmetic_magma_real_signed<double>();
     // This used to be tested on long double as well, but this takes seemingly
     // infinite time under Valgrind and does not yield anything that the above
     // tests do not.

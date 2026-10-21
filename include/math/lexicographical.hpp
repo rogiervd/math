@@ -26,24 +26,24 @@ the two values according to a lexicographical ordering.
 
 #include <boost/mpl/and.hpp>
 
-#include <boost/utility/enable_if.hpp>
 #include <boost/functional/hash_fwd.hpp>
+#include <boost/utility/enable_if.hpp>
 
-#include "meta/vector.hpp"
 #include "meta/all_of_c.hpp"
+#include "meta/vector.hpp"
 
 #include "utility/type_sequence_traits.hpp"
 
-#include "range/tuple.hpp"
+#include "range/all_of.hpp"
 #include "range/call_unpack.hpp"
 #include "range/equal.hpp"
+#include "range/hash_range.hpp"
 #include "range/less_lexicographical.hpp"
 #include "range/transform.hpp"
-#include "range/all_of.hpp"
-#include "range/hash_range.hpp"
+#include "range/tuple.hpp"
 
-#include "magma.hpp"
 #include "detail/tuple_helper.hpp"
+#include "magma.hpp"
 
 namespace math {
 
@@ -121,38 +121,45 @@ template <class Components> class lexicographical;
 
 template <class ComponentTags> struct lexicographical_tag;
 
-template <class ... Components>
-    struct decayed_magma_tag <lexicographical <over <Components ...>>>
+template <class... Components>
+struct decayed_magma_tag<lexicographical<over<Components...>>>
 {
-    typedef lexicographical_tag <
-        over <typename magma_tag <Components>::type ...>> type;
+    typedef lexicographical_tag<over<typename magma_tag<Components>::type...>>
+        type;
 };
 
-template <class ... Components> class lexicographical <over <Components ...>> {
+template <class... Components> class lexicographical<over<Components...>>
+{
 public:
-    typedef meta::vector <Components ...> component_types;
-    typedef range::tuple <Components ...> components_type;
+    typedef meta::vector<Components...> component_types;
+    typedef range::tuple<Components...> components_type;
 
 private:
-    typedef typename meta::first <component_types>::type first_component_type;
-    typedef typename meta::drop <component_types>::type rest_component_type;
+    typedef typename meta::first<component_types>::type first_component_type;
+    typedef typename meta::drop<component_types>::type rest_component_type;
 
-    static_assert (meta::all_of_c <std::is_same <Components,
-            typename std::decay <Components>::type>::value ...>::value,
+    static_assert(
+        meta::all_of_c<std::is_same<
+            Components,
+            typename std::decay<Components>::type>::value...>::value,
         "The components may not be cv- or reference-qualified.");
 
-    static_assert (meta::all_of_c <has <callable::order <callable::choose> (
+    static_assert(
+        meta::all_of_c<has<callable::order<callable::choose>(
             Components, Components)>::value...>::value,
         "All components must have an ordered 'choose'.");
 
-    static_assert (meta::all_of_c <
-            is::monoid <callable::times, Components>::value ...>::value,
+    static_assert(
+        meta::all_of_c<
+            is::monoid<callable::times, Components>::value...>::value,
         "All components must be monoids over 'times'.");
-    static_assert (meta::all_of_c <
-            is::monoid <callable::choose, Components>::value ...>::value,
+    static_assert(
+        meta::all_of_c<
+            is::monoid<callable::choose, Components>::value...>::value,
         "All components must be monoids over 'choose'.");
-    static_assert (meta::all_of_c <
-            is::commutative <callable::choose, Components>::value ...>::value,
+    static_assert(
+        meta::all_of_c<
+            is::commutative<callable::choose, Components>::value...>::value,
         "For all components, 'choose' must be commutative.");
 
 public:
@@ -163,31 +170,36 @@ public:
     \a Direction.
     */
     template <class Direction> struct is_semiring
-    : boost::mpl::and_ <
-        is::semiring <Direction,
-            callable::times, callable::choose, first_component_type>,
-        meta::all_of_c <is::distributive <Direction,
-            callable::times, callable::choose, Components>::value ...>
-    > {};
+    : boost::mpl::and_<
+          is::semiring<
+              Direction, callable::times, callable::choose,
+              first_component_type>,
+          meta::all_of_c<is::distributive<
+              Direction, callable::times, callable::choose,
+              Components>::value...>> {};
 
-    static_assert (is_semiring <left>::value || is_semiring <right>::value,
+    static_assert(
+        is_semiring<left>::value || is_semiring<right>::value,
         "The components must allow this to be a semiring in at least one "
         "direction.");
 
     components_type components_;
+
 public:
     /**
     Construct from arguments that are pairwise convertible to the components.
     This constructor is implicit.
     */
-    template <class ... Arguments, class Enable = typename boost::enable_if <
-        utility::are_constructible <
-            meta::vector <Components ...>, meta::vector <Arguments ...>>>::type>
-    explicit lexicographical (Arguments && ... arguments)
-    : components_ (std::forward <Arguments> (arguments) ...) {}
+    template <
+        class... Arguments,
+        class Enable = typename boost::enable_if<utility::are_constructible<
+            meta::vector<Components...>, meta::vector<Arguments...>>>::type>
+    explicit lexicographical(Arguments &&... arguments)
+    : components_(std::forward<Arguments>(arguments)...)
+    {}
 
-    lexicographical (lexicographical const &) = default;
-    lexicographical (lexicographical &&) = default;
+    lexicographical(lexicographical const &) = default;
+    lexicographical(lexicographical &&) = default;
 
     /**
     Construct from a lexicographical with different component types, all of
@@ -195,13 +207,13 @@ public:
     This constructor is implicit.
     \param other The lexicographical to copy.
     */
-    template <class ... OtherComponents>
-    lexicographical (lexicographical <over <OtherComponents ...>> const & other,
-        typename boost::enable_if <utility::are_convertible <
-            meta::vector <OtherComponents const & ...>,
-            meta::vector <Components ...>>
-        >::type * = 0)
-    : components_ (other.components()) {}
+    template <class... OtherComponents> lexicographical(
+        lexicographical<over<OtherComponents...>> const & other,
+        typename boost::enable_if<utility::are_convertible<
+            meta::vector<OtherComponents const &...>,
+            meta::vector<Components...>>>::type * = 0)
+    : components_(other.components())
+    {}
 
     /**
     Construct from a lexicographical with different component types, at least
@@ -209,18 +221,16 @@ public:
     This constructor is explicit.
     \param other The lexicographical to copy.
     */
-    template <class ... OtherComponents>
-    explicit lexicographical (
-        lexicographical <over <OtherComponents ...>> const & other, typename
-        boost::enable_if <
-            tuple_helper::components_constructible_only <
-                meta::vector <Components ...>,
-                meta::vector <OtherComponents const & ...>>
-            >::type * = 0)
-    : components_ (other.components()) {}
+    template <class... OtherComponents> explicit lexicographical(
+        lexicographical<over<OtherComponents...>> const & other,
+        typename boost::enable_if<tuple_helper::components_constructible_only<
+            meta::vector<Components...>,
+            meta::vector<OtherComponents const &...>>>::type * = 0)
+    : components_(other.components())
+    {}
 
-    lexicographical & operator = (lexicographical const &) = default;
-    lexicographical & operator = (lexicographical &&) = default;
+    lexicographical & operator=(lexicographical const &) = default;
+    lexicographical & operator=(lexicographical &&) = default;
 
     components_type & components() { return components_; }
     components_type const & components() const { return components_; }
@@ -228,58 +238,61 @@ public:
 
 namespace callable {
 
-    struct make_lexicographical {
-        template <class ... Components>
-            lexicographical <over <Components ...>> operator() (
-                Components const & ... components) const
-        { return lexicographical <over <Components ...>> (components ...); }
+    struct make_lexicographical
+    {
+        template <class... Components>
+        lexicographical<over<Components...>> operator()(
+            Components const &... components) const
+        {
+            return lexicographical<over<Components...>>(components...);
+        }
     };
 
-    struct make_lexicographical_over {
+    struct make_lexicographical_over
+    {
         template <class Components>
-            auto operator() (Components && components) const
-        RETURNS (range::call_unpack (
-            make_lexicographical(), std::forward <Components> (components)));
+        auto operator()(Components && components) const RETURNS(
+            range::call_unpack(
+                make_lexicographical(), std::forward<Components>(components)));
     };
 
-} // namespace callable
+}  // namespace callable
 
 static auto constexpr make_lexicographical = callable::make_lexicographical();
-static auto constexpr make_lexicographical_over
-    = callable::make_lexicographical_over();
+static auto constexpr make_lexicographical_over =
+    callable::make_lexicographical_over();
 
 namespace detail {
 
     template <class Type> struct is_lexicographical_tag : boost::mpl::false_ {};
-    template <class ... ComponentTags> struct is_lexicographical_tag <
-        lexicographical_tag <over <ComponentTags ...>>>
+    template <class... ComponentTags>
+    struct is_lexicographical_tag<lexicographical_tag<over<ComponentTags...>>>
     : boost::mpl::true_ {};
 
-} // namespace detail
+}  // namespace detail
 
 namespace operation {
 
     namespace tuple_helper {
 
-        template <class ... ComponentTags> struct get_components <
-            lexicographical_tag <over <ComponentTags ...>>>
+        template <class... ComponentTags>
+        struct get_components<lexicographical_tag<over<ComponentTags...>>>
         {
             template <class Lexicographical>
-                auto operator() (Lexicographical const & l) const
-            RETURNS (l.components());
+            auto operator()(Lexicographical const & l) const
+                RETURNS(l.components());
         };
 
-    } // namespace tuple_helper
+    }  // namespace tuple_helper
 
     /* Queries. */
 
-    template <class ... ComponentTags>
-        struct is_member <lexicographical_tag <over <ComponentTags ...>>>
+    template <class... ComponentTags>
+    struct is_member<lexicographical_tag<over<ComponentTags...>>>
     {
         template <class Lexicographical>
-            auto operator() (Lexicographical const & l) const
-        RETURNS (range::all_of (range::transform (
-            l.components(), ::math::is_member)));
+        auto operator()(Lexicographical const & l) const RETURNS(
+            range::all_of(range::transform(l.components(), ::math::is_member)));
     };
 
     // is_annihilator.
@@ -289,43 +302,44 @@ namespace operation {
     If not, then the default implementation (compare component-per-component
     with the result of annihilator()) works.
     */
-    template <class ComponentTags> struct is_annihilator <
-        lexicographical_tag <ComponentTags>, callable::times>
+    template <class ComponentTags>
+    struct is_annihilator<lexicographical_tag<ComponentTags>, callable::times>
     {
-        template <class Lexicographical> auto operator() (
-            Lexicographical const & l) const
-        RETURNS (math::is_annihilator <callable::times> (
-            range::first (l.components())));
+        template <class Lexicographical>
+        auto operator()(Lexicographical const & l) const RETURNS(
+            math::is_annihilator<callable::times>(
+                range::first(l.components())));
     };
 
     // Compare annihilators equal, otherwise compare components.
     template <class ComponentTags>
-        struct equal <lexicographical_tag <ComponentTags>>
-    : tuple_helper::equal_if_annihilator <callable::times,
-        tuple_helper::equal_components <math::callable::equal>> {};
+    struct equal<lexicographical_tag<ComponentTags>>
+    : tuple_helper::equal_if_annihilator<
+          callable::times,
+          tuple_helper::equal_components<math::callable::equal>> {};
 
     // Compare annihilators equal, otherwise compare components.
     template <class ComponentTags>
-        struct approximately_equal <lexicographical_tag <ComponentTags>>
-    : tuple_helper::equal_if_annihilator <callable::times,
-        tuple_helper::equal_components <math::callable::approximately_equal>>
-    {};
+    struct approximately_equal<lexicographical_tag<ComponentTags>>
+    : tuple_helper::equal_if_annihilator<
+          callable::times,
+          tuple_helper::equal_components<math::callable::approximately_equal>> {
+    };
 
     // Compare annihilators equal, otherwise compare components.
     template <class ComponentTags>
-        struct compare <lexicographical_tag <ComponentTags>>
-    : tuple_helper::compare_if_annihilator <callable::times,
-        tuple_helper::compare_components <math::callable::compare>> {};
+    struct compare<lexicographical_tag<ComponentTags>>
+    : tuple_helper::compare_if_annihilator<
+          callable::times,
+          tuple_helper::compare_components<math::callable::compare>> {};
 
     /* Produce. */
 
-    template <class ... ComponentTags>
-        struct identity <lexicographical_tag <over <ComponentTags ...>>,
-            callable::times>
+    template <class... ComponentTags> struct identity<
+        lexicographical_tag<over<ComponentTags...>>, callable::times>
     {
-        auto operator() () const
-        RETURNS (make_lexicographical (
-            identity <ComponentTags, callable::times>()() ...));
+        auto operator()() const RETURNS(make_lexicographical(
+            identity<ComponentTags, callable::times>()()...));
     };
 
     /**
@@ -333,70 +347,73 @@ namespace operation {
     This is (0, 1 ...) because apart from for the first component, the plus
     operation is not guaranteed to be defined.
     */
-    template <class FirstComponentTag, class ... ComponentTags>
-        struct identity <lexicographical_tag <over <
-            FirstComponentTag, ComponentTags ...>>, callable::choose>
+    template <class FirstComponentTag, class... ComponentTags> struct identity<
+        lexicographical_tag<over<FirstComponentTag, ComponentTags...>>,
+        callable::choose>
     {
-        auto operator() () const
-        RETURNS (make_lexicographical (
-            identity <FirstComponentTag, callable::choose>()(),
-            identity <ComponentTags, callable::times>()() ...));
+        auto operator()() const RETURNS(make_lexicographical(
+            identity<FirstComponentTag, callable::choose>()(),
+            identity<ComponentTags, callable::times>()()...));
     };
 
     // plus: forward to implementation for "choose".
     template <class Tags>
-        struct identity <lexicographical_tag <Tags>, callable::plus>
-    : identity <lexicographical_tag <Tags>, callable::choose> {};
+    struct identity<lexicographical_tag<Tags>, callable::plus>
+    : identity<lexicographical_tag<Tags>, callable::choose> {};
 
     /**
     Multiplicative annihilator: equal to the additive identity.
     */
-    template <class FirstComponentTag, class ... ComponentTags>
-        struct annihilator <lexicographical_tag <over <
-            FirstComponentTag, ComponentTags ...>>, callable::times>
+    template <class FirstComponentTag, class... ComponentTags>
+    struct annihilator<
+        lexicographical_tag<over<FirstComponentTag, ComponentTags...>>,
+        callable::times>
     {
-        auto operator() () const
-        RETURNS (make_lexicographical (
-            annihilator <FirstComponentTag, callable::times>()(),
-            identity <ComponentTags, callable::times>()() ...));
+        auto operator()() const RETURNS(make_lexicographical(
+            annihilator<FirstComponentTag, callable::times>()(),
+            identity<ComponentTags, callable::times>()()...));
     };
 
     /* Operations. */
 
     template <class Tags>
-        struct order <lexicographical_tag <Tags>, callable::choose>
-    : tuple_helper::compare_components <
-        math::callable::order <callable::choose>> {};
+    struct order<lexicographical_tag<Tags>, callable::choose>
+    : tuple_helper::compare_components<
+          math::callable::order<callable::choose>> {};
 
     // order <plus>: forward to order <choose>.
     template <class Tags>
-        struct order <lexicographical_tag <Tags>, callable::plus>
-    : order <lexicographical_tag <Tags>, callable::choose> {};
+    struct order<lexicographical_tag<Tags>, callable::plus>
+    : order<lexicographical_tag<Tags>, callable::choose> {};
 
     /**
     Apply the multiplication operation on the weights, and on the values.
     */
-    template <class ... ComponentTags>
-        struct times <lexicographical_tag <over <ComponentTags ...>>>
-    : tuple_helper::binary_operation <callable::make_lexicographical,
-        meta::vector <times <ComponentTags> ...>> {};
+    template <class... ComponentTags>
+    struct times<lexicographical_tag<over<ComponentTags...>>>
+    : tuple_helper::binary_operation<
+          callable::make_lexicographical,
+          meta::vector<times<ComponentTags>...>> {};
 
     // Semiring under times and choose/plus: depends on the direction.
-    template <class FirstComponentTag, class ... ComponentTags, class Direction>
-        struct is_semiring <
-            lexicographical_tag <over <FirstComponentTag, ComponentTags ...>>,
-                Direction, callable::times, callable::choose>
-    : meta::all_of_c <
-        is_semiring <FirstComponentTag,
-            Direction, callable::times, callable::choose>::value,
-        is_distributive <ComponentTags,
-            Direction, callable::times, callable::choose>::value ...> {};
+    template <class FirstComponentTag, class... ComponentTags, class Direction>
+    struct is_semiring<
+        lexicographical_tag<over<FirstComponentTag, ComponentTags...>>,
+        Direction, callable::times, callable::choose>
+    : meta::all_of_c<
+          is_semiring<
+              FirstComponentTag, Direction, callable::times,
+              callable::choose>::value,
+          is_distributive<
+              ComponentTags, Direction, callable::times,
+              callable::choose>::value...> {};
 
-    template <class ComponentTags, class Direction> struct is_semiring <
-        lexicographical_tag <ComponentTags>,
-            Direction, callable::times, callable::plus>
-    : is_semiring <lexicographical_tag <ComponentTags>,
-        Direction, callable::times, callable::choose> {};
+    template <class ComponentTags, class Direction> struct is_semiring<
+        lexicographical_tag<ComponentTags>, Direction, callable::times,
+        callable::plus>
+    : is_semiring<
+          lexicographical_tag<ComponentTags>, Direction, callable::times,
+          callable::choose> {};
 
     /*
     divide is undefined.
@@ -406,24 +423,25 @@ namespace operation {
     This would probably require an interface similar to product's.
     */
 
-    template <class ... Tags>
-        struct print <lexicographical_tag <over <Tags ...>>>
-    : tuple_helper::print_components <meta::vector <Tags ...>> {};
+    template <class... Tags> struct print<lexicographical_tag<over<Tags...>>>
+    : tuple_helper::print_components<meta::vector<Tags...>> {};
 
-    template <class ... ComponentTags,
-            class ... Components1, class ... Components2>
-        struct unify_type <lexicographical_tag <over <ComponentTags ...>>,
-            lexicographical <over <Components1 ...>>,
-            lexicographical <over <Components2 ...>>>
+    template <
+        class... ComponentTags, class... Components1, class... Components2>
+    struct unify_type<
+        lexicographical_tag<over<ComponentTags...>>,
+        lexicographical<over<Components1...>>,
+        lexicographical<over<Components2...>>>
     {
         // Unify both underlying types in parallel.
-        typedef lexicographical <over <typename unify_type <
-            ComponentTags, Components1, Components2>::type ...>> type;
+        typedef lexicographical<over<typename unify_type<
+            ComponentTags, Components1, Components2>::type...>>
+            type;
     };
 
-} // namespace operation
+}  // namespace operation
 
-MATH_MAGMA_GENERATE_OPERATORS (detail::is_lexicographical_tag)
+MATH_MAGMA_GENERATE_OPERATORS(detail::is_lexicographical_tag)
 
 // Boost.Hash support.
 
@@ -431,20 +449,21 @@ namespace lexicographical_detail {
 
     // Annihilators are treated specially.
     static std::size_t constexpr annihilator_hash =
-        std::size_t (0xa5e33b35c473015b  & std::size_t (-1));
+        std::size_t(0xa5e33b35c473015b & std::size_t(-1));
 
-} // namespace lexicographical_detail
+}  // namespace lexicographical_detail
 
 // Without an inverse: just combine the hash values of the components.
 template <class Components>
-    inline std::size_t hash_value (lexicographical <Components> const & l)
+inline std::size_t hash_value(lexicographical<Components> const & l)
 {
-    if (is_annihilator <callable::times> (l))
+    if (is_annihilator<callable::times>(l)) {
         return lexicographical_detail::annihilator_hash;
-    else
-        return range::hash_range (l.components());
+    } else {
+        return range::hash_range(l.components());
+    }
 }
 
-} // namespace math
+}  // namespace math
 
-#endif // MATH_LEXICOGRAPHICAL_HPP_INCLUDED
+#endif  // MATH_LEXICOGRAPHICAL_HPP_INCLUDED

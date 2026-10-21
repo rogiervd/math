@@ -24,7 +24,9 @@ Test log_float.hpp on its own, without including IO headers.
 /**
 Instantiate the output routine without creating an ostream instance.
 */
-void print_log_float (std::ostream & os, math::log_float <float> const & f)
-{ os << f; }
+void print_log_float(std::ostream & os, math::log_float<float> const & f)
+{
+    os << f;
+}
 
 int main() { return 0; }

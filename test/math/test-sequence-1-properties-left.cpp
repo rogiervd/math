@@ -27,10 +27,11 @@ be run first.
 
 #include "sequence-tests-fast-properties.hpp"
 
-BOOST_AUTO_TEST_SUITE (test_suite_sequence_fast_left_properties)
+BOOST_AUTO_TEST_SUITE(test_suite_sequence_fast_left_properties)
 
-BOOST_AUTO_TEST_CASE (test_sequence) {
-    test_sequence_spot <math::left, math::right>();
+BOOST_AUTO_TEST_CASE(test_sequence)
+{
+    test_sequence_spot<math::left, math::right>();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

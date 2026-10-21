@@ -27,11 +27,12 @@ namespace math { namespace detail {
     template <class Implementation, typename ExponentType> struct log_float_base
     {
         /// \internal
-        Implementation * this_()
-        { return static_cast <Implementation *> (this); }
+        Implementation * this_() { return static_cast<Implementation *>(this); }
         /// \internal
         Implementation const * this_() const
-        { return static_cast <Implementation const *> (this); }
+        {
+            return static_cast<Implementation const *>(this);
+        }
         /// \internal
         ExponentType exponent() const { return this_()->exponent(); }
 
@@ -43,20 +44,22 @@ namespace math { namespace detail {
         \note This may underflow or overflow, with the behaviour specified by
         the \c Policy.
         */
-        ExponentType get() const {
+        ExponentType get() const
+        {
             typedef typename Implementation::policy_type policy_type;
-            static const char * function_name = "log_float<%1%>::get";
+            static char const * function_name = "log_float<%1%>::get";
             constexpr ExponentType infinity =
                 std::numeric_limits<ExponentType>::infinity();
             using std::exp;
-            ExponentType result = exp (exponent());
+            ExponentType result = exp(exponent());
             if (result == 0 && exponent() != -infinity) {
-                raise_underflow_error <ExponentType> (function_name,
-                    "value cannot be represented except by 0",
+                raise_underflow_error<ExponentType>(
+                    function_name, "value cannot be represented except by 0",
                     policy_type());
             }
             if (result == infinity && exponent() != infinity) {
-                raise_overflow_error <ExponentType> (function_name,
+                raise_overflow_error<ExponentType>(
+                    function_name,
                     "value cannot be represented except by infinity",
                     policy_type());
             }
@@ -73,36 +76,41 @@ namespace math { namespace detail {
         /**
         \return false iff the value is equal to 0, and otherwise true.
         */
-        explicit operator bool() const {
-            return this_()->exponent() !=
-                -std::numeric_limits <ExponentType>::infinity();
+        explicit operator bool() const
+        {
+            return this_()->exponent()
+                != -std::numeric_limits<ExponentType>::infinity();
         }
 
         /**
         \return true iff the value is equal to 0, and otherwise false.
         */
-        bool operator ! () const {
-            return this_()->exponent() ==
-                -std::numeric_limits <ExponentType>::infinity();
+        bool operator!() const
+        {
+            return this_()->exponent()
+                == -std::numeric_limits<ExponentType>::infinity();
         }
     };
 
-    template <typename ExponentType, class Policy>
-    inline constexpr int sign (
-        log_float_base <log_float <ExponentType, Policy>, ExponentType> const &)
-    { return +1; }
+    template <typename ExponentType, class Policy> inline constexpr int sign(
+        log_float_base<log_float<ExponentType, Policy>, ExponentType> const &)
+    {
+        return +1;
+    }
 
-    template <typename ExponentType, class Policy>
-    inline int sign (
-        log_float_base <signed_log_float <ExponentType, Policy>, ExponentType>
-            const & w)
-    { return w.sign(); }
+    template <typename ExponentType, class Policy> inline int sign(
+        log_float_base<
+            signed_log_float<ExponentType, Policy>, ExponentType> const & w)
+    {
+        return w.sign();
+    }
 
     template <typename Wide, typename ExponentType>
-    inline ExponentType exponent (log_float_base <Wide, ExponentType> const & w)
-    { return w.exponent(); }
+    inline ExponentType exponent(log_float_base<Wide, ExponentType> const & w)
+    {
+        return w.exponent();
+    }
 
-}} // namespace math::detail
+}}  // namespace math::detail
 
 #endif  // MATH_LOG_FLOAT_DETAIL_BASE_HPP_INCLUDED
-

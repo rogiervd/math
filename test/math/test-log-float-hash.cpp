@@ -47,42 +47,43 @@ bypass explicit error handling in favour of leaving this to the hardware.
 
 BOOST_AUTO_TEST_SUITE(test_suite_log_float_hash)
 
-BOOST_AUTO_TEST_CASE (test_hash) {
-    typedef math::log_float <double> log_float;
-    typedef math::signed_log_float <double> signed_log_float;
+BOOST_AUTO_TEST_CASE(test_hash)
+{
+    typedef math::log_float<double> log_float;
+    typedef math::signed_log_float<double> signed_log_float;
 
     // Check hash on log_float.
-    std::vector <log_float> examples;
-    examples.push_back (0);
-    examples.push_back (log_float (
-        -std::numeric_limits <double>::max(), math::as_exponent()));
-    examples.push_back (1.e-30);
-    examples.push_back (1.e-10);
-    examples.push_back (.1);
-    examples.push_back (log_float (-0., math::as_exponent()));
-    examples.push_back (log_float (0., math::as_exponent()));
-    examples.push_back (.5);
-    examples.push_back (1);
-    examples.push_back (2);
-    examples.push_back (10);
-    examples.push_back (1.e+30);
-    examples.push_back (log_float (
-        std::numeric_limits <double>::max(), math::as_exponent()));
-    examples.push_back (log_float (
-        std::numeric_limits <double>::infinity(), math::as_exponent()));
+    std::vector<log_float> examples;
+    examples.push_back(0);
+    examples.push_back(
+        log_float(-std::numeric_limits<double>::max(), math::as_exponent()));
+    examples.push_back(1.e-30);
+    examples.push_back(1.e-10);
+    examples.push_back(.1);
+    examples.push_back(log_float(-0., math::as_exponent()));
+    examples.push_back(log_float(0., math::as_exponent()));
+    examples.push_back(.5);
+    examples.push_back(1);
+    examples.push_back(2);
+    examples.push_back(10);
+    examples.push_back(1.e+30);
+    examples.push_back(
+        log_float(std::numeric_limits<double>::max(), math::as_exponent()));
+    examples.push_back(log_float(
+        std::numeric_limits<double>::infinity(), math::as_exponent()));
 
-    math::report_check_hash (examples);
+    math::report_check_hash(examples);
 
     // Check hash on signed_log_float.
     // For positive values, the hash value should be the same.
-    math::report_check_cast_hash <signed_log_float> (examples);
+    math::report_check_cast_hash<signed_log_float>(examples);
 
-    std::vector <signed_log_float> signed_examples;
+    std::vector<signed_log_float> signed_examples;
     for (log_float example : examples) {
-        signed_examples.push_back (example);
-        signed_examples.push_back (-example);
+        signed_examples.push_back(example);
+        signed_examples.push_back(-example);
     }
-    math::report_check_hash (signed_examples);
+    math::report_check_hash(signed_examples);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

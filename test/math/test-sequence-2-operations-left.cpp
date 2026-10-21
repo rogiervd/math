@@ -27,16 +27,17 @@ be run first.
 
 #include "sequence-tests-fast-operations.hpp"
 
-BOOST_AUTO_TEST_SUITE (test_suite_sequence_fast_left_operations)
+BOOST_AUTO_TEST_SUITE(test_suite_sequence_fast_left_operations)
 
-BOOST_AUTO_TEST_CASE (test_sequence) {
-    test_construction <math::left>();
-    test_comparison <math::left> ("ab", "abc");
-    test_times <math::left> ();
-    test_plus <math::left> ("ab", "abc");
-    test_pick <math::left>();
-    test_choose <math::left> ("ab", "abc");
-    test_divide <math::left> ("ab", "abc", "bc");
+BOOST_AUTO_TEST_CASE(test_sequence)
+{
+    test_construction<math::left>();
+    test_comparison<math::left>("ab", "abc");
+    test_times<math::left>();
+    test_plus<math::left>("ab", "abc");
+    test_pick<math::left>();
+    test_choose<math::left>("ab", "abc");
+    test_divide<math::left>("ab", "abc", "bc");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

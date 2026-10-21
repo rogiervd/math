@@ -19,10 +19,11 @@ limitations under the License.
 
 #include "product-tests.hpp"
 
-BOOST_AUTO_TEST_SUITE (test_suite_product_full_heterogeneous)
+BOOST_AUTO_TEST_SUITE(test_suite_product_full_heterogeneous)
 
-BOOST_AUTO_TEST_CASE (test_product_all) {
-    test_product_heterogeneous <math::with_inverse <math::callable::plus>>();
+BOOST_AUTO_TEST_CASE(test_product_all)
+{
+    test_product_heterogeneous<math::with_inverse<math::callable::plus>>();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -17,34 +17,34 @@ limitations under the License.
 #ifndef MATH_SEQUENCE_HPP_INCLUDED
 #define MATH_SEQUENCE_HPP_INCLUDED
 
-#include <vector>
+#include <algorithm>  // for std::reverse.
 #include <list>
 #include <stdexcept>
-#include <algorithm> // for std::reverse.
+#include <vector>
 
 #include <iosfwd>
 
-#include <boost/utility/enable_if.hpp>
+#include <boost/functional/hash_fwd.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/optional.hpp>
-#include <boost/functional/hash_fwd.hpp>
+#include <boost/utility/enable_if.hpp>
 
-#include "utility/overload_order.hpp"
 #include "utility/disable_if_same.hpp"
+#include "utility/overload_order.hpp"
 
 #include "range/core.hpp"
-#include "range/for_each_macro.hpp"
 #include "range/empty_view.hpp"
-#include "range/tuple.hpp"
-#include "range/std/view_optional.hpp"
-#include "range/std/vector.hpp"
 #include "range/equal.hpp"
-#include "range/less_lexicographical.hpp"
+#include "range/for_each_macro.hpp"
 #include "range/hash_range.hpp"
+#include "range/less_lexicographical.hpp"
+#include "range/std/vector.hpp"
+#include "range/std/view_optional.hpp"
+#include "range/tuple.hpp"
 
-#include "rime/if.hpp"
-#include "rime/call_if.hpp"
 #include "rime/assert.hpp"
+#include "rime/call_if.hpp"
+#include "rime/if.hpp"
 
 #include "magma.hpp"
 
@@ -89,84 +89,101 @@ template <class Symbol, class Direction = left> class sequence_annihilator;
 template <class Symbol, class Direction> struct sequence_tag;
 
 template <class Symbol, class Direction>
-    struct decayed_magma_tag <sequence <Symbol, Direction>>
-{ typedef sequence_tag <Symbol, Direction> type; };
+struct decayed_magma_tag<sequence<Symbol, Direction>>
+{
+    typedef sequence_tag<Symbol, Direction> type;
+};
 
 template <class Symbol, class Direction>
-    struct decayed_magma_tag <empty_sequence <Symbol, Direction>>
-{ typedef sequence_tag <Symbol, Direction> type; };
+struct decayed_magma_tag<empty_sequence<Symbol, Direction>>
+{
+    typedef sequence_tag<Symbol, Direction> type;
+};
 
 template <class Symbol, class Direction>
-    struct decayed_magma_tag <single_sequence <Symbol, Direction>>
-{ typedef sequence_tag <Symbol, Direction> type; };
+struct decayed_magma_tag<single_sequence<Symbol, Direction>>
+{
+    typedef sequence_tag<Symbol, Direction> type;
+};
 
 template <class Symbol, class Direction>
-    struct decayed_magma_tag <optional_sequence <Symbol, Direction>>
-{ typedef sequence_tag <Symbol, Direction> type; };
+struct decayed_magma_tag<optional_sequence<Symbol, Direction>>
+{
+    typedef sequence_tag<Symbol, Direction> type;
+};
 
 template <class Symbol, class Direction>
-    struct decayed_magma_tag <sequence_annihilator <Symbol, Direction>>
-{ typedef sequence_tag <Symbol, Direction> type; };
+struct decayed_magma_tag<sequence_annihilator<Symbol, Direction>>
+{
+    typedef sequence_tag<Symbol, Direction> type;
+};
 
-template <class Symbol, class Direction> class sequence {
+template <class Symbol, class Direction> class sequence
+{
 private:
     bool is_annihilator_;
-    std::vector <Symbol> symbols_;
+    std::vector<Symbol> symbols_;
+
 public:
     /**
     Initialise with no symbols.
     (Multiplicative identity.)
     */
-    sequence() : is_annihilator_ (false), symbols_() {}
+    sequence() : is_annihilator_(false), symbols_() {}
 
     /**
     Initialise with the empty sequence.
     */
-    sequence (empty_sequence <Symbol, Direction> const &)
-    : is_annihilator_ (false), symbols_() {}
+    sequence(empty_sequence<Symbol, Direction> const &)
+    : is_annihilator_(false), symbols_()
+    {}
 
     /**
     Initialise with a sequence with one element.
     */
-    sequence (single_sequence <Symbol, Direction> const & s)
-    : is_annihilator_ (false), symbols_ (1, s.symbol()) {}
+    sequence(single_sequence<Symbol, Direction> const & s)
+    : is_annihilator_(false), symbols_(1, s.symbol())
+    {}
 
     /**
     Initialise with a sequence with zero or one element.
     */
-    sequence (optional_sequence <Symbol, Direction> const & s)
-    : is_annihilator_ (false)
+    sequence(optional_sequence<Symbol, Direction> const & s)
+    : is_annihilator_(false)
     {
-        if (!s.empty())
-            symbols_.push_back (s.symbol().get());
-        assert (s.empty() == this->empty());
+        if (!s.empty()) {
+            symbols_.push_back(s.symbol().get());
+        }
+        assert(s.empty() == this->empty());
     }
 
     /**
     Initialise as the multiplicative annihilator.
     (Additive identity.)
     */
-    sequence (sequence_annihilator <Symbol, Direction> const &)
-    : is_annihilator_ (true) {}
+    sequence(sequence_annihilator<Symbol, Direction> const &)
+    : is_annihilator_(true)
+    {}
 
     /**
     Initialise with a range of symbols.
     */
-    template <class Range, class Enable = typename
-            boost::enable_if <range::is_range <Range>>::type>
-        explicit sequence (Range && range)
-    : is_annihilator_ (false)
+    template <
+        class Range,
+        class Enable = typename boost::enable_if<range::is_range<Range>>::type>
+    explicit sequence(Range && range) : is_annihilator_(false)
     {
-        RANGE_FOR_EACH (element, range)
-            symbols_.push_back (element);
+        RANGE_FOR_EACH(element, range)
+        symbols_.push_back(element);
     }
 
     /**
     Initialise with a range of symbols.
     (Optimised version using the move constructor of std::vector.)
     */
-    template <class Range> explicit sequence (std::vector <Symbol> && range)
-    : is_annihilator_ (false), symbols_ (std::move (range)) {}
+    template <class Range> explicit sequence(std::vector<Symbol> && range)
+    : is_annihilator_(false), symbols_(std::move(range))
+    {}
 
     /**
     Return \c true iff this is an annihilator.
@@ -177,17 +194,19 @@ public:
     Return \c true iff this contains a symbol sequence of zero elements.
     \pre This is not an annihilator.
     */
-    bool empty() const {
-        assert (!is_annihilator());
-        return range::empty (symbols_);
+    bool empty() const
+    {
+        assert(!is_annihilator());
+        return range::empty(symbols_);
     }
 
     /**
     Return a range containing the symbols.
     \pre This is not an annihilator.
     */
-    std::vector <Symbol> const & symbols() const {
-        assert (!is_annihilator());
+    std::vector<Symbol> const & symbols() const
+    {
+        assert(!is_annihilator());
         return symbols_;
     }
 };
@@ -197,7 +216,8 @@ Sequence that is known at compile time to be of zero length.
 
 \sa math::sequence, math::single_sequence, math::optional_sequence
 */
-template <class Symbol, class Direction> class empty_sequence {
+template <class Symbol, class Direction> class empty_sequence
+{
 public:
     empty_sequence() {}
 
@@ -205,35 +225,44 @@ public:
     Initialise with a sequence, which must be empty.
     \throw magma_not_convertible If the sequence is non-empty.
     */
-    explicit empty_sequence (sequence <Symbol, Direction> const & s) {
-        if (s.is_annihilator() || !s.empty())
+    explicit empty_sequence(sequence<Symbol, Direction> const & s)
+    {
+        if (s.is_annihilator() || !s.empty()) {
             throw magma_not_convertible();
+        }
     }
 
     /**
     Initialise with single_sequence, which is never possible and always throws.
     \throw magma_not_convertible
     */
-    explicit empty_sequence (single_sequence <Symbol, Direction> const &)
-    { throw magma_not_convertible(); }
+    explicit empty_sequence(single_sequence<Symbol, Direction> const &)
+    {
+        throw magma_not_convertible();
+    }
 
     /**
     Initialise with optional_sequence, which must be empty.
     \throw magma_not_convertible If the sequence is non-empty.
     */
-    explicit empty_sequence (optional_sequence <Symbol, Direction> const & s) {
-        if (!s.empty())
+    explicit empty_sequence(optional_sequence<Symbol, Direction> const & s)
+    {
+        if (!s.empty()) {
             throw magma_not_convertible();
+        }
     }
 
     /**
     Initialise with a range of symbols.
     This range must be empty.
     */
-    template <class Range, class Enable = typename
-        boost::enable_if <range::is_range <Range>>::type>
-    explicit empty_sequence (Range && range)
-    { rime::assert_ (range::empty (range)); }
+    template <
+        class Range,
+        class Enable = typename boost::enable_if<range::is_range<Range>>::type>
+    explicit empty_sequence(Range && range)
+    {
+        rime::assert_(range::empty(range));
+    }
 
     rime::false_type is_annihilator() const { return rime::false_; }
     rime::true_type empty() const { return rime::true_; }
@@ -246,7 +275,8 @@ Sequence that is known at compile time to be of length one.
 
 \sa math::sequence, math::empty_sequence, math::optional_sequence
 */
-template <class Symbol, class Direction> class single_sequence {
+template <class Symbol, class Direction> class single_sequence
+{
 private:
     Symbol symbol_;
 
@@ -254,15 +284,17 @@ private:
     Extract the first symbol from a symbol_sequence.
     If the range has another length than 1, throw \c magma_not_convertible.
     */
-    static Symbol get_only_symbol_from (sequence <Symbol, Direction> const & s)
+    static Symbol get_only_symbol_from(sequence<Symbol, Direction> const & s)
     {
-        if (s.is_annihilator())
+        if (s.is_annihilator()) {
             throw magma_not_convertible();
+        }
         auto && symbols = s.symbols();
-        if (range::empty (symbols) || !range::empty (range::drop (symbols)))
+        if (range::empty(symbols) || !range::empty(range::drop(symbols))) {
             throw magma_not_convertible();
-        else
-            return range::first (symbols);
+        } else {
+            return range::first(symbols);
+        }
     }
 
 public:
@@ -270,36 +302,36 @@ public:
     Initialise with an explicit symbol.
     \todo Add overloads for Symbol && and Symbol &?
     */
-    explicit single_sequence (Symbol const & symbol)
-    : symbol_ (symbol) {}
+    explicit single_sequence(Symbol const & symbol) : symbol_(symbol) {}
 
     /**
     Initialise with a range of symbols, which must have one element.
     */
-    template <class Range,
-        class Enable1 = typename
-            boost::enable_if <range::is_range <Range>>::type,
-        class Enable2 = typename
-            utility::disable_if_same_or_derived <Symbol, Range>::type>
-    explicit single_sequence (Range && range)
-    : symbol_ (range::first (range))
-    { rime::assert_ (range::empty (range::drop (range))); }
+    template <
+        class Range,
+        class Enable1 = typename boost::enable_if<range::is_range<Range>>::type,
+        class Enable2 =
+            typename utility::disable_if_same_or_derived<Symbol, Range>::type>
+    explicit single_sequence(Range && range) : symbol_(range::first(range))
+    {
+        rime::assert_(range::empty(range::drop(range)));
+    }
 
     /**
     Convert from sequence: explicit.
     \pre The sequence must contain exactly one element.
     \throw magma_not_convertible If the sequence has another length than 1.
     */
-    explicit single_sequence (sequence <Symbol, Direction> const & that)
-    : symbol_ (get_only_symbol_from (that)) {}
+    explicit single_sequence(sequence<Symbol, Direction> const & that)
+    : symbol_(get_only_symbol_from(that))
+    {}
 
     rime::false_type empty() const { return rime::false_; }
     rime::false_type is_annihilator() const { return rime::false_; }
 
     Symbol const & symbol() const { return symbol_; }
 
-    range::tuple <Symbol const &> symbols() const
-    { return range::tie (symbol_); }
+    range::tuple<Symbol const &> symbols() const { return range::tie(symbol_); }
 };
 
 /**
@@ -307,24 +339,26 @@ Sequence that is known at compile time to be of length zero or one.
 
 \sa math::sequence
 */
-template <class Symbol, class Direction> class optional_sequence {
+template <class Symbol, class Direction> class optional_sequence
+{
 private:
-    boost::optional <Symbol> symbol_;
+    boost::optional<Symbol> symbol_;
 
     /**
     Extract an optional element from a range of length zero or one.
     */
     template <class Range>
-        static boost::optional <Symbol> extract_from_range (Range && range)
+    static boost::optional<Symbol> extract_from_range(Range && range)
     {
-        if (range::empty (range))
-            return boost::optional <Symbol>();
-        else {
-            auto chopped = range::chop (range);
-            assert (range::empty (chopped.rest()));
-            return boost::optional <Symbol> (chopped.move_first());
+        if (range::empty(range)) {
+            return boost::optional<Symbol>();
+        } else {
+            auto chopped = range::chop(range);
+            assert(range::empty(chopped.rest()));
+            return boost::optional<Symbol>(chopped.move_first());
         }
     }
+
 public:
     /**
     Initialise empty.
@@ -334,21 +368,21 @@ public:
     /**
     Initialise with an explicit symbol.
     */
-    explicit optional_sequence (Symbol const & symbol)
-    : symbol_ (symbol) {}
+    explicit optional_sequence(Symbol const & symbol) : symbol_(symbol) {}
 
     /**
     Convert empty, from empty_sequence.
     */
-    optional_sequence (empty_sequence <Symbol, Direction> const & that)
-    : symbol_ () {}
+    optional_sequence(empty_sequence<Symbol, Direction> const & that)
+    : symbol_()
+    {}
 
     /**
     Convert with one symbol, from single_sequence.
     */
-    optional_sequence (
-        single_sequence <Symbol, Direction> const & that)
-    : symbol_ (that.symbol()) {}
+    optional_sequence(single_sequence<Symbol, Direction> const & that)
+    : symbol_(that.symbol())
+    {}
 
     /**
     Convert from sequence: explicit.
@@ -356,39 +390,45 @@ public:
     \throw magma_not_convertible
         If the sequence is an annihilator or has a greater length.
     */
-    explicit optional_sequence (sequence <Symbol, Direction> const & that) {
-        if (that.is_annihilator())
+    explicit optional_sequence(sequence<Symbol, Direction> const & that)
+    {
+        if (that.is_annihilator()) {
             throw magma_not_convertible();
-        auto && symbols = that.symbols();
-        if (!range::empty (symbols)) {
-            if (!range::empty (range::drop (symbols)))
-                throw magma_not_convertible();
-            else
-                symbol_ = range::first (symbols);
         }
-        assert (that.empty() == this->empty());
+        auto && symbols = that.symbols();
+        if (!range::empty(symbols)) {
+            if (!range::empty(range::drop(symbols))) {
+                throw magma_not_convertible();
+            } else {
+                symbol_ = range::first(symbols);
+            }
+        }
+        assert(that.empty() == this->empty());
     }
 
     /**
     Initialise with a range of symbols, which must have one element.
     */
-    template <class Range,
-        class Enable1 = typename
-            boost::enable_if <range::is_range <Range>>::type,
-        class Enable2 = typename
-            utility::disable_if_same_or_derived <Symbol, Range>::type>
-    explicit optional_sequence (Range && range)
-    : symbol_ (extract_from_range (std::forward <Range> (range))) {}
+    template <
+        class Range,
+        class Enable1 = typename boost::enable_if<range::is_range<Range>>::type,
+        class Enable2 =
+            typename utility::disable_if_same_or_derived<Symbol, Range>::type>
+    explicit optional_sequence(Range && range)
+    : symbol_(extract_from_range(std::forward<Range>(range)))
+    {}
 
     rime::false_type is_annihilator() const { return rime::false_; }
     bool empty() const { return !symbol_; }
 
-    boost::optional <Symbol> const & symbol() const { return symbol_; }
+    boost::optional<Symbol> const & symbol() const { return symbol_; }
 
-    typename range::result_of <range::callable::view_optional (
-        boost::optional <Symbol> const &)>::type
-    symbols() const
-    { return range::view_optional (symbol_); }
+    typename range::result_of<
+        range::callable::view_optional(boost::optional<Symbol> const &)>::type
+        symbols() const
+    {
+        return range::view_optional(symbol_);
+    }
 };
 
 /**
@@ -397,7 +437,8 @@ Multiplying this with any sequence yields a sequence_annihilator.
 
 \sa math::sequence
 */
-template <class Symbol, class Direction> class sequence_annihilator {
+template <class Symbol, class Direction> class sequence_annihilator
+{
 public:
     sequence_annihilator() {}
 
@@ -405,9 +446,11 @@ public:
     Construct from a sequence, which must be an annihilator.
     \throw magma_not_convertible If the argument is not an annihilator.
     */
-    explicit sequence_annihilator (sequence <Symbol, Direction> const & s) {
-        if (!s.is_annihilator())
+    explicit sequence_annihilator(sequence<Symbol, Direction> const & s)
+    {
+        if (!s.is_annihilator()) {
             throw magma_not_convertible();
+        }
     }
 
     rime::true_type is_annihilator() const { return rime::true_; }
@@ -417,19 +460,22 @@ namespace detail {
 
     template <class Type> struct is_sequence_tag : boost::mpl::false_ {};
     template <class Symbol, class Direction>
-        struct is_sequence_tag <sequence_tag <Symbol, Direction>>
+    struct is_sequence_tag<sequence_tag<Symbol, Direction>>
     : boost::mpl::true_ {};
 
-} // namespace detail
+}  // namespace detail
 
-MATH_MAGMA_GENERATE_OPERATORS (detail::is_sequence_tag)
+MATH_MAGMA_GENERATE_OPERATORS(detail::is_sequence_tag)
 
 namespace operation {
 
-    template <bool value> struct return_bool {
-        template <class ... Arguments>
-            rime::bool_ <value> operator() (Arguments const & ...) const
-        { return rime::bool_ <value>(); }
+    template <bool value> struct return_bool
+    {
+        template <class... Arguments>
+        rime::bool_<value> operator()(Arguments const &...) const
+        {
+            return rime::bool_<value>();
+        }
     };
 
     namespace sequence_detail {
@@ -441,112 +487,130 @@ namespace operation {
         */
         template <class Direction> struct range_direction;
 
-        template <> struct range_direction <left>
-        { typedef ::direction::front type; };
-        template <> struct range_direction <right>
-        { typedef ::direction::back type; };
+        template <> struct range_direction<left>
+        {
+            typedef ::direction::front type;
+        };
+        template <> struct range_direction<right>
+        {
+            typedef ::direction::back type;
+        };
 
-    } // namespace sequence_detail
+    }  // namespace sequence_detail
 
     /* Queries. */
     template <class Symbol, class Direction>
-        struct equal <sequence_tag <Symbol, Direction>>
+    struct equal<sequence_tag<Symbol, Direction>>
     {
     private:
-        struct when_first_annihilator {
-            template <class Sequence1, class Sequence2> auto operator() (
+        struct when_first_annihilator
+        {
+            template <class Sequence1, class Sequence2> auto operator()(
                 Sequence1 const & sequence1, Sequence2 const & sequence2) const
-            RETURNS (sequence2.is_annihilator());
+                RETURNS(sequence2.is_annihilator());
         };
 
-        struct when_neither_annihilator {
-            template <class Sequence1, class Sequence2> auto operator() (
+        struct when_neither_annihilator
+        {
+            template <class Sequence1, class Sequence2> auto operator()(
                 Sequence1 const & sequence1, Sequence2 const & sequence2) const
-            RETURNS (range::equal (sequence1.symbols(), sequence2.symbols()));
+                RETURNS(range::equal(sequence1.symbols(), sequence2.symbols()));
         };
 
-        struct when_first_not_annihilator {
-            template <class Sequence1, class Sequence2> auto operator() (
+        struct when_first_not_annihilator
+        {
+            template <class Sequence1, class Sequence2> auto operator()(
                 Sequence1 const & sequence1, Sequence2 const & sequence2) const
-            RETURNS (rime::call_if (sequence2.is_annihilator(),
-                return_bool <false>(), when_neither_annihilator(),
-                sequence1, sequence2));
+                RETURNS(
+                    rime::call_if(
+                        sequence2.is_annihilator(), return_bool<false>(),
+                        when_neither_annihilator(), sequence1, sequence2));
         };
 
     public:
-        template <class Sequence1, class Sequence2> auto operator () (
+        template <class Sequence1, class Sequence2> auto operator()(
             Sequence1 const & sequence1, Sequence2 const & sequence2) const
-        RETURNS (rime::call_if (sequence1.is_annihilator(),
-            when_first_annihilator(), when_first_not_annihilator(),
-            sequence1, sequence2));
+            RETURNS(
+                rime::call_if(
+                    sequence1.is_annihilator(), when_first_annihilator(),
+                    when_first_not_annihilator(), sequence1, sequence2));
     };
 
     template <class Symbol, class Direction>
-        struct compare <sequence_tag <Symbol, Direction>>
+    struct compare<sequence_tag<Symbol, Direction>>
     {
     private:
         // It is recommended that the "best" element comes first in the strict
         // weak order, so the annihilator is last in the sorting order.
-        struct when_first_annihilator {
-            template <class Sequence1, class Sequence2> auto operator() (
+        struct when_first_annihilator
+        {
+            template <class Sequence1, class Sequence2> auto operator()(
                 Sequence1 const & sequence1, Sequence2 const & sequence2) const
-            RETURNS (rime::false_);
+                RETURNS(rime::false_);
         };
 
-        struct when_neither_annihilator {
-            template <class Sequence1, class Sequence2> auto operator() (
+        struct when_neither_annihilator
+        {
+            template <class Sequence1, class Sequence2> auto operator()(
                 Sequence1 const & sequence1, Sequence2 const & sequence2) const
-            RETURNS (range::less_lexicographical (
-                sequence1.symbols(), sequence2.symbols(),
-                typename sequence_detail::range_direction <Direction>::type()));
+                RETURNS(
+                    range::less_lexicographical(
+                        sequence1.symbols(), sequence2.symbols(),
+                        typename sequence_detail::range_direction<
+                            Direction>::type()));
         };
 
-        struct when_first_not_annihilator {
-            template <class Sequence1, class Sequence2> auto operator() (
+        struct when_first_not_annihilator
+        {
+            template <class Sequence1, class Sequence2> auto operator()(
                 Sequence1 const & sequence1, Sequence2 const & sequence2) const
-            RETURNS (rime::call_if (sequence2.is_annihilator(),
-                return_bool <true>(), when_neither_annihilator(),
-                sequence1, sequence2));
+                RETURNS(
+                    rime::call_if(
+                        sequence2.is_annihilator(), return_bool<true>(),
+                        when_neither_annihilator(), sequence1, sequence2));
         };
 
     public:
-        template <class Sequence1, class Sequence2> auto operator () (
+        template <class Sequence1, class Sequence2> auto operator()(
             Sequence1 const & sequence1, Sequence2 const & sequence2) const
-        RETURNS (rime::call_if (sequence1.is_annihilator(),
-            when_first_annihilator(), when_first_not_annihilator(),
-            sequence1, sequence2));
+            RETURNS(
+                rime::call_if(
+                    sequence1.is_annihilator(), when_first_annihilator(),
+                    when_first_not_annihilator(), sequence1, sequence2));
     };
 
     /* Produce. */
 
     template <class Symbol, class Direction, class Sequence>
-        struct identity <sequence_tag <Symbol, Direction>, callable::times,
-            Sequence>
+    struct identity<sequence_tag<Symbol, Direction>, callable::times, Sequence>
     {
-        empty_sequence <Symbol, Direction> operator() () const
-        { return empty_sequence <Symbol, Direction>(); }
+        empty_sequence<Symbol, Direction> operator()() const
+        {
+            return empty_sequence<Symbol, Direction>();
+        }
     };
 
     template <class Symbol, class Direction, class Sequence>
-        struct identity <sequence_tag <Symbol, Direction>, callable::plus,
-            Sequence>
+    struct identity<sequence_tag<Symbol, Direction>, callable::plus, Sequence>
     {
-        sequence_annihilator <Symbol, Direction> operator() () const
-        { return sequence_annihilator <Symbol, Direction>(); }
+        sequence_annihilator<Symbol, Direction> operator()() const
+        {
+            return sequence_annihilator<Symbol, Direction>();
+        }
     };
 
     // identity for choose: forward to identity for plus.
     template <class Symbol, class Direction, class Sequence>
-        struct identity <sequence_tag <Symbol, Direction>, callable::choose,
-            Sequence>
-    : identity <sequence_tag <Symbol, Direction>, callable::plus, Sequence> {};
+    struct identity<sequence_tag<Symbol, Direction>, callable::choose, Sequence>
+    : identity<sequence_tag<Symbol, Direction>, callable::plus, Sequence> {};
 
-    template <class Symbol, class Direction, class Sequence>
-        struct annihilator <sequence_tag <Symbol, Direction>, callable::times,
-            Sequence>
+    template <class Symbol, class Direction, class Sequence> struct annihilator<
+        sequence_tag<Symbol, Direction>, callable::times, Sequence>
     {
-        sequence_annihilator <Symbol, Direction> operator() () const
-        { return sequence_annihilator <Symbol, Direction>(); }
+        sequence_annihilator<Symbol, Direction> operator()() const
+        {
+            return sequence_annihilator<Symbol, Direction>();
+        }
     };
 
     /* Operations. */
@@ -557,376 +621,451 @@ namespace operation {
     tie-breaker.
     */
     template <class Symbol, class Direction>
-        struct order <sequence_tag <Symbol, Direction>, callable::choose>
+    struct order<sequence_tag<Symbol, Direction>, callable::choose>
     {
-        typedef typename sequence_detail::range_direction <Direction>::type
+        typedef typename sequence_detail::range_direction<Direction>::type
             range_direction;
 
-        typedef empty_sequence <Symbol, Direction> empty;
-        typedef single_sequence <Symbol, Direction> single;
-        typedef optional_sequence <Symbol, Direction> optional;
-        typedef sequence <Symbol, Direction> sequence_type;
-        typedef sequence_annihilator <Symbol, Direction> annihilator;
+        typedef empty_sequence<Symbol, Direction> empty;
+        typedef single_sequence<Symbol, Direction> single;
+        typedef optional_sequence<Symbol, Direction> optional;
+        typedef sequence<Symbol, Direction> sequence_type;
+        typedef sequence_annihilator<Symbol, Direction> annihilator;
 
         // Left is empty_sequence.
-        rime::false_type operator() (
+        rime::false_type operator()(
             empty const & left, empty const & right) const
-        { return rime::false_; }
-
-        rime::true_type operator() (
-            empty const & left, single const & right) const
-        { return rime::true_; }
-
-        bool operator() (empty const & left, optional const & right) const
-        { return !right.empty(); }
-
-        rime::true_type operator() (
-            empty const & left, annihilator const & right) const
-        { return rime::true_; }
-
-        bool operator() (empty const & left, sequence_type const & right) const
-        { return right.is_annihilator() || !right.empty(); }
-
-        // Left is single_sequence.
-        rime::false_type operator() (
-            single const & left, empty const & right) const
-        { return rime::false_; }
-
-        bool operator() (single const & left, single const & right) const
-        { return left.symbol() < right.symbol(); }
-
-        bool operator() (single const & left, optional const & right) const {
-            if (right.empty())
-                return false;
-            else
-                return left.symbol() < right.symbol();
+        {
+            return rime::false_;
         }
 
-        rime::true_type operator() (
-            single const & left, annihilator const & right) const
-        { return rime::true_; }
-
-        bool operator() (single const & left, sequence_type const & right) const
+        rime::true_type operator()(
+            empty const & left, single const & right) const
         {
-            if (right.is_annihilator())
-                return true;
-            if (right.empty())
+            return rime::true_;
+        }
+
+        bool operator()(empty const & left, optional const & right) const
+        {
+            return !right.empty();
+        }
+
+        rime::true_type operator()(
+            empty const & left, annihilator const & right) const
+        {
+            return rime::true_;
+        }
+
+        bool operator()(empty const & left, sequence_type const & right) const
+        {
+            return right.is_annihilator() || !right.empty();
+        }
+
+        // Left is single_sequence.
+        rime::false_type operator()(
+            single const & left, empty const & right) const
+        {
+            return rime::false_;
+        }
+
+        bool operator()(single const & left, single const & right) const
+        {
+            return left.symbol() < right.symbol();
+        }
+
+        bool operator()(single const & left, optional const & right) const
+        {
+            if (right.empty()) {
                 return false;
-            if (range::size (right.symbols()) == 1)
+            } else {
+                return left.symbol() < right.symbol();
+            }
+        }
+
+        rime::true_type operator()(
+            single const & left, annihilator const & right) const
+        {
+            return rime::true_;
+        }
+
+        bool operator()(single const & left, sequence_type const & right) const
+        {
+            if (right.is_annihilator()) {
+                return true;
+            }
+            if (right.empty()) {
+                return false;
+            }
+            if (range::size(right.symbols()) == 1) {
                 return left.symbol()
-                    < range::first (right.symbols(), range_direction());
+                    < range::first(right.symbols(), range_direction());
+            }
             return true;
         }
 
         // Left is optional_sequence.
 
-        rime::false_type operator() (
+        rime::false_type operator()(
             optional const & left, empty const & right) const
-        { return rime::false_; }
-
-        bool operator() (optional const & left, single const & right) const {
-            if (left.empty())
-                return true;
-            else
-                return left.symbol() < right.symbol();
+        {
+            return rime::false_;
         }
 
-        bool operator() (optional const & left, optional const & right) const {
-            if (left.empty())
+        bool operator()(optional const & left, single const & right) const
+        {
+            if (left.empty()) {
+                return true;
+            } else {
+                return left.symbol() < right.symbol();
+            }
+        }
+
+        bool operator()(optional const & left, optional const & right) const
+        {
+            if (left.empty()) {
                 return !right.empty();
-            if (right.empty())
+            }
+            if (right.empty()) {
                 return false;
+            }
             return left.symbol() < right.symbol();
         }
 
-        rime::true_type operator() (
+        rime::true_type operator()(
             optional const & left, annihilator const & right) const
-        { return rime::true_; }
-
-        bool operator() (optional const & left, sequence_type const & right)
-            const
         {
-            if (right.is_annihilator())
+            return rime::true_;
+        }
+
+        bool operator()(
+            optional const & left, sequence_type const & right) const
+        {
+            if (right.is_annihilator()) {
                 return true;
-            if (left.empty())
+            }
+            if (left.empty()) {
                 return !right.empty();
-            if (right.empty())
+            }
+            if (right.empty()) {
                 return false;
-            if (range::size (right.symbols()) == 1)
+            }
+            if (range::size(right.symbols()) == 1) {
                 return left.symbol()
-                    < range::first (right.symbols(), range_direction());
+                    < range::first(right.symbols(), range_direction());
+            }
             return true;
         }
 
         // Left is an annihilator.
-        template <class Sequence>
-        rime::false_type operator() (
+        template <class Sequence> rime::false_type operator()(
             annihilator const & left, Sequence const & right) const
-        { return rime::false_; }
+        {
+            return rime::false_;
+        }
 
         // Left is a sequence.
-        bool operator() (sequence_type const & left, empty const & right) const
-        { return !left.is_annihilator() && left.empty(); }
-
-        bool operator() (sequence_type const & left, single const & right) const
+        bool operator()(sequence_type const & left, empty const & right) const
         {
-            if (left.is_annihilator())
+            return !left.is_annihilator() && left.empty();
+        }
+
+        bool operator()(sequence_type const & left, single const & right) const
+        {
+            if (left.is_annihilator()) {
                 return false;
-            if (left.empty())
+            }
+            if (left.empty()) {
                 return true;
-            if (range::size (left.symbols()) == 1)
-                return range::first (left.symbols(), range_direction())
+            }
+            if (range::size(left.symbols()) == 1) {
+                return range::first(left.symbols(), range_direction())
                     < right.symbol();
+            }
             return false;
         }
 
-        bool operator() (sequence_type const & left, optional const & right)
-            const
+        bool operator()(
+            sequence_type const & left, optional const & right) const
         {
-            if (left.is_annihilator())
+            if (left.is_annihilator()) {
                 return false;
-            if (left.empty())
+            }
+            if (left.empty()) {
                 return !right.empty();
-            if (right.empty())
+            }
+            if (right.empty()) {
                 return false;
-            if (range::size (left.symbols()) == 1)
-                return range::first (left.symbols(), range_direction())
+            }
+            if (range::size(left.symbols()) == 1) {
+                return range::first(left.symbols(), range_direction())
                     < right.symbol();
+            }
             return false;
         }
 
-        rime::false_type operator() (
+        rime::false_type operator()(
             sequence_type const & left, annihilator const & right) const
-        { return rime::false_; }
+        {
+            return rime::false_;
+        }
 
-        bool operator() (
+        bool operator()(
             sequence_type const & left, sequence_type const & right) const
         {
-            if (left.is_annihilator())
+            if (left.is_annihilator()) {
                 return false;
-            if (right.is_annihilator())
+            }
+            if (right.is_annihilator()) {
                 return true;
+            }
             auto && left_symbols = left.symbols();
             auto && right_symbols = right.symbols();
-            if (range::size (left_symbols) < range::size (right_symbols))
+            if (range::size(left_symbols) < range::size(right_symbols)) {
                 return true;
-            if (range::size (right_symbols) < range::size (left_symbols))
+            }
+            if (range::size(right_symbols) < range::size(left_symbols)) {
                 return false;
-            return range::less_lexicographical (left_symbols, right_symbols);
+            }
+            return range::less_lexicographical(left_symbols, right_symbols);
         }
     };
 
     // Even though "order" is defined, this overrides the default implementation
     // to get the types right.
     template <class Symbol, class Direction>
-        struct choose <sequence_tag <Symbol, Direction>>
+    struct choose<sequence_tag<Symbol, Direction>>
     : associative, commutative, path_operation
     {
-        typedef typename sequence_detail::range_direction <Direction>::type
+        typedef typename sequence_detail::range_direction<Direction>::type
             range_direction;
 
-        typedef empty_sequence <Symbol, Direction> empty;
-        typedef single_sequence <Symbol, Direction> single;
-        typedef optional_sequence <Symbol, Direction> optional;
-        typedef sequence <Symbol, Direction> sequence_type;
-        typedef sequence_annihilator <Symbol, Direction> annihilator;
+        typedef empty_sequence<Symbol, Direction> empty;
+        typedef single_sequence<Symbol, Direction> single;
+        typedef optional_sequence<Symbol, Direction> optional;
+        typedef sequence<Symbol, Direction> sequence_type;
+        typedef sequence_annihilator<Symbol, Direction> annihilator;
 
-        struct implementation {
+        struct implementation
+        {
             // One argument is known to be an annihilator.
-            template <class Sequence> Sequence operator() (
+            template <class Sequence> Sequence operator()(
                 annihilator const &, Sequence const & right,
-                utility::overload_order <1> *) const
-            { return right; }
+                utility::overload_order<1> *) const
+            {
+                return right;
+            }
 
-            template <class Sequence> Sequence operator() (
+            template <class Sequence> Sequence operator()(
                 Sequence const & left, annihilator const &,
-                utility::overload_order <2> *) const
-            { return left; }
+                utility::overload_order<2> *) const
+            {
+                return left;
+            }
 
             // One argument is known-empty.
-            template <class Right> empty operator() (
+            template <class Right> empty operator()(
                 empty const &, Right const &,
-                utility::overload_order <3> *) const
-            { return empty(); }
+                utility::overload_order<3> *) const
+            {
+                return empty();
+            }
 
-            template <class Left> empty operator() (
-                Left const &, empty const &,
-                utility::overload_order <4> *) const
-            { return empty(); }
+            template <class Left> empty operator()(
+                Left const &, empty const &, utility::overload_order<4> *) const
+            {
+                return empty();
+            }
 
             // One argument is known-single.
-            single operator() (single const & left, single const & right,
-                utility::overload_order <5> *) const
+            single operator()(
+                single const & left, single const & right,
+                utility::overload_order<5> *) const
             {
-                if (left.symbol() < right.symbol())
+                if (left.symbol() < right.symbol()) {
                     return left;
-                else
+                } else {
                     return right;
+                }
             }
 
             // Case where one argument is at most one symbol long.
-            template <class Short, class Long> optional when_short (
-                Short const & s, Long const & l) const
+            template <class Short, class Long>
+            optional when_short(Short const & s, Long const & l) const
             {
-                if (l.is_annihilator())
+                if (l.is_annihilator()) {
                     return s;
-                if (s.empty() || l.empty())
+                }
+                if (s.empty() || l.empty()) {
                     return optional();
-                if (!range::empty (range::drop (
-                        l.symbols(), range_direction())))
+                }
+                if (!range::empty(
+                        range::drop(l.symbols(), range_direction()))) {
                     // l is more than one symbol long.
                     return s;
-                if (s.symbol() < range::first (l.symbols(), range_direction()))
+                }
+                if (s.symbol() < range::first(l.symbols(), range_direction())) {
                     return s;
-                else
-                    return optional (l);
+                } else {
+                    return optional(l);
+                }
             }
 
             // One argument is an optional_sequence.
-            template <class Sequence> optional operator() (
+            template <class Sequence> optional operator()(
                 optional const & left, Sequence const & right,
-                utility::overload_order <6> *) const
-            { return when_short (left, right); }
+                utility::overload_order<6> *) const
+            {
+                return when_short(left, right);
+            }
 
-            template <class Sequence> optional operator() (
+            template <class Sequence> optional operator()(
                 Sequence const & left, optional const & right,
-                utility::overload_order <7> *) const
-            { return when_short (right, left); }
+                utility::overload_order<7> *) const
+            {
+                return when_short(right, left);
+            }
 
             // One argument is an single_sequence.
-            template <class Sequence> optional operator() (
+            template <class Sequence> optional operator()(
                 single const & left, Sequence const & right,
-                utility::overload_order <6> *) const
-            { return when_short (left, right); }
+                utility::overload_order<6> *) const
+            {
+                return when_short(left, right);
+            }
 
-            template <class Sequence> optional operator() (
+            template <class Sequence> optional operator()(
                 Sequence const & left, single const & right,
-                utility::overload_order <7> *) const
-            { return when_short (right, left); }
+                utility::overload_order<7> *) const
+            {
+                return when_short(right, left);
+            }
 
             // Both are sequences.
-            sequence_type operator() (
+            sequence_type operator()(
                 sequence_type const & left, sequence_type const & right,
-                utility::overload_order <8> *) const
+                utility::overload_order<8> *) const
             {
-                if (left.is_annihilator())
+                if (left.is_annihilator()) {
                     return right;
-                if (right.is_annihilator())
+                }
+                if (right.is_annihilator()) {
                     return left;
-                auto left_size = range::size (left.symbols());
-                auto right_size = range::size (right.symbols());
-                if (left_size < right_size)
+                }
+                auto left_size = range::size(left.symbols());
+                auto right_size = range::size(right.symbols());
+                if (left_size < right_size) {
                     return left;
-                if (right_size < left_size)
+                }
+                if (right_size < left_size) {
                     return right;
-                if (range::less_lexicographical (
-                        left.symbols(), right.symbols()))
+                }
+                if (range::less_lexicographical(
+                        left.symbols(), right.symbols())) {
                     return left;
-                else
+                } else {
                     return right;
+                }
             }
         };
 
-        template <class Left, class Right> auto operator() (
-            Left const & left, Right const & right) const
-        RETURNS (implementation() (left, right, utility::pick_overload()));
+        template <class Left, class Right>
+        auto operator()(Left const & left, Right const & right) const
+            RETURNS(implementation()(left, right, utility::pick_overload()));
     };
 
     // Since "choose" selects the shortest sequence first, and compares
     // lexicographically as a tie-breaker, sequences in one direction are
     // semirings in both directions.
-    template <class Symbol, class Direction> struct is_semiring <
-        sequence_tag <Symbol, Direction>, either,
-        callable::times, callable::choose>
-    : rime::true_type {};
+    template <class Symbol, class Direction> struct is_semiring<
+        sequence_tag<Symbol, Direction>, either, callable::times,
+        callable::choose> : rime::true_type {};
 
     // Concatenate
     template <class Symbol, class Direction>
-        struct times <sequence_tag <Symbol, Direction>>
-    : associative
+    struct times<sequence_tag<Symbol, Direction>> : associative
     {
     private:
-        typedef sequence_annihilator <Symbol, Direction> annihilator_type;
-        typedef empty_sequence <Symbol, Direction> empty_type;
-        typedef single_sequence <Symbol, Direction> single_type;
-        typedef optional_sequence <Symbol, Direction> optional_type;
-        typedef sequence <Symbol, Direction> sequence_type;
+        typedef sequence_annihilator<Symbol, Direction> annihilator_type;
+        typedef empty_sequence<Symbol, Direction> empty_type;
+        typedef single_sequence<Symbol, Direction> single_type;
+        typedef optional_sequence<Symbol, Direction> optional_type;
+        typedef sequence<Symbol, Direction> sequence_type;
 
-        struct implementation {
+        struct implementation
+        {
             // Annihilator: annihilates.
-            auto operator() (
+            auto operator()(
                 annihilator_type const & left, annihilator_type const &,
-                utility::overload_order <1> *) const
-            RETURNS (left);
+                utility::overload_order<1> *) const RETURNS(left);
 
-            template <class Sequence> auto operator() (
+            template <class Sequence> auto operator()(
                 annihilator_type const & annihilator, Sequence const &,
-                utility::overload_order <1> *) const
-            RETURNS (annihilator);
+                utility::overload_order<1> *) const RETURNS(annihilator);
 
-            template <class Sequence> auto operator() (
+            template <class Sequence> auto operator()(
                 Sequence const &, annihilator_type const & annihilator,
-                utility::overload_order <1> *) const
-            RETURNS (annihilator);
+                utility::overload_order<1> *) const RETURNS(annihilator);
 
             // Empty symbol: return the other one.
-            auto operator() (
+            auto operator()(
                 empty_type const & left, empty_type const &,
-                utility::overload_order <2> *) const
-            RETURNS (left);
+                utility::overload_order<2> *) const RETURNS(left);
 
-            template <class Sequence> auto operator() (
+            template <class Sequence> auto operator()(
                 empty_type const &, Sequence const & right,
-                utility::overload_order <2> *) const
-            RETURNS (right);
+                utility::overload_order<2> *) const RETURNS(right);
 
-            template <class Sequence> auto operator() (
+            template <class Sequence> auto operator()(
                 Sequence const & left, empty_type const &,
-                utility::overload_order <2> *) const
-            RETURNS (left);
+                utility::overload_order<2> *) const RETURNS(left);
 
             // Non-empty: both operands could be three types.
 
-            void append_symbols (
-                std::vector <Symbol> & symbols, single_type const & s) const
-            { symbols.push_back (s.symbol()); }
-
-            void append_symbols (
-                std::vector <Symbol> & symbols, optional_type const & s) const
+            void append_symbols(
+                std::vector<Symbol> & symbols, single_type const & s) const
             {
-                if (!s.empty())
-                    symbols.push_back (s.symbol().get());
+                symbols.push_back(s.symbol());
             }
 
-            void append_symbols (
-                std::vector <Symbol> & symbols, sequence_type const & s) const
+            void append_symbols(
+                std::vector<Symbol> & symbols, optional_type const & s) const
+            {
+                if (!s.empty()) {
+                    symbols.push_back(s.symbol().get());
+                }
+            }
+
+            void append_symbols(
+                std::vector<Symbol> & symbols, sequence_type const & s) const
             {
                 auto && s_symbols = s.symbols();
-                symbols.insert (symbols.end(),
-                    s_symbols.begin(), s_symbols.end());
+                symbols.insert(
+                    symbols.end(), s_symbols.begin(), s_symbols.end());
             }
 
             template <class Sequence1, class Sequence2>
-                sequence <Symbol, Direction> operator() (
-                    Sequence1 const & sequence1, Sequence2 const & sequence2,
-                    utility::overload_order <3> *) const
+            sequence<Symbol, Direction> operator()(
+                Sequence1 const & sequence1, Sequence2 const & sequence2,
+                utility::overload_order<3> *) const
             {
-                if (sequence1.is_annihilator())
+                if (sequence1.is_annihilator()) {
                     return sequence1;
-                if (sequence2.is_annihilator())
+                }
+                if (sequence2.is_annihilator()) {
                     return sequence2;
+                }
 
-                std::vector <Symbol> concatenation;
-                append_symbols (concatenation, sequence1);
-                append_symbols (concatenation, sequence2);
-                return sequence <Symbol, Direction> (std::move (concatenation));
+                std::vector<Symbol> concatenation;
+                append_symbols(concatenation, sequence1);
+                append_symbols(concatenation, sequence2);
+                return sequence<Symbol, Direction>(std::move(concatenation));
             }
         };
 
     public:
-        template <class Left, class Right> auto operator() (
-            Left const & left, Right const & right) const
-        RETURNS (implementation() (left, right, utility::pick_overload()));
+        template <class Left, class Right>
+        auto operator()(Left const & left, Right const & right) const
+            RETURNS(implementation()(left, right, utility::pick_overload()));
 
         // This returns the wrong type but is useful for debugging:
         /*
@@ -940,39 +1079,35 @@ namespace operation {
     Addition for left sequences: find the longest common prefix.
     */
     template <class Symbol, class Direction>
-        struct plus <sequence_tag <Symbol, Direction>>
+    struct plus<sequence_tag<Symbol, Direction>>
     : associative, commutative, idempotent
     {
     private:
-        typedef sequence_annihilator <Symbol, Direction> annihilator_type;
-        typedef empty_sequence <Symbol, Direction> empty_type;
-        typedef single_sequence <Symbol, Direction> single_type;
-        typedef optional_sequence <Symbol, Direction> optional_type;
-        typedef sequence <Symbol, Direction> sequence_type;
+        typedef sequence_annihilator<Symbol, Direction> annihilator_type;
+        typedef empty_sequence<Symbol, Direction> empty_type;
+        typedef single_sequence<Symbol, Direction> single_type;
+        typedef optional_sequence<Symbol, Direction> optional_type;
+        typedef sequence<Symbol, Direction> sequence_type;
 
-        struct implementation {
+        struct implementation
+        {
             // Annihalator is the additive identity.
-            template <class Sequence> auto operator() (
+            template <class Sequence> auto operator()(
                 annihilator_type const &, Sequence const & right,
-                utility::overload_order <1> *) const
-            RETURNS (right);
+                utility::overload_order<1> *) const RETURNS(right);
 
-            template <class Sequence> auto operator() (
+            template <class Sequence> auto operator()(
                 Sequence const & left, annihilator_type const &,
-                utility::overload_order <2> *) const
-            RETURNS (left);
+                utility::overload_order<2> *) const RETURNS(left);
 
             // Empty sequence: return the empty sequence.
-            template <class Sequence> auto operator() (
-                empty_type const & empty,
-                Sequence const &,
-                utility::overload_order <3> *) const
-            RETURNS (empty);
+            template <class Sequence> auto operator()(
+                empty_type const & empty, Sequence const &,
+                utility::overload_order<3> *) const RETURNS(empty);
 
-            template <class Sequence> auto operator() (
+            template <class Sequence> auto operator()(
                 Sequence const &, empty_type const & empty,
-                utility::overload_order <4> *) const
-            RETURNS (empty);
+                utility::overload_order<4> *) const RETURNS(empty);
 
             // Two sequences: different implementation for left and right.
             /*
@@ -982,100 +1117,113 @@ namespace operation {
             s/range::back/direction/), except for dealing with "push_back".
             This requires range::subrange.
             */
-            sequence <Symbol, left> operator() (
-                sequence <Symbol, left> const & sequence1,
-                sequence <Symbol, left> const & sequence2,
-                utility::overload_order <5> * pick) const
+            sequence<Symbol, left> operator()(
+                sequence<Symbol, left> const & sequence1,
+                sequence<Symbol, left> const & sequence2,
+                utility::overload_order<5> * pick) const
             {
                 // Annihalator is the additive identity.
-                if (sequence1.is_annihilator())
+                if (sequence1.is_annihilator()) {
                     return sequence2;
-                if (sequence2.is_annihilator())
+                }
+                if (sequence2.is_annihilator()) {
                     return sequence1;
+                }
 
                 // This should be replaced by something with range::subrange.
-                std::vector <Symbol> longest_common_prefix;
-                auto symbols1 = range::view (sequence1.symbols());
-                auto symbols2 = range::view (sequence2.symbols());
-                while (!range::empty (symbols1) && !range::empty (symbols2)
-                    && range::first (symbols1) == range::first (symbols2))
-                {
-                    longest_common_prefix.push_back (range::first (symbols1));
-                    symbols1 = range::drop (symbols1);
-                    symbols2 = range::drop (symbols2);
+                std::vector<Symbol> longest_common_prefix;
+                auto symbols1 = range::view(sequence1.symbols());
+                auto symbols2 = range::view(sequence2.symbols());
+                while (!range::empty(symbols1) && !range::empty(symbols2)
+                       && range::first(symbols1) == range::first(symbols2)) {
+                    longest_common_prefix.push_back(range::first(symbols1));
+                    symbols1 = range::drop(symbols1);
+                    symbols2 = range::drop(symbols2);
                 }
-                return sequence <Symbol, left> (longest_common_prefix);
+                return sequence<Symbol, left>(longest_common_prefix);
             }
 
-            sequence <Symbol, right> operator() (
-                sequence <Symbol, right> const & sequence1,
-                sequence <Symbol, right> const & sequence2,
-                utility::overload_order <5> * pick) const
+            sequence<Symbol, right> operator()(
+                sequence<Symbol, right> const & sequence1,
+                sequence<Symbol, right> const & sequence2,
+                utility::overload_order<5> * pick) const
             {
                 // Annihalator is the additive identity.
-                if (sequence1.is_annihilator())
+                if (sequence1.is_annihilator()) {
                     return sequence2;
-                if (sequence2.is_annihilator())
-                    return sequence1;
-
-                std::list <Symbol> longest_common_prefix;
-                auto symbols1 = range::view (sequence1.symbols(), range::back);
-                auto symbols2 = range::view (sequence2.symbols(), range::back);
-                while (!range::empty (symbols1, range::back)
-                    && !range::empty (symbols2, range::back)
-                    && range::first (symbols1, range::back)
-                        == range::first (symbols2, range::back))
-                {
-                    longest_common_prefix.push_front (
-                        range::first (symbols1, range::back));
-                    symbols1 = range::drop (symbols1, range::back);
-                    symbols2 = range::drop (symbols2, range::back);
                 }
-                return sequence <Symbol, right> (longest_common_prefix);
+                if (sequence2.is_annihilator()) {
+                    return sequence1;
+                }
+
+                std::list<Symbol> longest_common_prefix;
+                auto symbols1 = range::view(sequence1.symbols(), range::back);
+                auto symbols2 = range::view(sequence2.symbols(), range::back);
+                while (!range::empty(symbols1, range::back)
+                       && !range::empty(symbols2, range::back)
+                       && range::first(symbols1, range::back)
+                           == range::first(symbols2, range::back)) {
+                    longest_common_prefix.push_front(
+                        range::first(symbols1, range::back));
+                    symbols1 = range::drop(symbols1, range::back);
+                    symbols2 = range::drop(symbols2, range::back);
+                }
+                return sequence<Symbol, right>(longest_common_prefix);
             }
 
             // At least one of the arguments has zero or one, or one elements.
             // The common prefix therefore is zero or one elements long.
 
-            static Symbol const & first_symbol (single_type const & s)
-            { return s.symbol(); }
-            static Symbol const & first_symbol (optional_type const & s)
-            { return s.symbol().get(); }
+            static Symbol const & first_symbol(single_type const & s)
+            {
+                return s.symbol();
+            }
+            static Symbol const & first_symbol(optional_type const & s)
+            {
+                return s.symbol().get();
+            }
 
-            static Symbol const & first_symbol (
-                sequence <Symbol, left> const & s)
-            { return range::first (s.symbols(), range::front); }
-            static Symbol const & first_symbol (
-                sequence <Symbol, right> const & s)
-            { return range::first (s.symbols(), range::back); }
+            static Symbol const & first_symbol(sequence<Symbol, left> const & s)
+            {
+                return range::first(s.symbols(), range::front);
+            }
+            static Symbol const & first_symbol(
+                sequence<Symbol, right> const & s)
+            {
+                return range::first(s.symbols(), range::back);
+            }
 
             template <class Sequence1, class Sequence2>
-                optional_type operator() (
-                    Sequence1 const & sequence1, Sequence2 const & sequence2,
-                    utility::overload_order <5> * pick) const
+            optional_type operator()(
+                Sequence1 const & sequence1, Sequence2 const & sequence2,
+                utility::overload_order<5> * pick) const
             {
                 typedef optional_type result_type;
                 // Annihilator is the additive identity.
-                if (sequence1.is_annihilator())
-                    return result_type (sequence2);
-                if (sequence2.is_annihilator())
-                    return result_type (sequence1);
+                if (sequence1.is_annihilator()) {
+                    return result_type(sequence2);
+                }
+                if (sequence2.is_annihilator()) {
+                    return result_type(sequence1);
+                }
 
-                if (sequence1.empty() || sequence2.empty())
+                if (sequence1.empty() || sequence2.empty()) {
                     return result_type();
+                }
 
-                Symbol const & symbol = first_symbol (sequence1);
-                if (symbol == first_symbol (sequence2))
-                    return result_type (symbol);
-                else
+                Symbol const & symbol = first_symbol(sequence1);
+                if (symbol == first_symbol(sequence2)) {
+                    return result_type(symbol);
+                } else {
                     return result_type();
+                }
             }
         };
 
     public:
-        template <class Left, class Right> auto operator() (
-            Left const & left, Right const & right) const
-        RETURNS (implementation() (left, right, utility::pick_overload()));
+        template <class Left, class Right>
+        auto operator()(Left const & left, Right const & right) const
+            RETURNS(implementation()(left, right, utility::pick_overload()));
 
         // This returns the wrong type but is useful for debugging:
         /*
@@ -1088,314 +1236,354 @@ namespace operation {
     // The direction matches the direction of the sequence:
     // left and right sequences are left and right semirings over times and
     // plus.
-    template <class Symbol, class Direction> struct is_semiring <
-        sequence_tag <Symbol, Direction>, Direction,
-        callable::times, callable::plus>
-    : rime::true_type {};
+    template <class Symbol, class Direction> struct is_semiring<
+        sequence_tag<Symbol, Direction>, Direction, callable::times,
+        callable::plus> : rime::true_type {};
 
     /**
     The prefix of the dividend must be equal to the divisor.
     \return The dividend without the prefix.
     */
     template <class Symbol, class Direction>
-        struct divide <sequence_tag <Symbol, Direction>, Direction>
+    struct divide<sequence_tag<Symbol, Direction>, Direction>
     : throw_if_undefined
     {
-        typedef sequence <Symbol, Direction> sequence_type;
-        typedef empty_sequence <Symbol, Direction> empty_sequence_type;
-        typedef single_sequence <Symbol, Direction> single_sequence_type;
-        typedef optional_sequence <Symbol, Direction> optional_sequence_type;
-        typedef sequence_annihilator <Symbol, Direction>
+        typedef sequence<Symbol, Direction> sequence_type;
+        typedef empty_sequence<Symbol, Direction> empty_sequence_type;
+        typedef single_sequence<Symbol, Direction> single_sequence_type;
+        typedef optional_sequence<Symbol, Direction> optional_sequence_type;
+        typedef sequence_annihilator<Symbol, Direction>
             sequence_annihilator_type;
 
-        struct implementation {
+        struct implementation
+        {
             /**
             Implementation for the run-time type.
             This works for all sequences, but it returns the general type, which
             is not efficient.
             */
-            sequence_type operator() (sequence_type const & dividend,
-                sequence_type const & divisor, utility::overload_order <10> *)
-            const
+            sequence_type operator()(
+                sequence_type const & dividend, sequence_type const & divisor,
+                utility::overload_order<10> *) const
             {
                 if (dividend.is_annihilator()) {
-                    if (divisor.is_annihilator())
+                    if (divisor.is_annihilator()) {
                         throw operation_undefined();
-                    else
+                    } else {
                         return dividend;
-                } else if (divisor.is_annihilator())
+                    }
+                } else if (divisor.is_annihilator()) {
                     throw divide_by_zero();
+                }
 
                 // Start at the front of the sequence for a left division, and
                 // at the back for a right division.
-                auto start = typename
-                    sequence_detail::range_direction <Direction>::type();
-                auto divisor_symbols = range::view (divisor.symbols(), start);
-                auto dividend_symbols = range::view (dividend.symbols(), start);
-                while (!range::empty (divisor_symbols, start)) {
-                    if (range::empty (dividend_symbols, start))
+                auto start = typename sequence_detail::range_direction<
+                    Direction>::type();
+                auto divisor_symbols = range::view(divisor.symbols(), start);
+                auto dividend_symbols = range::view(dividend.symbols(), start);
+                while (!range::empty(divisor_symbols, start)) {
+                    if (range::empty(dividend_symbols, start)) {
                         throw operation_undefined();
-                    if (range::first (dividend_symbols, start)
-                            != range::first (divisor_symbols, start))
+                    }
+                    if (range::first(dividend_symbols, start)
+                        != range::first(divisor_symbols, start)) {
                         throw operation_undefined();
-                    divisor_symbols = range::drop (divisor_symbols, start);
-                    dividend_symbols = range::drop (dividend_symbols, start);
+                    }
+                    divisor_symbols = range::drop(divisor_symbols, start);
+                    dividend_symbols = range::drop(dividend_symbols, start);
                 }
-                return sequence_type (dividend_symbols);
+                return sequence_type(dividend_symbols);
             }
 
             /* Specialisations. */
 
             /* 1. annihilators. */
 
-            sequence_type operator() (
+            sequence_type operator()(
                 sequence_annihilator_type const & dividend,
                 sequence_annihilator_type const & divisor,
-                utility::overload_order <1> *) const
-            { throw operation_undefined(); }
+                utility::overload_order<1> *) const
+            {
+                throw operation_undefined();
+            }
 
             // Divide by annihilator.
-            template <class Dividend> sequence_type operator() (
+            template <class Dividend> sequence_type operator()(
                 Dividend const & dividend,
                 sequence_annihilator_type const & divisor,
-                utility::overload_order <1> *) const
-            { throw divide_by_zero(); }
+                utility::overload_order<1> *) const
+            {
+                throw divide_by_zero();
+            }
 
             // Divide annihilator by something else.
-            template <class Divisor> sequence_annihilator_type operator() (
+            template <class Divisor> sequence_annihilator_type operator()(
                 sequence_annihilator_type const & dividend,
-                Divisor const & divisor, utility::overload_order <1> *) const
+                Divisor const & divisor, utility::overload_order<1> *) const
             {
-                if (divisor.is_annihilator())
+                if (divisor.is_annihilator()) {
                     throw operation_undefined();
-                else
+                } else {
                     return dividend;
+                }
             }
 
             /* 2. Empty divisor. */
-            template <class Dividend> auto operator() (
+            template <class Dividend> auto operator()(
                 Dividend const & dividend, empty_sequence_type const & divisor,
-                utility::overload_order <2> *) const
-            RETURNS (dividend);
+                utility::overload_order<2> *) const RETURNS(dividend);
 
             /* 3. Empty dividend. */
-            template <class Divisor> empty_sequence_type operator() (
+            template <class Divisor> empty_sequence_type operator()(
                 empty_sequence_type const & dividend, Divisor const & divisor,
-                utility::overload_order <3> *) const
+                utility::overload_order<3> *) const
             {
-                if (divisor.is_annihilator())
+                if (divisor.is_annihilator()) {
                     throw divide_by_zero();
-                else if (!divisor.empty())
+                } else if (!divisor.empty()) {
                     throw operation_undefined();
-                else
+                } else {
                     return dividend;
+                }
             }
 
             /* 4. Combinations of single, optional, and general sequence. */
 
-            Symbol const & first_symbol (sequence <Symbol, left> const & s)
-                const
-            { return range::first (s.symbols()); }
-
-            Symbol const & first_symbol (sequence <Symbol, right> const & s)
-                const
-            { return range::first (s.symbols(), range::back); }
-
-            empty_sequence_type operator() (
-                single_sequence_type const & dividend,
-                single_sequence_type const & divisor,
-                utility::overload_order <4> *) const
+            Symbol const & first_symbol(sequence<Symbol, left> const & s) const
             {
-                if (dividend.symbol() == divisor.symbol())
-                    return empty_sequence_type();
-                else
-                    throw operation_undefined();
+                return range::first(s.symbols());
             }
 
-            optional_sequence_type operator() (
+            Symbol const & first_symbol(sequence<Symbol, right> const & s) const
+            {
+                return range::first(s.symbols(), range::back);
+            }
+
+            empty_sequence_type operator()(
+                single_sequence_type const & dividend,
+                single_sequence_type const & divisor,
+                utility::overload_order<4> *) const
+            {
+                if (dividend.symbol() == divisor.symbol()) {
+                    return empty_sequence_type();
+                } else {
+                    throw operation_undefined();
+                }
+            }
+
+            optional_sequence_type operator()(
                 single_sequence_type const & dividend,
                 optional_sequence_type const & divisor,
-                utility::overload_order <4> *) const
+                utility::overload_order<4> *) const
             {
                 // Correct case.
-                if (divisor.empty())
+                if (divisor.empty()) {
                     return dividend;
-                if (dividend.symbol() == divisor.symbol().get())
+                }
+                if (dividend.symbol() == divisor.symbol().get()) {
                     return empty_sequence_type();
+                }
                 throw operation_undefined();
             }
 
-            optional_sequence_type operator() (
+            optional_sequence_type operator()(
                 single_sequence_type const & dividend,
                 sequence_type const & divisor,
-                utility::overload_order <4> *) const
+                utility::overload_order<4> *) const
             {
-                if (divisor.is_annihilator())
+                if (divisor.is_annihilator()) {
                     throw divide_by_zero();
+                }
                 // Correct case.
-                if (divisor.empty())
+                if (divisor.empty()) {
                     return dividend;
-                if (range::size (divisor.symbols()) == 1
-                        && dividend.symbol() == first_symbol (divisor))
+                }
+                if (range::size(divisor.symbols()) == 1
+                    && dividend.symbol() == first_symbol(divisor)) {
                     return empty_sequence_type();
+                }
                 // Otherwise, the division is not defined.
                 throw operation_undefined();
             }
 
             // Optional-symbol dividend.
-            empty_sequence_type operator() (
+            empty_sequence_type operator()(
                 optional_sequence_type const & dividend,
                 single_sequence_type const & divisor,
-                utility::overload_order <4> *) const
+                utility::overload_order<4> *) const
             {
                 if (!dividend.empty()
-                        && dividend.symbol().get() == divisor.symbol())
+                    && dividend.symbol().get() == divisor.symbol()) {
                     return empty_sequence_type();
+                }
                 throw operation_undefined();
             }
 
-            optional_sequence_type operator() (
+            optional_sequence_type operator()(
                 optional_sequence_type const & dividend,
                 optional_sequence_type const & divisor,
-                utility::overload_order <4> *) const
+                utility::overload_order<4> *) const
             {
-                if (divisor.empty())
+                if (divisor.empty()) {
                     return dividend;
+                }
                 if (!dividend.empty() && !divisor.empty()
-                        && dividend.symbol() == divisor.symbol())
+                    && dividend.symbol() == divisor.symbol()) {
                     return empty_sequence_type();
+                }
                 throw operation_undefined();
             }
 
-            optional_sequence_type operator() (
+            optional_sequence_type operator()(
                 optional_sequence_type const & dividend,
                 sequence_type const & divisor,
-                utility::overload_order <4> *) const
+                utility::overload_order<4> *) const
             {
-                if (divisor.is_annihilator())
+                if (divisor.is_annihilator()) {
                     throw divide_by_zero();
+                }
                 // Correct case.
-                if (divisor.empty())
+                if (divisor.empty()) {
                     return dividend;
-                if (!dividend.empty()
-                        && range::size (divisor.symbols()) == 1
-                        && dividend.symbol() == first_symbol (divisor))
+                }
+                if (!dividend.empty() && range::size(divisor.symbols()) == 1
+                    && dividend.symbol() == first_symbol(divisor)) {
                     return empty_sequence_type();
+                }
                 // Otherwise, the division is not defined.
                 throw operation_undefined();
             }
 
             // Negotiate between std::vector and the Range library.
-            std::vector <Symbol> drop_copy (
-                std::vector <Symbol> const & symbols) const
+            std::vector<Symbol> drop_copy(
+                std::vector<Symbol> const & symbols) const
             {
-                auto result_symbols_source = range::drop (symbols, typename
-                    sequence_detail::range_direction <Direction>::type());
-                return std::vector <Symbol> (
+                auto result_symbols_source = range::drop(
+                    symbols,
+                    typename sequence_detail::range_direction<
+                        Direction>::type());
+                return std::vector<Symbol>(
                     result_symbols_source.begin(), result_symbols_source.end());
             }
 
             // Divisor is a single_sequence or an optional_sequence.
-            sequence_type operator() (
+            sequence_type operator()(
                 sequence_type const & dividend,
                 single_sequence_type const & divisor,
-                utility::overload_order <4> *) const
+                utility::overload_order<4> *) const
             {
-                if (dividend.is_annihilator())
+                if (dividend.is_annihilator()) {
                     return dividend;
+                }
 
-                if (dividend.empty())
+                if (dividend.empty()) {
                     throw operation_undefined();
-                if (first_symbol (dividend) != divisor.symbol())
+                }
+                if (first_symbol(dividend) != divisor.symbol()) {
                     throw operation_undefined();
+                }
 
-                return sequence_type (drop_copy (dividend.symbols()));
+                return sequence_type(drop_copy(dividend.symbols()));
             }
 
-            sequence_type operator() (
+            sequence_type operator()(
                 sequence_type const & dividend,
                 optional_sequence_type const & divisor,
-                utility::overload_order <4> *) const
+                utility::overload_order<4> *) const
             {
-                if (divisor.empty() || dividend.is_annihilator())
+                if (divisor.empty() || dividend.is_annihilator()) {
                     return dividend;
+                }
 
-                if (dividend.empty())
+                if (dividend.empty()) {
                     throw operation_undefined();
-                if (first_symbol (dividend) != divisor.symbol().get())
+                }
+                if (first_symbol(dividend) != divisor.symbol().get()) {
                     throw operation_undefined();
+                }
 
-                return sequence_type (drop_copy (dividend.symbols()));
+                return sequence_type(drop_copy(dividend.symbols()));
             }
         };
 
-        template <class Sequence1, class Sequence2> auto operator() (
+        template <class Sequence1, class Sequence2> auto operator()(
             Sequence1 const & sequence1, Sequence2 const & sequence2) const
-        RETURNS (
-            implementation() (sequence1, sequence2, utility::pick_overload()));
+            RETURNS(
+                implementation()(
+                    sequence1, sequence2, utility::pick_overload()));
     };
 
     template <class Symbol, class Direction>
-        struct reverse <sequence_tag <Symbol, Direction>, callable::times>
+    struct reverse<sequence_tag<Symbol, Direction>, callable::times>
     {
-        typedef typename opposite_direction <Direction>::type other_direction;
+        typedef typename opposite_direction<Direction>::type other_direction;
 
-        sequence <Symbol, other_direction> operator() (
-            sequence <Symbol, Direction> const & s) const
+        sequence<Symbol, other_direction> operator()(
+            sequence<Symbol, Direction> const & s) const
         {
-            if (s.is_annihilator())
-                return sequence_annihilator <Symbol, other_direction>();
-            else {
-                std::vector <Symbol> symbols = s.symbols();
-                std::reverse (symbols.begin(), symbols.end());
-                return sequence <Symbol, other_direction> (std::move (symbols));
+            if (s.is_annihilator()) {
+                return sequence_annihilator<Symbol, other_direction>();
+            } else {
+                std::vector<Symbol> symbols = s.symbols();
+                std::reverse(symbols.begin(), symbols.end());
+                return sequence<Symbol, other_direction>(std::move(symbols));
             }
         }
 
-        empty_sequence <Symbol, other_direction> operator() (
-            empty_sequence <Symbol, Direction> const & s) const
-        { return empty_sequence <Symbol, other_direction>(); }
+        empty_sequence<Symbol, other_direction> operator()(
+            empty_sequence<Symbol, Direction> const & s) const
+        {
+            return empty_sequence<Symbol, other_direction>();
+        }
 
-        single_sequence <Symbol, other_direction> operator() (
-            single_sequence <Symbol, Direction> const & s) const
-        { return single_sequence <Symbol, other_direction> (s.symbol()); }
+        single_sequence<Symbol, other_direction> operator()(
+            single_sequence<Symbol, Direction> const & s) const
+        {
+            return single_sequence<Symbol, other_direction>(s.symbol());
+        }
 
-        sequence_annihilator <Symbol, other_direction> operator() (
-            sequence_annihilator <Symbol, Direction> const & s) const
-        { return sequence_annihilator <Symbol, other_direction>(); }
+        sequence_annihilator<Symbol, other_direction> operator()(
+            sequence_annihilator<Symbol, Direction> const & s) const
+        {
+            return sequence_annihilator<Symbol, other_direction>();
+        }
     };
 
     template <class Symbol, class Direction>
-        struct print <sequence_tag <Symbol, Direction>>
+    struct print<sequence_tag<Symbol, Direction>>
     {
-        template <class Stream>
-            void operator() (Stream & stream,
-                sequence <Symbol, Direction> const & s) const
+        template <class Stream> void operator()(
+            Stream & stream, sequence<Symbol, Direction> const & s) const
         {
-            if (s.is_annihilator())
+            if (s.is_annihilator()) {
                 stream << "<annihilator>";
-            else {
+            } else {
                 stream << "[ ";
-                RANGE_FOR_EACH (symbol, s.symbols())
-                    stream << symbol << " ";
+                RANGE_FOR_EACH(symbol, s.symbols())
+                stream << symbol << " ";
                 stream << "]";
             }
         }
 
-        template <class Stream>
-            void operator() (Stream & stream,
-                empty_sequence <Symbol, Direction> const &) const
-        { stream << "[]"; }
+        template <class Stream> void operator()(
+            Stream & stream, empty_sequence<Symbol, Direction> const &) const
+        {
+            stream << "[]";
+        }
 
-        template <class Stream>
-            void operator() (Stream & stream,
-                single_sequence <Symbol, Direction> const & s) const
-        { stream << "[ " << s.symbol() << "]"; }
+        template <class Stream> void operator()(
+            Stream & stream, single_sequence<Symbol, Direction> const & s) const
+        {
+            stream << "[ " << s.symbol() << "]";
+        }
 
-        template <class Stream>
-            void operator() (Stream & stream,
-                sequence_annihilator <Symbol, Direction> const &) const
-        { stream << "<annihilator>"; }
+        template <class Stream> void operator()(
+            Stream & stream,
+            sequence_annihilator<Symbol, Direction> const &) const
+        {
+            stream << "<annihilator>";
+        }
     };
 
     /**
@@ -1405,52 +1593,61 @@ namespace operation {
     */
     // Same type.
     template <class Symbol, class Direction, class Sequence>
-        struct unify_type <sequence_tag <Symbol, Direction>, Sequence, Sequence>
-    { typedef Sequence type; };
+    struct unify_type<sequence_tag<Symbol, Direction>, Sequence, Sequence>
+    {
+        typedef Sequence type;
+    };
 
     template <class Symbol, class Direction, class Sequence1, class Sequence2>
-        struct unify_type <sequence_tag <Symbol, Direction>,
-            Sequence1, Sequence2>
-    { typedef sequence <Symbol, Direction> type; };
+    struct unify_type<sequence_tag<Symbol, Direction>, Sequence1, Sequence2>
+    {
+        typedef sequence<Symbol, Direction> type;
+    };
 
     // Mixing empty/single sequences.
-    template <class Symbol, class Direction>
-        struct unify_type <sequence_tag <Symbol, Direction>,
-            empty_sequence <Symbol, Direction>,
-            single_sequence <Symbol, Direction>>
-    { typedef optional_sequence <Symbol, Direction> type; };
+    template <class Symbol, class Direction> struct unify_type<
+        sequence_tag<Symbol, Direction>, empty_sequence<Symbol, Direction>,
+        single_sequence<Symbol, Direction>>
+    {
+        typedef optional_sequence<Symbol, Direction> type;
+    };
 
-    template <class Symbol, class Direction>
-        struct unify_type <sequence_tag <Symbol, Direction>,
-            empty_sequence <Symbol, Direction>,
-            optional_sequence <Symbol, Direction>>
-    { typedef optional_sequence <Symbol, Direction> type; };
+    template <class Symbol, class Direction> struct unify_type<
+        sequence_tag<Symbol, Direction>, empty_sequence<Symbol, Direction>,
+        optional_sequence<Symbol, Direction>>
+    {
+        typedef optional_sequence<Symbol, Direction> type;
+    };
 
-    template <class Symbol, class Direction>
-        struct unify_type <sequence_tag <Symbol, Direction>,
-            single_sequence <Symbol, Direction>,
-            empty_sequence <Symbol, Direction>>
-    { typedef optional_sequence <Symbol, Direction> type; };
+    template <class Symbol, class Direction> struct unify_type<
+        sequence_tag<Symbol, Direction>, single_sequence<Symbol, Direction>,
+        empty_sequence<Symbol, Direction>>
+    {
+        typedef optional_sequence<Symbol, Direction> type;
+    };
 
-    template <class Symbol, class Direction>
-        struct unify_type <sequence_tag <Symbol, Direction>,
-            single_sequence <Symbol, Direction>,
-            optional_sequence <Symbol, Direction>>
-    { typedef optional_sequence <Symbol, Direction> type; };
+    template <class Symbol, class Direction> struct unify_type<
+        sequence_tag<Symbol, Direction>, single_sequence<Symbol, Direction>,
+        optional_sequence<Symbol, Direction>>
+    {
+        typedef optional_sequence<Symbol, Direction> type;
+    };
 
-    template <class Symbol, class Direction>
-        struct unify_type <sequence_tag <Symbol, Direction>,
-            optional_sequence <Symbol, Direction>,
-            empty_sequence <Symbol, Direction>>
-    { typedef optional_sequence <Symbol, Direction> type; };
+    template <class Symbol, class Direction> struct unify_type<
+        sequence_tag<Symbol, Direction>, optional_sequence<Symbol, Direction>,
+        empty_sequence<Symbol, Direction>>
+    {
+        typedef optional_sequence<Symbol, Direction> type;
+    };
 
-    template <class Symbol, class Direction>
-        struct unify_type <sequence_tag <Symbol, Direction>,
-            optional_sequence <Symbol, Direction>,
-            single_sequence <Symbol, Direction>>
-    { typedef optional_sequence <Symbol, Direction> type; };
+    template <class Symbol, class Direction> struct unify_type<
+        sequence_tag<Symbol, Direction>, optional_sequence<Symbol, Direction>,
+        single_sequence<Symbol, Direction>>
+    {
+        typedef optional_sequence<Symbol, Direction> type;
+    };
 
-} // namespace operation
+}  // namespace operation
 
 /*
 Hash support for Boost.Hash.
@@ -1466,37 +1663,45 @@ namespace sequence_detail {
 
     // A random number that will hopefully not come up much.
     static std::size_t constexpr annihilator_hash =
-        std::size_t (0x84c8fa43d5283350 & std::size_t (-1));
+        std::size_t(0x84c8fa43d5283350 & std::size_t(-1));
 
-} // sequence_detail
+}  // namespace sequence_detail
 
-template <class Symbol, class Direction> inline
-    std::size_t hash_value (
-        sequence_annihilator <Symbol, Direction> const & s)
-{ return sequence_detail::annihilator_hash; }
-
-template <class Symbol, class Direction> inline
-    std::size_t hash_value (sequence <Symbol, Direction> const & s)
+template <class Symbol, class Direction>
+inline std::size_t hash_value(sequence_annihilator<Symbol, Direction> const & s)
 {
-    if (s.is_annihilator())
-        return sequence_detail::annihilator_hash;
-    else
-        return range::hash_range (s.symbols());
+    return sequence_detail::annihilator_hash;
 }
 
-template <class Symbol, class Direction> inline
-    std::size_t hash_value (empty_sequence <Symbol, Direction> const & s)
+template <class Symbol, class Direction>
+inline std::size_t hash_value(sequence<Symbol, Direction> const & s)
+{
+    if (s.is_annihilator()) {
+        return sequence_detail::annihilator_hash;
+    } else {
+        return range::hash_range(s.symbols());
+    }
+}
+
+template <class Symbol, class Direction>
+inline std::size_t hash_value(empty_sequence<Symbol, Direction> const & s)
 // Return whatever hash_range returns for empty sequences.
-{ return range::hash_range (s.symbols()); }
+{
+    return range::hash_range(s.symbols());
+}
 
-template <class Symbol, class Direction> inline
-    std::size_t hash_value (single_sequence <Symbol, Direction> const & s)
-{ return boost::hash <Symbol>() (s.symbol()); }
+template <class Symbol, class Direction>
+inline std::size_t hash_value(single_sequence<Symbol, Direction> const & s)
+{
+    return boost::hash<Symbol>()(s.symbol());
+}
 
-template <class Symbol, class Direction> inline
-    std::size_t hash_value (optional_sequence <Symbol, Direction> const & s)
-{ return range::hash_range (s.symbols()); }
+template <class Symbol, class Direction>
+inline std::size_t hash_value(optional_sequence<Symbol, Direction> const & s)
+{
+    return range::hash_range(s.symbols());
+}
 
-} // namespace math
+}  // namespace math
 
-#endif // MATH_SEQUENCE_HPP_INCLUDED
+#endif  // MATH_SEQUENCE_HPP_INCLUDED

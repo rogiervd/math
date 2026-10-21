@@ -28,59 +28,57 @@ Helper for testing math::lexicographical.
 #include "math/cost.hpp"
 #include "math/sequence.hpp"
 
-typedef math::cost <float> cost;
-typedef math::lexicographical <math::over <cost, math::sequence <char>>>
+typedef math::cost<float> cost;
+typedef math::lexicographical<math::over<cost, math::sequence<char>>>
     lexicographical;
 
 // Normal.
-inline lexicographical make_lexicographical (float cost, std::string symbols) {
-    return lexicographical (
-        math::cost <float> (cost), math::sequence <char> (symbols));
+inline lexicographical make_lexicographical(float cost, std::string symbols)
+{
+    return lexicographical(
+        math::cost<float>(cost), math::sequence<char>(symbols));
 }
 
 // Empty sequence.
-inline math::lexicographical <math::over <cost, math::empty_sequence <char>>>
-    make_empty_lexicographical (float c)
+inline math::lexicographical<math::over<cost, math::empty_sequence<char>>>
+    make_empty_lexicographical(float c)
 {
-    return math::lexicographical <
-        math::over <cost, math::empty_sequence <char>>> (
-            cost (c), math::empty_sequence <char>());
+    return math::lexicographical<math::over<cost, math::empty_sequence<char>>>(
+        cost(c), math::empty_sequence<char>());
 }
 
 // Single-symbol sequence.
-inline math::lexicographical <math::over <cost, math::single_sequence <char>>>
-    make_single_lexicographical (float c, char symbol)
+inline math::lexicographical<math::over<cost, math::single_sequence<char>>>
+    make_single_lexicographical(float c, char symbol)
 {
-    return math::lexicographical <
-        math::over <cost, math::single_sequence <char>>> (
-            cost (c), math::single_sequence <char> (symbol));
+    return math::lexicographical<math::over<cost, math::single_sequence<char>>>(
+        cost(c), math::single_sequence<char>(symbol));
 }
 
 // Optional sequence.
-inline math::lexicographical <math::over <cost, math::optional_sequence <char>>>
-    make_optional_lexicographical (float c)
+inline math::lexicographical<math::over<cost, math::optional_sequence<char>>>
+    make_optional_lexicographical(float c)
 {
-    return math::lexicographical <
-        math::over <cost, math::optional_sequence <char>>> (
-            cost (c), math::optional_sequence <char>());
+    return math::lexicographical<
+        math::over<cost, math::optional_sequence<char>>>(
+        cost(c), math::optional_sequence<char>());
 }
 
-inline math::lexicographical <math::over <cost, math::optional_sequence <char>>>
-    make_optional_lexicographical (float c, char symbol)
+inline math::lexicographical<math::over<cost, math::optional_sequence<char>>>
+    make_optional_lexicographical(float c, char symbol)
 {
-    return math::lexicographical <
-        math::over <cost, math::optional_sequence <char>>> (
-            cost (c), math::optional_sequence <char> (symbol));
+    return math::lexicographical<
+        math::over<cost, math::optional_sequence<char>>>(
+        cost(c), math::optional_sequence<char>(symbol));
 }
 
 // Annihilator.
-inline math::lexicographical <
-    math::over <cost, math::sequence_annihilator <char>>>
-make_annihilator_lexicographical (float c)
+inline math::lexicographical<math::over<cost, math::sequence_annihilator<char>>>
+    make_annihilator_lexicographical(float c)
 {
-    return math::lexicographical <
-        math::over <cost, math::sequence_annihilator <char>>> (
-            cost (c), math::sequence_annihilator <char>());
+    return math::lexicographical<
+        math::over<cost, math::sequence_annihilator<char>>>(
+        cost(c), math::sequence_annihilator<char>());
 }
 
-#endif // MATH_TEST_MATH_TEST_LEXICOGRAPHICAL_MAKE_HPP_INCLUDED
+#endif  // MATH_TEST_MATH_TEST_LEXICOGRAPHICAL_MAKE_HPP_INCLUDED
