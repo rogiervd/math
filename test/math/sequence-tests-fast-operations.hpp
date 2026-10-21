@@ -65,21 +65,21 @@ template <class Direction> void test_construction() {
         }
         {
             single_sequence single1 ('z');
-            BOOST_CHECK_EQUAL (range::size (single1.symbols()), 1);
+            BOOST_CHECK_EQUAL (range::size (single1.symbols()), 1u);
             BOOST_CHECK_EQUAL (range::first (single1.symbols()), 'z');
 
             single_sequence single2 (std::string ("z"));
-            BOOST_CHECK_EQUAL (range::size (single2.symbols()), 1);
+            BOOST_CHECK_EQUAL (range::size (single2.symbols()), 1u);
             BOOST_CHECK_EQUAL (range::first (single2.symbols()), 'z');
             BOOST_CHECK (single2 == single1);
 
             sequence seq (std::string ("z"));
-            BOOST_CHECK_EQUAL (range::size (seq.symbols()), 1);
+            BOOST_CHECK_EQUAL (range::size (seq.symbols()), 1u);
             BOOST_CHECK_EQUAL (range::first (seq.symbols()), 'z');
             BOOST_CHECK (seq == single1);
 
             optional_sequence optional (std::string ("z"));
-            BOOST_CHECK_EQUAL (range::size (optional.symbols()), 1);
+            BOOST_CHECK_EQUAL (range::size (optional.symbols()), 1u);
             BOOST_CHECK_EQUAL (range::first (optional.symbols()), 'z');
 
             BOOST_CHECK (optional == single1);
