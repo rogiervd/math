@@ -153,8 +153,8 @@ namespace operation {
         : approximate_if <
             meta::any_of_c <is_approximate <Operations>::value ...>>
         {
-            typename std::result_of <Reassemble (
-                typename std::result_of <Operations()>::type ...)>::type
+            typename std::invoke_result <Reassemble,
+                typename std::invoke_result <Operations>::type ...>::type
             operator() () const
             { return Reassemble() (Operations()() ...); }
         };

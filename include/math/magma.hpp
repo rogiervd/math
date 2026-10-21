@@ -184,7 +184,7 @@ namespace callable {
         */
         template <class ... Arguments> auto
             operator() (Arguments && ... arguments) const
-        -> typename std::result_of <apply <Arguments ...> (Arguments ...)>::type
+        -> typename std::invoke_result <apply <Arguments ...>, Arguments ...>::type
         {
             return apply <Arguments ...>() (
                 std::forward <Arguments> (arguments) ...);
@@ -198,8 +198,8 @@ namespace callable {
         : Apply <Arguments ...>
         {
             template <class FirstArgument, class ... OtherArguments>
-                typename std::result_of <
-                    Apply <Arguments ...> const (OtherArguments ...)>::type
+                typename std::invoke_result <
+                    Apply <Arguments ...> const, OtherArguments ...>::type
             operator() (FirstArgument &&, OtherArguments && ... arguments) const
             {
                 return Apply <Arguments ...>()
@@ -1197,7 +1197,7 @@ For floating-point values, NaN is returned.
     Note that the return type is not necesssarily that type.
 */
 template <class Magma> inline
-    typename std::result_of <callable::non_member <Magma>()>::type
+    typename std::invoke_result <callable::non_member <Magma>>::type
     non_member()
 { return callable::non_member <Magma>()(); }
 
@@ -1220,13 +1220,13 @@ return the exact same value.
     A callable that represents the operation.
 */
 template <class Magma, class Operation> inline
-    typename std::result_of <callable::identity <Magma> (Operation)>::type
+    typename std::invoke_result <callable::identity <Magma>, Operation>::type
     identity (Operation const & operation)
 { return callable::identity <Magma>()(operation); }
 
 /// \cond DONT_DOCUMENT
 template <class Magma, class Operation> inline
-    typename std::result_of <callable::identity <Magma, Operation>()>::type
+    typename std::invoke_result <callable::identity <Magma, Operation>>::type
     identity()
 { return callable::identity <Magma, Operation>()(); }
 /// \endcond
@@ -1250,13 +1250,13 @@ return the exact same value.
     A callable that represents the operation.
 */
 template <class Magma, class Operation> inline
-    typename std::result_of <callable::annihilator <Magma> (Operation)>::type
+    typename std::invoke_result <callable::annihilator <Magma>, Operation>::type
     annihilator (Operation const & operation)
 { return callable::annihilator <Magma>()(operation); }
 
 /// \cond DONT_DOCUMENT
 template <class Magma, class Operation> inline
-    typename std::result_of <callable::annihilator <Magma, Operation>()>::type
+    typename std::invoke_result <callable::annihilator <Magma, Operation>>::type
     annihilator()
 { return callable::annihilator <Magma, Operation>()(); }
 /// \endcond
@@ -1271,7 +1271,7 @@ Equivalent to <c> identity <callable::plus, Magma>()</c>.
     Note that the return type is not necessarily that type.
 */
 template <class Magma> inline
-    typename std::result_of <callable::zero <Magma>()>::type
+    typename std::invoke_result <callable::zero <Magma>>::type
     zero()
 { return callable::zero <Magma>()(); }
 /**
@@ -1283,7 +1283,7 @@ Equivalent to <c> identity <callable::times, Magma>()</c>.
     Note that the return type is not necessarily that type.
 */
 template <class Magma> inline
-    typename std::result_of <callable::one <Magma>()>::type
+    typename std::invoke_result <callable::one <Magma>>::type
     one()
 { return callable::one <Magma>()(); }
 
@@ -1395,8 +1395,7 @@ template <class Direction, class Dividend, class Divisor,
     /// \endcond
 > inline auto divide (Dividend && dividend, Divisor && divisor)
     /// \cond DONT_DOCUMENT
-    -> typename std::result_of <
-        callable::divide <Direction> (Dividend, Divisor)>::type
+    -> typename std::invoke_result <callable::divide <Direction>, Dividend, Divisor>::type
     /// \endcond
 {
     return callable::divide <Direction>() (
@@ -1407,7 +1406,7 @@ template <class Direction, class Dividend, class Divisor,
 template <class Dividend, class Divisor,
     class Enable = typename boost::disable_if <is_direction <Dividend>>::type>
 inline typename
-    std::result_of <callable::divide <either> (Dividend, Divisor)>::type
+    std::invoke_result <callable::divide <either>, Dividend, Divisor>::type
     divide (Dividend && dividend, Divisor && divisor)
 {
     return callable::divide <either>() (
@@ -1437,8 +1436,7 @@ template <class Direction, class Minuend, class Subtrahend,
     /// \endcond
     > inline auto minus (Minuend && minuend, Subtrahend && subtrahend)
     /// \cond DONT_DOCUMENT
-    -> typename std::result_of <
-        callable::minus <Direction> (Minuend, Subtrahend)>::type
+    -> typename std::invoke_result <callable::minus <Direction>, Minuend, Subtrahend>::type
     /// \endcond
 {
     return callable::minus <Direction>() (
@@ -1450,7 +1448,7 @@ template <class Direction, class Minuend, class Subtrahend,
 template <class Minuend, class Subtrahend,
     class Enable = typename boost::disable_if <is_direction <Minuend>>::type
     > inline typename
-    std::result_of <callable::minus <either> (Minuend, Subtrahend)>::type
+    std::invoke_result <callable::minus <either>, Minuend, Subtrahend>::type
     minus (Minuend && minuend, Subtrahend && subtrahend)
 {
     return callable::minus <either>() (
@@ -1491,7 +1489,7 @@ template <class Operation, class Magma> inline
 // even if SFINAE kicks in.
 // Don't use template <class Operation, class Enable = ...>!
     typename boost::lazy_disable_if <is_direction <Operation>,
-        std::result_of <callable::invert <Operation> (Magma const &)>>::type
+        std::invoke_result <callable::invert <Operation>, Magma const &>>::type
     invert (Operation const & operation, Magma const & magma)
 { return callable::invert<>() (operation, magma); }
 
@@ -1507,7 +1505,7 @@ template <class Operation, class Magma> inline
 // even if SFINAE kicks in.
 // Don't use template <class Operation, class Enable = ...>!
     typename boost::lazy_disable_if <is_direction <Operation>,
-        std::result_of <callable::invert <Operation> (Magma const &)>>::type
+        std::invoke_result <callable::invert <Operation>, Magma const &>>::type
     invert (Magma const & magma)
 { return callable::invert <Operation>() (magma); }
 
@@ -1577,8 +1575,8 @@ template <class Direction, class Operation,
     /// \endcond
 > inline auto inverse_operation (Operation const & operation)
     /// \cond DONT_DOCUMENT
-    -> typename std::result_of <
-        callable::inverse_operation <Direction> (Operation)>::type
+    -> typename std::invoke_result <
+        callable::inverse_operation <Direction>, Operation>::type
     /// \endcond
 { return callable::inverse_operation <Direction>() (operation); }
 
@@ -1590,7 +1588,7 @@ template <class Operation> inline
 // even if SFINAE kicks in.
 // Don't use template <class Operation, class Enable = ...>!
     typename boost::lazy_disable_if <is_direction <Operation>,
-        std::result_of <callable::inverse_operation<> (Operation)>>::type
+        std::invoke_result <callable::inverse_operation<>, Operation>>::type
     inverse_operation (Operation const & operation)
 { return callable::inverse_operation<>() (operation); }
 
@@ -1598,7 +1596,7 @@ template <class Operation> inline
 template <class Direction, class Operation,
     class Enable = typename boost::enable_if <is_direction <Direction>>::type
 > inline typename
-    std::result_of <callable::inverse_operation <Direction, Operation>()>::type
+    std::invoke_result <callable::inverse_operation <Direction, Operation>>::type
     inverse_operation()
 { return callable::inverse_operation <Direction, Operation>() (); }
 
@@ -1608,7 +1606,7 @@ template <class Operation> inline
 // even if SFINAE kicks in.
 // Don't use template <class Operation, class Enable = ...>!
     typename boost::lazy_disable_if <is_direction <Operation>,
-        std::result_of <callable::inverse_operation <Operation>()>>::type
+        std::invoke_result <callable::inverse_operation <Operation>>>::type
     inverse_operation()
 { return callable::inverse_operation <Operation>() (); }
 
