@@ -1,0 +1,213 @@
+load("@rules_cc//cc:defs.bzl", "cc_test")
+
+# Tests that don't need anything special.
+[
+    cc_test(
+        name = test_name,
+        size = "small",
+        srcs = [test_name + ".cpp"],
+        deps = [
+            "//:math",
+            "@boost.test//:unit_test_main",
+        ],
+    )
+    for test_name in [
+        "test-alphabet",
+        "test-cost",
+        "test-generalise_type",
+        "test-lexicographical-2-viterbi",
+        "test-lexicographical-4-hash",
+        "test-log-float-hash",
+        "test-log-float-limits",
+        "test-log-float",
+        "test-magma",
+        "test-max_semiring",
+        "test-product-1-operations",
+        "test-product-1-spot",
+        "test-product-4-hash",
+        "test-sequence-4-hash",
+        "test-sequence-integration-alphabet",
+    ]
+]
+
+# This test does not use Boost.Test, and defines its own main function.
+cc_test(
+    name = "test-log-float-alone",
+    size = "small",
+    srcs = ["test-log-float-alone.cpp"],
+    deps = ["//:math"],
+)
+
+# Log-float tests: there is a problem with Valgrind and "long double".
+# Valgrind emulates 80-bit long double with only 64-bit precision, see:
+#   http://valgrind.org/docs/manual/manual-core.html#manual-core.limits
+
+cc_test(
+    name = "test-log-float-long-double",
+    size = "small",
+    srcs = ["test-log-float.cpp"],
+    args = [
+        "--",
+        "--with-long-double",
+    ],
+    tags = ["no-valgrind"],
+    deps = [
+        "//:math",
+        "@boost.test//:unit_test_main",
+    ],
+)
+
+
+# Tests that use extra headers.
+
+[
+    cc_test(
+        name = test_name,
+        size = "small",
+        srcs = [
+            test_name + ".cpp",
+            "product-tests.hpp",
+        ],
+        deps = [
+            "//:math",
+            "@boost.test//:unit_test_main",
+        ],
+    )
+    for test_name in [
+        "test-product-2-full-homogeneous-divide",
+        "test-product-2-full-homogeneous-minus",
+        "test-product-2-full-homogeneous",
+        "test-product-3-heterogeneous-divide",
+        "test-product-3-heterogeneous-minus",
+        "test-product-3-heterogeneous",
+    ]
+]
+
+[
+    cc_test(
+        name = test_name,
+        size = "small",
+        srcs = [
+            test_name + ".cpp",
+            "sequence-tests-slow.hpp",
+        ],
+        deps = [
+            "//:math",
+            "@boost.test//:unit_test_main",
+        ],
+    )
+    for test_name in [
+        "test-sequence-3-full-annihilator-left",
+        "test-sequence-3-full-annihilator-right",
+        "test-sequence-3-full-empty-left",
+        "test-sequence-3-full-empty-right",
+        "test-sequence-3-full-heterogeneous-choose-left",
+        "test-sequence-3-full-heterogeneous-choose-right",
+        "test-sequence-3-full-heterogeneous-plus-left",
+        "test-sequence-3-full-heterogeneous-plus-right",
+        "test-sequence-3-full-homogeneous-left",
+        "test-sequence-3-full-homogeneous-right",
+        "test-sequence-3-full-optional-left",
+        "test-sequence-3-full-optional-right",
+        "test-sequence-3-full-single-left",
+        "test-sequence-3-full-single-right",
+    ]
+]
+
+[
+    cc_test(
+        name = test_name,
+        size = "small",
+        srcs = [
+            test_name + ".cpp",
+            "sequence-tests-fast-operations.hpp",
+        ],
+        deps = [
+            "//:math",
+            "@boost.test//:unit_test_main",
+        ],
+    )
+    for test_name in [
+        "test-sequence-2-operations-left",
+        "test-sequence-2-operations-right",
+    ]
+]
+
+[
+    cc_test(
+        name = test_name,
+        size = "small",
+        srcs = [
+            test_name + ".cpp",
+            "arithmetic_magma-tests-integer.hpp",
+        ],
+        deps = [
+            "//:math",
+            "@boost.test//:unit_test_main",
+        ],
+    )
+    for test_name in [
+        "test-arithmetic_magma-char",
+        "test-arithmetic_magma-int",
+        "test-arithmetic_magma-long",
+    ]
+]
+
+[
+    cc_test(
+        name = test_name,
+        size = "small",
+        srcs = [
+            test_name + ".cpp",
+            "arithmetic_magma-tests-real.hpp",
+        ],
+        deps = [
+            "//:math",
+            "@boost.test//:unit_test_main",
+        ],
+    )
+    for test_name in [
+        "test-arithmetic_magma-log_float",
+        "test-arithmetic_magma-real",
+    ]
+]
+
+[
+    cc_test(
+        name = test_name,
+        size = "small",
+        srcs = [
+            test_name + ".cpp",
+            "sequence-tests-fast-properties.hpp",
+        ],
+        deps = [
+            "//:math",
+            "@boost.test//:unit_test_main",
+        ],
+    )
+    for test_name in [
+        "test-sequence-1-properties-left",
+        "test-sequence-1-properties-right",
+    ]
+]
+
+[
+    cc_test(
+        name = test_name,
+        size = "small",
+        srcs = [
+            test_name + ".cpp",
+            "make_lexicographical.hpp",
+        ],
+        deps = [
+            "//:math",
+            "@boost.test//:unit_test_main",
+        ],
+    )
+    for test_name in [
+        "test-lexicographical-1-fast",
+        "test-lexicographical-3-full-heterogeneous-choose",
+        "test-lexicographical-3-full-heterogeneous-plus",
+        "test-lexicographical-3-full-homogeneous",
+    ]
+]
