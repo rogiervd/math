@@ -19,12 +19,12 @@ common --registry https://bcr.bazel.build/
 common --enable_platform_specific_config
 
 build:linux --cxxopt=-std=c++17
-build:linux --cxxopt=-Werror
-build:linux --cxxopt=-Wall
+# Switch on warnings and make them errors, for this project's own source files
+# only, not for dependencies (as for Windows, below).
+build:linux --per_file_copt=.*,-^external/,-[+]//@-Wall,-Werror
 
 build:macos --cxxopt=-std=c++17
-build:macos --cxxopt=-Werror
-build:macos --cxxopt=-Wall
+build:macos --per_file_copt=.*,-^external/,-[+]//@-Wall,-Werror
 
 # Windows uses MSVC (cl.exe) by default, or clang-cl with --config=clang-cl.
 # Both take MSVC-style flags.
