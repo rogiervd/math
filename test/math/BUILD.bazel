@@ -1,7 +1,6 @@
-# TODO look at Jamfile and learn and edit!!!
-
 load("@rules_cc//cc:defs.bzl", "cc_test")
 
+# Tests that don't need anything special.
 [
     cc_test(
         name = test_name,
@@ -31,18 +30,18 @@ load("@rules_cc//cc:defs.bzl", "cc_test")
     ]
 ]
 
+# This test does not use Boost.Test, and defines its own main function.
 cc_test(
     name = "test-log-float-alone",
     size = "small",
     srcs = ["test-log-float-alone.cpp"],
-    # This test does not use Boost.Test, and defines its own main function.
     deps = ["//:math"],
 )
 
-# The long-double test does not work in all environments, so it is separate.
-# The normal version is above.
-# Valgrind emulates 80-bit long double with only 64-bit precision, so this test
-# does not run under Valgrind.
+# Log-float tests: there is a problem with Valgrind and "long double".
+# Valgrind emulates 80-bit long double with only 64-bit precision, see:
+#   http://valgrind.org/docs/manual/manual-core.html#manual-core.limits
+
 cc_test(
     name = "test-log-float-long-double",
     size = "small",
@@ -57,6 +56,9 @@ cc_test(
         "@boost.test//:unit_test_main",
     ],
 )
+
+
+# Tests that use extra headers.
 
 [
     cc_test(
