@@ -19,7 +19,7 @@ Test product.hpp.
 */
 
 #define BOOST_TEST_MODULE test_math_product
-#include "utility/test/boost_unit_test.hpp"
+#include <boost/test/unit_test.hpp>
 
 #include "math/product.hpp"
 

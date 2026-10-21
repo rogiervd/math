@@ -19,7 +19,7 @@ Test lexicographical.hpp with homogeneous types.
 */
 
 #define BOOST_TEST_MODULE test_math_lexicographical_full_homogeneous
-#include "utility/test/boost_unit_test.hpp"
+#include <boost/test/unit_test.hpp>
 
 #include "math/lexicographical.hpp"
 

@@ -19,7 +19,7 @@ Test lexicographical.hpp with heterogeneous types and \ref choose.
 */
 
 #define BOOST_TEST_MODULE test_math_lexicographical_full_heterogeneous_choose
-#include "utility/test/boost_unit_test.hpp"
+#include <boost/test/unit_test.hpp>
 
 #include "math/lexicographical.hpp"
 
