@@ -41,6 +41,8 @@ cc_test(
 
 # The long-double test does not work in all environments, so it is separate.
 # The normal version is above.
+# Valgrind emulates 80-bit long double with only 64-bit precision, so this test
+# does not run under Valgrind.
 cc_test(
     name = "test-log-float-long-double",
     size = "small",
@@ -49,6 +51,7 @@ cc_test(
         "--",
         "--with-long-double",
     ],
+    tags = ["no-valgrind"],
     deps = [
         "//:math",
         "@boost.test//:unit_test_main",
