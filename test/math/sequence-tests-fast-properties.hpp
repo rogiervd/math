@@ -29,6 +29,8 @@ compiling takes a lot less memory and time.
 
 #include <boost/mpl/assert.hpp>
 
+#include "range/std/string.hpp"
+
 template <class Direction, class Opposite> void test_sequence_spot() {
     typedef math::sequence <char, Direction> sequence;
     typedef math::empty_sequence <char, Direction> empty_sequence;

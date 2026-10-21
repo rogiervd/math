@@ -29,6 +29,9 @@ compiling takes a lot less memory and time.
 
 #include <boost/mpl/assert.hpp>
 
+#include "range/std/string.hpp"
+#include "range/std/list.hpp"
+
 template <class Direction> void test_construction() {
     {
         typedef math::sequence <char, Direction> sequence;

@@ -41,7 +41,7 @@ bypass explicit error handling in favour of leaving this to the hardware.
 
 #include "math/log-float.hpp"
 
-#include "range/std/container.hpp"
+#include "range/std/vector.hpp"
 
 #include "math/check/report_check_magma_boost_test.hpp"
 

@@ -23,7 +23,7 @@ Test code samples from the documentation.
 
 #include <vector>
 
-#include "range/std/container.hpp"
+#include "range/std/vector.hpp"
 
 #include "math/magma.hpp"
 #include "math/arithmetic_magma.hpp"

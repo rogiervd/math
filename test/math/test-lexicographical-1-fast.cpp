@@ -28,6 +28,8 @@ Test lexicographical.hpp.
 
 #include <boost/mpl/assert.hpp>
 
+#include "range/std/string.hpp"
+
 #include "math/sequence.hpp"
 #include "math/arithmetic_magma.hpp"
 #include "math/cost.hpp"
