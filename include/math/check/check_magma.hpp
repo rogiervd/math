@@ -32,7 +32,7 @@
 #include "range/core.hpp"
 #include "range/for_each.hpp"
 
-#include "../magma.hpp"
+#include "math/magma.hpp"
 
 namespace math {
 namespace check_detail {
