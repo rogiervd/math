@@ -78,7 +78,7 @@ pip.parse(
 use_repo(pip, "math_pypi")
 
 # Doxygen, for generating C++ API documentation.
-bazel_dep(name = "rules_doxygen", version = "2.6.4")
+bazel_dep(name = "rules_doxygen", version = "2.7.0")
 
 doxygen_extension = use_extension("@rules_doxygen//:extensions.bzl", "doxygen_extension")
 use_repo(doxygen_extension, "doxygen")
