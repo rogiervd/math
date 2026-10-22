@@ -21,6 +21,8 @@ Define helpers for magmas that consist of other magmas.
 #include "meta/count.hpp"
 #include "meta/vector.hpp"
 
+#include "utility/type_sequence_traits.hpp"
+
 #include "range/core.hpp"
 #include "range/equal.hpp"
 #include "range/less_lexicographical.hpp"
