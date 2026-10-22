@@ -11,7 +11,6 @@ cc_library(
     hdrs = glob([
         "include/math/*.hpp",
         "include/math/detail/*.hpp",
-        "include/math/check/*.hpp",
     ]),
     # Allow each header to be compiled on its own, to check that it includes
     # everything it needs, by passing Bazel --process_headers_in_dependencies.
@@ -33,6 +32,28 @@ cc_library(
         "@range",
         "@rime",
         "@utility",
+    ],
+)
+
+# To run tests using include/math/check/*.hpp, use the //:math_check target.
+cc_library(
+    name = "math_check",
+    hdrs = glob(["include/math/check/*.hpp"]),
+    features = ["parse_headers"],
+    include_prefix = "",
+    strip_include_prefix = "include/",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":math",
+        "@boost.format",
+        "@boost.functional",
+        "@boost.mpl",
+        "@boost.test",
+        "@boost.units",
+        "@boost.utility",
+        "@meta",
+        "@range",
+        "@rime",
     ],
 )
 
