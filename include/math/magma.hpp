@@ -47,6 +47,8 @@ Queries about operations:
 #ifndef MATH_MAGMA_HPP_INCLUDED
 #define MATH_MAGMA_HPP_INCLUDED
 
+#include <stdexcept>
+#include <string>
 #include <type_traits>
 
 #include <boost/utility/enable_if.hpp>
