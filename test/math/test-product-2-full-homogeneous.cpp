@@ -23,10 +23,11 @@ Test product.hpp.
 
 #include "product-tests.hpp"
 
-BOOST_AUTO_TEST_SUITE (test_suite_product_full_homogeneous)
+BOOST_AUTO_TEST_SUITE(test_suite_product_full_homogeneous)
 
-BOOST_AUTO_TEST_CASE (test_product_all) {
-    test_product_homogeneous <math::with_inverse<>>();
+BOOST_AUTO_TEST_CASE(test_product_all)
+{
+    test_product_homogeneous<math::with_inverse<>>();
     // These are tested in two separate files:
     // test_product_homogeneous <math::with_inverse <math::callable::plus>>();
     // test_product_homogeneous <math::with_inverse <math::callable::times>>();

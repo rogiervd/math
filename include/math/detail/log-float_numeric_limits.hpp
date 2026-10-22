@@ -31,16 +31,22 @@ namespace math { namespace detail {
     Provide a base for the specialisation of numeric_limits for log_float and
     signed_log_float.
     */
-    template <class LogFloat, class Underlying> class log_float_numeric_limits {
-        typedef std::numeric_limits <Underlying> underlying_limits;
+    template <class LogFloat, class Underlying> class log_float_numeric_limits
+    {
+        typedef std::numeric_limits<Underlying> underlying_limits;
+
     public:
         static constexpr bool is_specialized = true;
 
         static constexpr LogFloat min() throw()
-        { return LogFloat (underlying_limits::lowest(), as_exponent()); }
+        {
+            return LogFloat(underlying_limits::lowest(), as_exponent());
+        }
 
         static constexpr LogFloat max() throw()
-        { return LogFloat (underlying_limits::max(), as_exponent()); }
+        {
+            return LogFloat(underlying_limits::max(), as_exponent());
+        }
 
         static constexpr bool is_integer = false;
         static constexpr bool is_exact = false;
@@ -54,30 +60,37 @@ namespace math { namespace detail {
         The series expansion of this is log(m) + m/2 + (m**2)/24 + ... .
         The first term is a good approximation.
         */
-        static constexpr LogFloat epsilon() throw() {
+        static constexpr LogFloat epsilon() throw()
+        {
             using std::log;
             // Because of
-            return LogFloat (
-                log (underlying_limits::denorm_min()), as_exponent());
+            return LogFloat(
+                log(underlying_limits::denorm_min()), as_exponent());
         }
 
         static constexpr bool has_infinity = true;
         static constexpr bool has_quiet_NaN = underlying_limits::has_quiet_NaN;
-        static constexpr bool has_signaling_NaN
-            = underlying_limits::has_signaling_NaN;
+        static constexpr bool has_signaling_NaN =
+            underlying_limits::has_signaling_NaN;
 
-        static constexpr std::float_denorm_style has_denorm
-            = std::denorm_absent;
+        static constexpr std::float_denorm_style has_denorm =
+            std::denorm_absent;
         static constexpr bool has_denorm_loss = false;
 
         static constexpr LogFloat infinity() throw()
-        { return LogFloat (underlying_limits::infinity(), as_exponent()); }
+        {
+            return LogFloat(underlying_limits::infinity(), as_exponent());
+        }
 
         static constexpr LogFloat quiet_NaN() throw()
-        { return LogFloat (underlying_limits::quiet_NaN(), as_exponent()); }
+        {
+            return LogFloat(underlying_limits::quiet_NaN(), as_exponent());
+        }
 
         static constexpr LogFloat signaling_NaN() throw()
-        { return LogFloat (underlying_limits::signaling_NaN(), as_exponent()); }
+        {
+            return LogFloat(underlying_limits::signaling_NaN(), as_exponent());
+        }
 
         // Can't be implemented.
         // static constexpr LogFloat denorm_min() throw();
@@ -101,83 +114,80 @@ namespace math { namespace detail {
         static constexpr int max_exponent10 = 0;
 
         static constexpr bool tinyness_before = false;
-        static constexpr std::float_round_style round_style
-            = std::round_to_nearest;
+        static constexpr std::float_round_style round_style =
+            std::round_to_nearest;
     };
 
-}} // namespace math::detail
+}}  // namespace math::detail
 
 namespace std {
 
-    template <class ExponentType, class Policy>
-        class numeric_limits <math::log_float <ExponentType, Policy>>
-    : public ::math::detail::log_float_numeric_limits <
-        math::log_float <ExponentType, Policy>, ExponentType>
-    {
-        typedef math::log_float <ExponentType, Policy> value_type;
-        typedef ::math::detail::log_float_numeric_limits <
-            value_type, ExponentType> base_type;
-    public:
-        static constexpr bool is_signed = false;
+template <class ExponentType, class Policy>
+class numeric_limits<math::log_float<ExponentType, Policy>>
+: public ::math::detail::log_float_numeric_limits<
+      math::log_float<ExponentType, Policy>, ExponentType>
+{
+    typedef math::log_float<ExponentType, Policy> value_type;
+    typedef ::math::detail::log_float_numeric_limits<value_type, ExponentType>
+        base_type;
 
-        static constexpr value_type lowest() throw()
-        { return base_type::min(); }
-    };
+public:
+    static constexpr bool is_signed = false;
 
-    template <class ExponentType, class Policy>
-        class numeric_limits <math::signed_log_float <ExponentType, Policy>>
-    : public ::math::detail::log_float_numeric_limits <
-        math::signed_log_float <ExponentType, Policy>, ExponentType>
-    {
-        typedef math::signed_log_float <ExponentType, Policy> value_type;
-        typedef ::math::detail::log_float_numeric_limits <
-            value_type, ExponentType> base_type;
-    public:
-        static constexpr bool is_signed = true;
+    static constexpr value_type lowest() throw() { return base_type::min(); }
+};
 
-        static constexpr value_type lowest() throw()
-        { return -base_type::max(); }
-    };
+template <class ExponentType, class Policy>
+class numeric_limits<math::signed_log_float<ExponentType, Policy>>
+: public ::math::detail::log_float_numeric_limits<
+      math::signed_log_float<ExponentType, Policy>, ExponentType>
+{
+    typedef math::signed_log_float<ExponentType, Policy> value_type;
+    typedef ::math::detail::log_float_numeric_limits<value_type, ExponentType>
+        base_type;
 
-    // Forward qualified types.
-    template <class ExponentType, class Policy>
-        class numeric_limits <math::log_float <ExponentType, Policy> &>
-    : public numeric_limits <math::log_float <ExponentType, Policy>> {};
-    template <class ExponentType, class Policy>
-        class numeric_limits <math::signed_log_float <ExponentType, Policy> &>
-    : public numeric_limits <math::signed_log_float <ExponentType, Policy>> {};
+public:
+    static constexpr bool is_signed = true;
 
-    template <class ExponentType, class Policy>
-        class numeric_limits <math::log_float <ExponentType, Policy> &&>
-    : public numeric_limits <math::log_float <ExponentType, Policy>> {};
-    template <class ExponentType, class Policy>
-        class numeric_limits <math::signed_log_float <ExponentType, Policy> &&>
-    : public numeric_limits <math::signed_log_float <ExponentType, Policy>> {};
+    static constexpr value_type lowest() throw() { return -base_type::max(); }
+};
 
-    template <class ExponentType, class Policy>
-        class numeric_limits <math::log_float <ExponentType, Policy> const>
-    : public numeric_limits <math::log_float <ExponentType, Policy>> {};
-    template <class ExponentType, class Policy>
-        class numeric_limits <
-            math::signed_log_float <ExponentType, Policy> const>
-    : public numeric_limits <math::signed_log_float <ExponentType, Policy>> {};
+// Forward qualified types.
+template <class ExponentType, class Policy>
+class numeric_limits<math::log_float<ExponentType, Policy> &>
+: public numeric_limits<math::log_float<ExponentType, Policy>> {};
+template <class ExponentType, class Policy>
+class numeric_limits<math::signed_log_float<ExponentType, Policy> &>
+: public numeric_limits<math::signed_log_float<ExponentType, Policy>> {};
 
-    template <class ExponentType, class Policy>
-        class numeric_limits <math::log_float <ExponentType, Policy> const &>
-    : public numeric_limits <math::log_float <ExponentType, Policy>> {};
-    template <class ExponentType, class Policy>
-        class numeric_limits <
-            math::signed_log_float <ExponentType, Policy> const &>
-    : public numeric_limits <math::signed_log_float <ExponentType, Policy>> {};
+template <class ExponentType, class Policy>
+class numeric_limits<math::log_float<ExponentType, Policy> &&>
+: public numeric_limits<math::log_float<ExponentType, Policy>> {};
+template <class ExponentType, class Policy>
+class numeric_limits<math::signed_log_float<ExponentType, Policy> &&>
+: public numeric_limits<math::signed_log_float<ExponentType, Policy>> {};
 
-    template <class ExponentType, class Policy>
-        class numeric_limits <math::log_float <ExponentType, Policy> const &&>
-    : public numeric_limits <math::log_float <ExponentType, Policy>> {};
-    template <class ExponentType, class Policy>
-        class numeric_limits <
-            math::signed_log_float <ExponentType, Policy> const &&>
-    : public numeric_limits <math::signed_log_float <ExponentType, Policy>> {};
+template <class ExponentType, class Policy>
+class numeric_limits<math::log_float<ExponentType, Policy> const>
+: public numeric_limits<math::log_float<ExponentType, Policy>> {};
+template <class ExponentType, class Policy>
+class numeric_limits<math::signed_log_float<ExponentType, Policy> const>
+: public numeric_limits<math::signed_log_float<ExponentType, Policy>> {};
 
-} // namespace std
+template <class ExponentType, class Policy>
+class numeric_limits<math::log_float<ExponentType, Policy> const &>
+: public numeric_limits<math::log_float<ExponentType, Policy>> {};
+template <class ExponentType, class Policy>
+class numeric_limits<math::signed_log_float<ExponentType, Policy> const &>
+: public numeric_limits<math::signed_log_float<ExponentType, Policy>> {};
+
+template <class ExponentType, class Policy>
+class numeric_limits<math::log_float<ExponentType, Policy> const &&>
+: public numeric_limits<math::log_float<ExponentType, Policy>> {};
+template <class ExponentType, class Policy>
+class numeric_limits<math::signed_log_float<ExponentType, Policy> const &&>
+: public numeric_limits<math::signed_log_float<ExponentType, Policy>> {};
+
+}  // namespace std
 
 #endif  // MATH_DETAIL_LOG_FLOAT_LIMITS_HPP_INCLUDED

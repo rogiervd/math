@@ -24,30 +24,30 @@ Define a Cartesian product of magmas.
 #include <boost/mpl/and.hpp>
 #include <boost/mpl/not.hpp>
 
-#include <boost/utility/enable_if.hpp>
 #include <boost/functional/hash_fwd.hpp>
+#include <boost/utility/enable_if.hpp>
 
-#include "meta/vector.hpp"
 #include "meta/all_of_c.hpp"
+#include "meta/vector.hpp"
 
 #include "utility/returns.hpp"
 #include "utility/type_sequence_traits.hpp"
 
-#include "rime/core.hpp"
 #include "rime/always.hpp"
+#include "rime/core.hpp"
 
-#include "range/core.hpp"
-#include "range/tuple.hpp"
+#include "range/all_of.hpp"
+#include "range/any_of.hpp"
 #include "range/call_unpack.hpp"
+#include "range/core.hpp"
 #include "range/equal.hpp"
+#include "range/hash_range.hpp"
 #include "range/less_lexicographical.hpp"
 #include "range/transform.hpp"
-#include "range/any_of.hpp"
-#include "range/all_of.hpp"
-#include "range/hash_range.hpp"
+#include "range/tuple.hpp"
 
-#include "magma.hpp"
 #include "detail/tuple_helper.hpp"
+#include "magma.hpp"
 
 namespace math {
 
@@ -98,23 +98,24 @@ template <class Components, class Inverse = with_inverse<>> class product;
 
 template <class ComponentTags, class Inverse> struct product_tag;
 
-template <class ... Components, class Inverses>
-    struct decayed_magma_tag <product <over <Components ...>, Inverses>>
+template <class... Components, class Inverses>
+struct decayed_magma_tag<product<over<Components...>, Inverses>>
 {
-    typedef product_tag <
-            over <typename decayed_magma_tag <Components>::type ...>, Inverses>
+    typedef product_tag<
+        over<typename decayed_magma_tag<Components>::type...>, Inverses>
         type;
 };
 
-template <class ... Components, class Inverse>
-    class product <over <Components ...>, Inverse>
+template <class... Components, class Inverse>
+class product<over<Components...>, Inverse>
 {
 public:
-    typedef meta::vector <Components ...> component_types;
-    typedef range::tuple <Components ...> components_type;
+    typedef meta::vector<Components...> component_types;
+    typedef range::tuple<Components...> components_type;
     typedef Inverse inverse_specification;
 
-    static_assert (meta::all_of_c <is_magma <Components>::value ...>::value,
+    static_assert(
+        meta::all_of_c<is_magma<Components>::value...>::value,
         "Not all components passed to math::product are magmas.");
 
 private:
@@ -125,14 +126,16 @@ private:
 
 public:
     // All elements explicitly convertible: implicit constructor.
-    template <class ... Arguments, class Enable = typename boost::enable_if <
-        utility::are_constructible <
-            meta::vector <Components ...>, meta::vector <Arguments ...>>>::type>
-    explicit product (Arguments && ... arguments)
-    : components_ (std::forward <Arguments> (arguments) ...) {}
+    template <
+        class... Arguments,
+        class Enable = typename boost::enable_if<utility::are_constructible<
+            meta::vector<Components...>, meta::vector<Arguments...>>>::type>
+    explicit product(Arguments &&... arguments)
+    : components_(std::forward<Arguments>(arguments)...)
+    {}
 
-    product (product const &) = default;
-    product (product &&) = default;
+    product(product const &) = default;
+    product(product &&) = default;
 
     /**
     Construct from a product with different component types, all of which are
@@ -140,13 +143,14 @@ public:
     This constructor is implicit.
     \param other The product to copy.
     */
-    template <class ... OtherComponents, class Enable = typename
-        boost::enable_if <utility::are_convertible <
-            meta::vector <OtherComponents const & ...>,
-            meta::vector <Components ...>>
-        >::type>
-    product (product <over <OtherComponents ...>, Inverse> const & other)
-    : components_ (other.components()) {}
+    template <
+        class... OtherComponents,
+        class Enable = typename boost::enable_if<utility::are_convertible<
+            meta::vector<OtherComponents const &...>,
+            meta::vector<Components...>>>::type>
+    product(product<over<OtherComponents...>, Inverse> const & other)
+    : components_(other.components())
+    {}
 
     /**
     Construct from a product with different component types, at least one of
@@ -156,18 +160,18 @@ public:
     \internal \param dummy
         A dummy argument to distinguish this constructor from the implicit one.
     */
-    template <class ... OtherComponents>
-    explicit product (
-        product <over <OtherComponents ...>, Inverse> const & other, typename
-        boost::enable_if <
-            tuple_helper::components_constructible_only <
-                meta::vector <Components ...>,
-                meta::vector <OtherComponents const & ...>>,
+    template <class... OtherComponents> explicit product(
+        product<over<OtherComponents...>, Inverse> const & other,
+        typename boost::enable_if<
+            tuple_helper::components_constructible_only<
+                meta::vector<Components...>,
+                meta::vector<OtherComponents const &...>>,
             dummy_type>::type = dummy_type())
-    : components_ (other.components()) {}
+    : components_(other.components())
+    {}
 
-    product & operator = (product const &) = default;
-    product & operator = (product &&) = default;
+    product & operator=(product const &) = default;
+    product & operator=(product &&) = default;
 
     components_type & components() { return components_; }
     components_type const & components() const { return components_; }
@@ -175,52 +179,58 @@ public:
 
 namespace callable {
 
-    template <class Inverses> struct make_product {
-        template <class ... Components>
-            product <over <Components ...>, Inverses>
-            operator() (Components const & ... components) const
-        { return product <over <Components ...>, Inverses> (components ...); }
+    template <class Inverses> struct make_product
+    {
+        template <class... Components>
+        product<over<Components...>, Inverses> operator()(
+            Components const &... components) const
+        {
+            return product<over<Components...>, Inverses>(components...);
+        }
     };
 
-    template <class Inverses> struct make_product_over {
+    template <class Inverses> struct make_product_over
+    {
         template <class Components>
-            auto operator() (Components && components) const
-        RETURNS (range::call_unpack (
-            make_product <Inverses>(), std::forward <Components> (components)));
+        auto operator()(Components && components) const RETURNS(
+            range::call_unpack(
+                make_product<Inverses>(),
+                std::forward<Components>(components)));
     };
 
-} // namespace callable
+}  // namespace callable
 
-template <class Inverses, class ... Components>
-    inline auto make_product (Components const & ... components)
-RETURNS (callable::make_product <Inverses>() (components ...));
+template <class Inverses, class... Components>
+inline auto make_product(Components const &... components)
+    RETURNS(callable::make_product<Inverses>()(components...));
 
 template <class Inverses, class Components>
-    inline auto make_product_over (Components && components)
-RETURNS (callable::make_product_over <Inverses>() (
-    std::forward <Components> (components)));
+inline auto make_product_over(Components && components) RETURNS(
+    callable::make_product_over<Inverses>()(
+        std::forward<Components>(components)));
 
 namespace product_detail {
 
     template <class Type> struct is_product_tag : std::false_type {};
     template <class ComponentTags, class Inverses>
-        struct is_product_tag <product_tag <ComponentTags, Inverses>>
+    struct is_product_tag<product_tag<ComponentTags, Inverses>>
     : std::true_type {};
 
-} // namespace product_detail
+}  // namespace product_detail
 
-MATH_MAGMA_GENERATE_OPERATORS (product_detail::is_product_tag)
+MATH_MAGMA_GENERATE_OPERATORS(product_detail::is_product_tag)
 
 namespace operation {
 
     /* Queries. */
 
     template <class Tags, class Inverses>
-        struct is_member <product_tag <Tags, Inverses>>
+    struct is_member<product_tag<Tags, Inverses>>
     {
-        template <class Product> auto operator() (Product const & product) const
-        RETURNS (range::all_of (
-            range::transform (product.components(), math::is_member)));
+        template <class Product> auto operator()(Product const & product) const
+            RETURNS(
+                range::all_of(
+                    range::transform(product.components(), math::is_member)));
     };
 
     // is_annihilator.
@@ -230,182 +240,187 @@ namespace operation {
     If not, then the default implementation (compare component-per-component
     with the result of annihilator()) works.
     */
-    template <class ComponentTag1, class ... ComponentTags, class Operation>
-        struct is_annihilator <
-            product_tag <over <ComponentTag1, ComponentTags ...>,
-                with_inverse <Operation>>, Operation,
-                typename std::enable_if <!std::is_same <Operation, void>::value
-                    >::type>
+    template <class ComponentTag1, class... ComponentTags, class Operation>
+    struct is_annihilator<
+        product_tag<
+            over<ComponentTag1, ComponentTags...>, with_inverse<Operation>>,
+        Operation,
+        typename std::enable_if<!std::is_same<Operation, void>::value>::type>
     {
-        template <class Product> auto operator() (Product const & product) const
-        RETURNS (range::any_of (range::transform (
-            product.components(), callable::is_annihilator <Operation>())));
+        template <class Product> auto operator()(Product const & product) const
+            RETURNS(
+                range::any_of(
+                    range::transform(
+                        product.components(),
+                        callable::is_annihilator<Operation>())));
     };
     // A product over zero components has only one element, which is always an
     // annihilator.
-    template <class Operation>
-        struct is_annihilator <product_tag <over<>, with_inverse <Operation>>,
-            Operation>
-    : rime::callable::always_default <rime::true_type> {};
+    template <class Operation> struct is_annihilator<
+        product_tag<over<>, with_inverse<Operation>>, Operation>
+    : rime::callable::always_default<rime::true_type> {};
 
     // equal.
     // With no inverse: just compare components.
     template <class ComponentTags>
-        struct equal <product_tag <ComponentTags, with_inverse<>>>
-    : tuple_helper::equal_components <math::callable::equal> {};
+    struct equal<product_tag<ComponentTags, with_inverse<>>>
+    : tuple_helper::equal_components<math::callable::equal> {};
 
     // With inverse: compare annihilators equal, otherwise compare components.
     template <class ComponentTags, class Operation>
-        struct equal <product_tag <ComponentTags, with_inverse <Operation>>>
-    : tuple_helper::equal_if_annihilator <Operation,
-        tuple_helper::equal_components <math::callable::equal>> {};
+    struct equal<product_tag<ComponentTags, with_inverse<Operation>>>
+    : tuple_helper::equal_if_annihilator<
+          Operation, tuple_helper::equal_components<math::callable::equal>> {};
 
     // approximately_equal.
     template <class ComponentTags>
-        struct approximately_equal <product_tag <ComponentTags, with_inverse<>>>
-    : tuple_helper::equal_components <math::callable::approximately_equal> {};
+    struct approximately_equal<product_tag<ComponentTags, with_inverse<>>>
+    : tuple_helper::equal_components<math::callable::approximately_equal> {};
 
-    template <class ComponentTags, class Operation>
-        struct approximately_equal <
-            product_tag <ComponentTags, with_inverse <Operation>>>
-    : tuple_helper::equal_if_annihilator <Operation,
-        tuple_helper::equal_components <math::callable::approximately_equal>>
-    {};
+    template <class ComponentTags, class Operation> struct approximately_equal<
+        product_tag<ComponentTags, with_inverse<Operation>>>
+    : tuple_helper::equal_if_annihilator<
+          Operation,
+          tuple_helper::equal_components<math::callable::approximately_equal>> {
+    };
 
     // compare.
-    template <class ... ComponentTags>
-        struct compare <product_tag <over <ComponentTags ...>, with_inverse<>>,
-            typename boost::enable_if <meta::all_of_c <
-                is_implemented <compare <ComponentTags>>::value ...>>::type>
-    : tuple_helper::compare_components <math::callable::compare> {};
+    template <class... ComponentTags> struct compare<
+        product_tag<over<ComponentTags...>, with_inverse<>>,
+        typename boost::enable_if<meta::all_of_c<
+            is_implemented<compare<ComponentTags>>::value...>>::type>
+    : tuple_helper::compare_components<math::callable::compare> {};
 
     // With inverse: annihilators go at the end.
-    template <class ... ComponentTags, class Operation>
-        struct compare <product_tag <over <ComponentTags ...>,
-            with_inverse <Operation>>,
-            typename boost::enable_if <boost::mpl::and_ <
-                meta::all_of_c <
-                    is_implemented <compare <ComponentTags>>::value ...>,
-                // Only instantiate this if the Operation is not void.
-                // GCC 4.6 requires this, or it won't realise the the
-                // specialisation above is better.
-                boost::mpl::not_ <std::is_same <Operation, void>>
-            >>::type>
-    : tuple_helper::compare_if_annihilator <Operation,
-        tuple_helper::compare_components <math::callable::compare>> {};
+    template <class... ComponentTags, class Operation> struct compare<
+        product_tag<over<ComponentTags...>, with_inverse<Operation>>,
+        typename boost::enable_if<boost::mpl::and_<
+            meta::all_of_c<is_implemented<compare<ComponentTags>>::value...>,
+            // Only instantiate this if the Operation is not void.
+            // GCC 4.6 requires this, or it won't realise the the
+            // specialisation above is better.
+            boost::mpl::not_<std::is_same<Operation, void>>>>::type>
+    : tuple_helper::compare_if_annihilator<
+          Operation,
+          tuple_helper::compare_components<math::callable::compare>> {};
 
     namespace tuple_helper {
 
         template <class ComponentTags, class Inverses>
-            struct get_components <product_tag <ComponentTags, Inverses>>
+        struct get_components<product_tag<ComponentTags, Inverses>>
         {
-            template <class Product> auto operator() (Product const & p) const
-            RETURNS (p.components());
+            template <class Product> auto operator()(Product const & p) const
+                RETURNS(p.components());
         };
 
-    } // namespace tuple_helper
+    }  // namespace tuple_helper
 
     /* Produce. */
 
     // non_member could be implemented if all components implement it.
     // Otherwise, what value to pick for the other components?
 
-    template <class ... Tags, class Inverses, class Operation>
-        struct identity <product_tag <over <Tags ...>, Inverses>, Operation>
-    : tuple_helper::nullary_operation <callable::make_product <Inverses>,
-        meta::vector <identity <Tags, Operation> ...>> {};
+    template <class... Tags, class Inverses, class Operation>
+    struct identity<product_tag<over<Tags...>, Inverses>, Operation>
+    : tuple_helper::nullary_operation<
+          callable::make_product<Inverses>,
+          meta::vector<identity<Tags, Operation>...>> {};
 
     // annihilator: implemented if all components have an annihilator.
     // (otherwise, what value to pick for the other components?)
-    template <class ... Tags, class Inverses, class Operation>
-        struct annihilator <product_tag <over <Tags ...>, Inverses>, Operation,
-        typename boost::enable_if <meta::all_of_c <
-            is_implemented <annihilator <Tags, Operation>>::value ...
-        >>::type>
-    : tuple_helper::nullary_operation <callable::make_product <Inverses>,
-        meta::vector <annihilator <Tags, Operation> ...>> {};
+    template <class... Tags, class Inverses, class Operation>
+    struct annihilator<
+        product_tag<over<Tags...>, Inverses>, Operation,
+        typename boost::enable_if<meta::all_of_c<
+            is_implemented<annihilator<Tags, Operation>>::value...>>::type>
+    : tuple_helper::nullary_operation<
+          callable::make_product<Inverses>,
+          meta::vector<annihilator<Tags, Operation>...>> {};
 
     /* Binary operations. */
 
-    template <class ... Tags, class Inverses>
-        struct times <product_tag <over <Tags ...>, Inverses>>
-    : tuple_helper::binary_operation <callable::make_product <Inverses>,
-        meta::vector <times <Tags> ...>> {};
+    template <class... Tags, class Inverses>
+    struct times<product_tag<over<Tags...>, Inverses>>
+    : tuple_helper::binary_operation<
+          callable::make_product<Inverses>, meta::vector<times<Tags>...>> {};
 
-    template <class ... Tags, class Inverses>
-        struct plus <product_tag <over <Tags ...>, Inverses>>
-    : tuple_helper::binary_operation <callable::make_product <Inverses>,
-        meta::vector <plus <Tags> ...>> {};
+    template <class... Tags, class Inverses>
+    struct plus<product_tag<over<Tags...>, Inverses>>
+    : tuple_helper::binary_operation<
+          callable::make_product<Inverses>, meta::vector<plus<Tags>...>> {};
 
     // is_semiring iff all components are semirings...
-    template <class ... Tags, class Inverses,
-            class Direction, class Operation1, class Operation2>
-        struct is_semiring <product_tag <over <Tags ...>, Inverses>, Direction,
-            Operation1, Operation2>
-    : meta::all_of_c <
-        is_semiring <Tags, Direction, Operation1, Operation2>::value ...> {};
+    template <
+        class... Tags, class Inverses, class Direction, class Operation1,
+        class Operation2>
+    struct is_semiring<
+        product_tag<over<Tags...>, Inverses>, Direction, Operation1, Operation2>
+    : meta::all_of_c<
+          is_semiring<Tags, Direction, Operation1, Operation2>::value...> {};
 
     // ... except when the product is empty.
-    template <class Inverses, class Direction,
-        class Operation1, class Operation2>
-    struct is_semiring <product_tag <over<>, Inverses>, Direction,
-        Operation1, Operation2>
+    template <
+        class Inverses, class Direction, class Operation1, class Operation2>
+    struct is_semiring<
+        product_tag<over<>, Inverses>, Direction, Operation1, Operation2>
     : rime::false_type {};
 
-    template <class ... Tags, class Inverses,
-            class Direction, class Operation1, class Operation2>
-        struct is_distributive <product_tag <over <Tags ...>, Inverses>,
-            Direction, Operation1, Operation2>
-    : meta::all_of_c <
-        is_distributive <Tags, Direction, Operation1, Operation2>::value ...>
-    {};
+    template <
+        class... Tags, class Inverses, class Direction, class Operation1,
+        class Operation2>
+    struct is_distributive<
+        product_tag<over<Tags...>, Inverses>, Direction, Operation1, Operation2>
+    : meta::all_of_c<
+          is_distributive<Tags, Direction, Operation1, Operation2>::value...> {
+    };
 
-    template <class ... Tags,
-            class ... Components1, class ... Components2, class Inverses>
-        struct unify_type <product_tag <over <Tags ...>, Inverses>,
-            product <over <Components1 ...>, Inverses>,
-            product <over <Components2 ...>, Inverses>>
+    template <
+        class... Tags, class... Components1, class... Components2,
+        class Inverses>
+    struct unify_type<
+        product_tag<over<Tags...>, Inverses>,
+        product<over<Components1...>, Inverses>,
+        product<over<Components2...>, Inverses>>
     {
         // Unify both underlying types separately.
-        typedef product <over <
-            typename unify_type <Tags, Components1, Components2>::type ...>,
-            Inverses> type;
+        typedef product<
+            over<typename unify_type<Tags, Components1, Components2>::type...>,
+            Inverses>
+            type;
     };
 
     // divide: only if the template parameter Inverses is with_inverse <times>.
-    template <class ... Tags, class Direction>
-        struct divide <product_tag <over <Tags ...>,
-            with_inverse <callable::times>>, Direction>
-    : tuple_helper::binary_operation <
-        callable::make_product <with_inverse <callable::times>>,
-        meta::vector <divide <Tags, Direction> ...>> {};
+    template <class... Tags, class Direction> struct divide<
+        product_tag<over<Tags...>, with_inverse<callable::times>>, Direction>
+    : tuple_helper::binary_operation<
+          callable::make_product<with_inverse<callable::times>>,
+          meta::vector<divide<Tags, Direction>...>> {};
 
     // minus: only if the template parameter Inverses is with_inverse <plus>.
-    template <class ... Tags, class Direction>
-        struct minus <product_tag <over <Tags ...>,
-            with_inverse <callable::plus>>, Direction>
-    : tuple_helper::binary_operation <
-        callable::make_product <with_inverse <callable::plus>>,
-        meta::vector <minus <Tags, Direction> ...>> {};
+    template <class... Tags, class Direction> struct minus<
+        product_tag<over<Tags...>, with_inverse<callable::plus>>, Direction>
+    : tuple_helper::binary_operation<
+          callable::make_product<with_inverse<callable::plus>>,
+          meta::vector<minus<Tags, Direction>...>> {};
 
-    template <class ... Tags, class Direction, class Operation>
-        struct invert <product_tag <over <Tags ...>, with_inverse <Operation>>,
-            Direction, Operation>
-    : tuple_helper::unary_operation <
-        callable::make_product <with_inverse <Operation>>,
-        meta::vector <invert <Tags, Direction, Operation> ...>> {};
+    template <class... Tags, class Direction, class Operation> struct invert<
+        product_tag<over<Tags...>, with_inverse<Operation>>, Direction,
+        Operation>
+    : tuple_helper::unary_operation<
+          callable::make_product<with_inverse<Operation>>,
+          meta::vector<invert<Tags, Direction, Operation>...>> {};
 
-    template <class ... Tags, class Inverse, class Operation>
-        struct reverse <product_tag <over <Tags ...>, Inverse>, Operation>
-    : tuple_helper::unary_operation <
-        callable::make_product <Inverse>,
-        meta::vector <reverse <Tags, Operation> ...>> {};
+    template <class... Tags, class Inverse, class Operation>
+    struct reverse<product_tag<over<Tags...>, Inverse>, Operation>
+    : tuple_helper::unary_operation<
+          callable::make_product<Inverse>,
+          meta::vector<reverse<Tags, Operation>...>> {};
 
-    template <class ... Tags, class Inverses>
-        struct print <product_tag <over <Tags ...>, Inverses>>
-    : tuple_helper::print_components <meta::vector <Tags ...>> {};
+    template <class... Tags, class Inverses>
+    struct print<product_tag<over<Tags...>, Inverses>>
+    : tuple_helper::print_components<meta::vector<Tags...>> {};
 
-} // namespace operation
+}  // namespace operation
 
 // Boost.Hash support.
 
@@ -413,26 +428,27 @@ namespace product_detail {
 
     // Products with inverses need to treat annihilators specially.
     static std::size_t constexpr annihilator_hash =
-        std::size_t (0xcba51c150183b7f1 & std::size_t (-1));
+        std::size_t(0xcba51c150183b7f1 & std::size_t(-1));
 
-} // namespace product_detail
+}  // namespace product_detail
 
 // Without an inverse: just combine the hash values of the components.
 template <class Components>
-    inline std::size_t hash_value (
-        product <Components, with_inverse<>> const & p)
-{ return range::hash_range (p.components()); }
-
-// With an inverse: if p is an annihilator, then return a special hash value.
-template <class Components, class Operation>
-    inline std::size_t hash_value (
-        product <Components, with_inverse <Operation>> const & p)
+inline std::size_t hash_value(product<Components, with_inverse<>> const & p)
 {
-    if (is_annihilator <Operation> (p))
-        return product_detail::annihilator_hash;
-    return range::hash_range (p.components());
+    return range::hash_range(p.components());
 }
 
-} // namespace math
+// With an inverse: if p is an annihilator, then return a special hash value.
+template <class Components, class Operation> inline std::size_t hash_value(
+    product<Components, with_inverse<Operation>> const & p)
+{
+    if (is_annihilator<Operation>(p)) {
+        return product_detail::annihilator_hash;
+    }
+    return range::hash_range(p.components());
+}
 
-#endif // MATH_PRODUCT_HPP_INCLUDED
+}  // namespace math
+
+#endif  // MATH_PRODUCT_HPP_INCLUDED

@@ -25,52 +25,55 @@ Test arithmetic_magma.hpp, and, in the process, magma.hpp.
 
 #include "arithmetic_magma-tests-integer.hpp"
 
-BOOST_AUTO_TEST_SUITE (test_suite_arithmetic_magma_int)
+BOOST_AUTO_TEST_SUITE(test_suite_arithmetic_magma_int)
 
-BOOST_AUTO_TEST_CASE (test_arithmetic_magma_integers) {
-    test_arithmetic_magma_integer <int> (
-        get_signed_integer_examples <int>(),
-        get_signed_integer_examples <int>());
-    test_arithmetic_magma_integer <unsigned> (
-        get_unequal_unsigned_integer_examples <unsigned>(),
-        get_unsigned_integer_examples <unsigned>());
+BOOST_AUTO_TEST_CASE(test_arithmetic_magma_integers)
+{
+    test_arithmetic_magma_integer<int>(
+        get_signed_integer_examples<int>(), get_signed_integer_examples<int>());
+    test_arithmetic_magma_integer<unsigned>(
+        get_unequal_unsigned_integer_examples<unsigned>(),
+        get_unsigned_integer_examples<unsigned>());
 }
 
-BOOST_AUTO_TEST_CASE (test_arithmetic_magma_integers_signed) {
+BOOST_AUTO_TEST_CASE(test_arithmetic_magma_integers_signed)
+{
     namespace callable = math::callable;
     using math::has;
 
     // Signed types do have minus.
-    BOOST_MPL_ASSERT ((has <
-        callable::invert <math::left, math::callable::plus> (int)>));
-    BOOST_MPL_ASSERT ((has <
-        callable::invert <math::right, math::callable::plus> (long)>));
-    BOOST_MPL_ASSERT ((has <
-        callable::invert <math::either, math::callable::plus> (short)>));
-    BOOST_MPL_ASSERT ((has <
-        callable::invert <math::callable::plus> (int)>));
+    BOOST_MPL_ASSERT(
+        (has<callable::invert<math::left, math::callable::plus>(int)>) );
+    BOOST_MPL_ASSERT(
+        (has<callable::invert<math::right, math::callable::plus>(long)>) );
+    BOOST_MPL_ASSERT(
+        (has<callable::invert<math::either, math::callable::plus>(short)>) );
+    BOOST_MPL_ASSERT((has<callable::invert<math::callable::plus>(int)>) );
 
-    BOOST_MPL_ASSERT ((has <callable::minus<> (signed char, signed char)>));
-    BOOST_MPL_ASSERT_NOT ((math::is::approximate <
-        callable::minus<> (long const &, long &)>));
+    BOOST_MPL_ASSERT((has<callable::minus<>(signed char, signed char)>) );
+    BOOST_MPL_ASSERT_NOT(
+        (math::is::approximate<callable::minus<>(long const &, long &)>) );
     int a = 2, b = 4;
-    BOOST_CHECK_EQUAL (math::minus<> (a, b), int (-2));
+    BOOST_CHECK_EQUAL(math::minus<>(a, b), int(-2));
 
-    BOOST_MPL_ASSERT_NOT ((math::is::approximate <
-        callable::invert <math::callable::plus> (int)>));
+    BOOST_MPL_ASSERT_NOT(
+        (math::is::approximate<callable::invert<math::callable::plus>(int)>) );
 
     // Unsigned types do not have minus.
-    BOOST_MPL_ASSERT_NOT ((has <
-        callable::invert <math::left, math::callable::plus> (unsigned int)>));
-    BOOST_MPL_ASSERT_NOT ((has <
-        callable::invert <math::right, math::callable::plus> (unsigned long)>));
-    BOOST_MPL_ASSERT_NOT ((has <callable::invert <
-        math::either, math::callable::plus> (unsigned short)>));
-    BOOST_MPL_ASSERT_NOT ((has <
-        callable::invert <math::callable::plus> (unsigned int)>));
+    BOOST_MPL_ASSERT_NOT(
+        (has<callable::invert<math::left, math::callable::plus>(
+             unsigned int)>) );
+    BOOST_MPL_ASSERT_NOT(
+        (has<callable::invert<math::right, math::callable::plus>(
+             unsigned long)>) );
+    BOOST_MPL_ASSERT_NOT(
+        (has<callable::invert<math::either, math::callable::plus>(
+             unsigned short)>) );
+    BOOST_MPL_ASSERT_NOT(
+        (has<callable::invert<math::callable::plus>(unsigned int)>) );
 
-    BOOST_MPL_ASSERT_NOT ((has <
-        callable::minus<> (unsigned char, unsigned char)>));
+    BOOST_MPL_ASSERT_NOT(
+        (has<callable::minus<>(unsigned char, unsigned char)>) );
 }
 
 BOOST_AUTO_TEST_SUITE_END()

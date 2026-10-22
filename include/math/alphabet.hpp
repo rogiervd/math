@@ -17,27 +17,27 @@ limitations under the License.
 #ifndef MATH_ALPHABET_HPP_INCLUDED
 #define MATH_ALPHABET_HPP_INCLUDED
 
+#include <cstdint>
+#include <limits>
 #include <memory>
 #include <type_traits>
-#include <limits>
-#include <cstdint>
 
-#include <boost/mpl/placeholders.hpp>
 #include <boost/mpl/bool.hpp>
 #include <boost/mpl/pair.hpp>
+#include <boost/mpl/placeholders.hpp>
 
 #include <boost/bimap.hpp>
 #include <boost/functional/hash_fwd.hpp>
 
 #include "utility/returns.hpp"
 
-#include "meta/vector.hpp"
-#include "meta/filter.hpp"
 #include "meta/contains.hpp"
 #include "meta/equal.hpp"
+#include "meta/filter.hpp"
+#include "meta/vector.hpp"
 
-#include "rime/core.hpp"
 #include "rime/assert.hpp"
+#include "rime/core.hpp"
 
 namespace math {
 
@@ -87,7 +87,8 @@ to it.
     The maximum number of special symbols.
     The default value is 128.
 */
-template <class NormalSymbol, class Tag = void,
+template <
+    class NormalSymbol, class Tag = void,
     std::size_t max_normal_symbol_num = 0xFFFFFF7F,
     class SpecialSymbols = meta::vector<>,
     std::size_t special_symbol_headroom = 0x80>
@@ -97,32 +98,35 @@ class alphabet;
 Exception that is thrown on an attempt to add another element to an alphabet
 when it is full.
 */
-class alphabet_overflow : public std::length_error {
+class alphabet_overflow : public std::length_error
+{
 public:
     alphabet_overflow()
-    : std::length_error (
-        "Attempt to add a symbol to an alphabet that has no room left.") {}
+    : std::length_error(
+          "Attempt to add a symbol to an alphabet that has no room left.")
+    {}
 };
 
 /**
 Exception that can be thrown when a symbol is not contained in an alphabet.
 An object should normally be of derived type symbol_not_found_of.
 */
-class symbol_not_found : public std::out_of_range {
+class symbol_not_found : public std::out_of_range
+{
 public:
-    symbol_not_found()
-    : std::out_of_range ("Symbol not found in alphabet.") {}
+    symbol_not_found() : std::out_of_range("Symbol not found in alphabet.") {}
 };
 
 /**
 Exception that can be thrown when a symbol is not contained in an alphabet.
 \tparam Symbol The type of the symbol that was not found.
 */
-template <class Symbol> class symbol_not_found_of : public symbol_not_found {
+template <class Symbol> class symbol_not_found_of : public symbol_not_found
+{
     Symbol symbol_;
+
 public:
-    symbol_not_found_of (Symbol const & symbol)
-    : symbol_ (symbol) {}
+    symbol_not_found_of(Symbol const & symbol) : symbol_(symbol) {}
 
     // GCC 4.6 seems to automatically generate this without "noexcept".
     ~symbol_not_found_of() noexcept {}
@@ -153,40 +157,47 @@ This class also supports boost::hash.
     Must be the same as the \c Tag template parameter of the matching
     \a alphabet.
 */
-template <class Value, class Tag
-/// \cond DONT_DOCUMENT
-    , class Enable = void
-/// \endcond
-> class dense_symbol {
+template <
+    class Value,
+    class Tag
+    /// \cond DONT_DOCUMENT
+    ,
+    class Enable = void
+    /// \endcond
+    >
+class dense_symbol
+{
     Value id_;
+
 public:
     dense_symbol() : id_() {}
 
 private:
-    template <class NormalSymbol, class Tag2,
-        std::size_t max_normal_symbol_num,
+    template <
+        class NormalSymbol, class Tag2, std::size_t max_normal_symbol_num,
         class SpecialSymbols, std::size_t special_symbol_headroom>
     friend class alphabet;
 
-    explicit dense_symbol (Value const & id)
-    : id_ (id) {}
+    explicit dense_symbol(Value const & id) : id_(id) {}
 
 public:
-    dense_symbol (dense_symbol const &) = default;
-    dense_symbol & operator = (dense_symbol const &) = default;
+    dense_symbol(dense_symbol const &) = default;
+    dense_symbol & operator=(dense_symbol const &) = default;
 
     /**
     Copy constructor that takes a compile-time symbol if this is a run-time
     symbol.
     */
-    template <class Value2,
+    template <
+        class Value2,
         /// \cond DONT_DOCUMENT
-        class Enable2 = typename std::enable_if <
-            rime::is_constant <Value2>::value
-            && !rime::is_constant <Value>::value>::type
+        class Enable2 = typename std::enable_if<
+            rime::is_constant<Value2>::value
+            && !rime::is_constant<Value>::value>::type
         /// \endcond
-        > dense_symbol (dense_symbol <Value2, Tag> const & that)
-    : id_ (that.id()) {}
+        >
+    dense_symbol(dense_symbol<Value2, Tag> const & that) : id_(that.id())
+    {}
 
     /**
     Return the dense id of the symbol.
@@ -205,53 +216,54 @@ an object of that type.
 template <class Type> struct symbol_type_tag {};
 
 // Equal.
-template <class Value1, class Value2, class Tag>
-    inline auto operator == (dense_symbol <Value1, Tag> const & symbol1,
-        dense_symbol <Value2, Tag> const & symbol2)
-RETURNS (symbol1.id() == symbol2.id());
+template <class Value1, class Value2, class Tag> inline auto operator==(
+    dense_symbol<Value1, Tag> const & symbol1,
+    dense_symbol<Value2, Tag> const & symbol2)
+    RETURNS(symbol1.id() == symbol2.id());
 
 // Not equal.
-template <class Value1, class Value2, class Tag>
-    inline auto operator != (dense_symbol <Value1, Tag> const & symbol1,
-        dense_symbol <Value2, Tag> const & symbol2)
-RETURNS (symbol1.id() != symbol2.id());
+template <class Value1, class Value2, class Tag> inline auto operator!=(
+    dense_symbol<Value1, Tag> const & symbol1,
+    dense_symbol<Value2, Tag> const & symbol2)
+    RETURNS(symbol1.id() != symbol2.id());
 
 // Less.
-template <class Value1, class Value2, class Tag>
-    inline auto operator < (dense_symbol <Value1, Tag> const & symbol1,
-        dense_symbol <Value2, Tag> const & symbol2)
-RETURNS (symbol1.id() < symbol2.id());
+template <class Value1, class Value2, class Tag> inline auto operator<(
+    dense_symbol<Value1, Tag> const & symbol1,
+    dense_symbol<Value2, Tag> const & symbol2)
+    RETURNS(symbol1.id() < symbol2.id());
 
 // Less or equal.
-template <class Value1, class Value2, class Tag>
-    inline auto operator <= (dense_symbol <Value1, Tag> const & symbol1,
-        dense_symbol <Value2, Tag> const & symbol2)
-RETURNS (symbol1.id() <= symbol2.id());
+template <class Value1, class Value2, class Tag> inline auto operator<=(
+    dense_symbol<Value1, Tag> const & symbol1,
+    dense_symbol<Value2, Tag> const & symbol2)
+    RETURNS(symbol1.id() <= symbol2.id());
 
 // Greater.
-template <class Value1, class Value2, class Tag>
-    inline auto operator > (dense_symbol <Value1, Tag> const & symbol1,
-        dense_symbol <Value2, Tag> const & symbol2)
-RETURNS (symbol1.id() > symbol2.id());
+template <class Value1, class Value2, class Tag> inline auto operator>(
+    dense_symbol<Value1, Tag> const & symbol1,
+    dense_symbol<Value2, Tag> const & symbol2)
+    RETURNS(symbol1.id() > symbol2.id());
 
 // Greater than or equal.
-template <class Value1, class Value2, class Tag>
-    inline auto operator >= (dense_symbol <Value1, Tag> const & symbol1,
-        dense_symbol <Value2, Tag> const & symbol2)
-RETURNS (symbol1.id() >= symbol2.id());
+template <class Value1, class Value2, class Tag> inline auto operator>=(
+    dense_symbol<Value1, Tag> const & symbol1,
+    dense_symbol<Value2, Tag> const & symbol2)
+    RETURNS(symbol1.id() >= symbol2.id());
 
 // Compute hash for boost::hash.
 template <class Value, class Tag>
-    inline std::size_t hash_value (dense_symbol <Value, Tag> const & symbol)
+inline std::size_t hash_value(dense_symbol<Value, Tag> const & symbol)
 {
-    boost::hash <typename rime::value <Value>::type> hasher;
-    return hasher (symbol.id());
+    boost::hash<typename rime::value<Value>::type> hasher;
+    return hasher(symbol.id());
 }
 
 namespace detail {
 
-    typedef meta::vector <std::int_least8_t, std::int_least16_t,
-            std::int_least32_t, std::int_least64_t, std::intmax_t>
+    typedef meta::vector<
+        std::int_least8_t, std::int_least16_t, std::int_least32_t,
+        std::int_least64_t, std::intmax_t>
         possible_dense_types;
 
     /**
@@ -264,71 +276,78 @@ namespace detail {
     unsigned integers.
     Internally, therefore, the dense symbols use unsigned integers.
     */
-    template <std::size_t num> struct int_type_for {
+    template <std::size_t num> struct int_type_for
+    {
         /// Check whether "num" is unchanged when placed in the unsigned
         /// type.
-        template <class Unsigned, std::size_t check = Unsigned (num)>
-            struct equal : boost::mpl::bool_ <check == num> {};
+        template <class Unsigned, std::size_t check = Unsigned(num)>
+        struct equal : boost::mpl::bool_<check == num> {};
 
         template <class Int> struct fits
-        : equal <typename std::make_unsigned <Int>::type> {};
+        : equal<typename std::make_unsigned<Int>::type> {};
 
-        typedef typename meta::filter <fits <boost::mpl::_1>,
-            possible_dense_types>::type possible_types;
+        typedef typename meta::filter<
+            fits<boost::mpl::_1>, possible_dense_types>::type possible_types;
 
-        static_assert (!meta::empty <possible_types>::value,
+        static_assert(
+            !meta::empty<possible_types>::value,
             "No types found that can contain 'num'.");
 
-        typedef typename meta::first <possible_types>::type type;
+        typedef typename meta::first<possible_types>::type type;
     };
 
     /**
     Mapping of the symbol type to the dense symbol type.
     */
-    template <class Symbol, class DenseValue>
-        struct normal_symbol_mapping
+    template <class Symbol, class DenseValue> struct normal_symbol_mapping
     {
         DenseValue symbol_num;
         DenseValue max_symbol_num;
 
-        typedef boost::bimap <Symbol, DenseValue> mapping_type;
+        typedef boost::bimap<Symbol, DenseValue> mapping_type;
         mapping_type mapping;
-    public:
-        normal_symbol_mapping (DenseValue max_symbol_num)
-        : symbol_num (0), max_symbol_num (max_symbol_num) {}
 
-        DenseValue get_dense (Symbol const & symbol) const {
-            auto symbol_mapping = mapping.left.find (symbol);
+    public:
+        normal_symbol_mapping(DenseValue max_symbol_num)
+        : symbol_num(0), max_symbol_num(max_symbol_num)
+        {}
+
+        DenseValue get_dense(Symbol const & symbol) const
+        {
+            auto symbol_mapping = mapping.left.find(symbol);
             if (symbol_mapping != mapping.left.end()) {
                 // The symbol is in the map.
                 return symbol_mapping->second;
-            } else
-                throw symbol_not_found_of <Symbol> (symbol);
+            } else {
+                throw symbol_not_found_of<Symbol>(symbol);
+            }
         }
 
-        Symbol const & get_symbol (DenseValue const & dense_symbol)
-            const
+        Symbol const & get_symbol(DenseValue const & dense_symbol) const
         {
-            auto symbol_mapping = mapping.right.find (dense_symbol);
+            auto symbol_mapping = mapping.right.find(dense_symbol);
             if (symbol_mapping != mapping.right.end()) {
                 // The symbol is in the map.
                 return symbol_mapping->second;
-            } else
-                throw symbol_not_found_of <DenseValue> (dense_symbol);
+            } else {
+                throw symbol_not_found_of<DenseValue>(dense_symbol);
+            }
         }
 
-        DenseValue add (Symbol const & symbol) {
-            auto symbol_mapping = mapping.left.find (symbol);
+        DenseValue add(Symbol const & symbol)
+        {
+            auto symbol_mapping = mapping.left.find(symbol);
             if (symbol_mapping != mapping.left.end()) {
                 // The symbol is already in the map.
                 return symbol_mapping->second;
             } else {
-                if (symbol_num == max_symbol_num)
+                if (symbol_num == max_symbol_num) {
                     throw alphabet_overflow();
-                DenseValue new_value (symbol_num);
-                ++ symbol_num;
-                mapping.insert (typename mapping_type::value_type (
-                    symbol, new_value));
+                }
+                DenseValue new_value(symbol_num);
+                ++symbol_num;
+                mapping.insert(
+                    typename mapping_type::value_type(symbol, new_value));
                 return new_value;
             }
         }
@@ -347,54 +366,56 @@ namespace detail {
         This must be a meta-range.
     */
     template <class DenseValue, class Tag, class Symbols>
-        class handle_special_symbols;
+    class handle_special_symbols;
 
     template <class DenseValue, class Tag, class Symbols>
-        class handle_special_symbols
+    class handle_special_symbols
     /// \cond DONT_DOCUMENT
-    : protected handle_special_symbols <DenseValue, Tag,
-        typename meta::drop <meta::back, Symbols>::type>
+    : protected handle_special_symbols<
+          DenseValue, Tag, typename meta::drop<meta::back, Symbols>::type>
     /// \endcond
     {
-        typedef handle_special_symbols <DenseValue, Tag,
-            typename meta::drop <meta::back, Symbols>::type> base_type;
-        typedef typename meta::first <meta::back, Symbols>::type symbol_type;
+        typedef handle_special_symbols<
+            DenseValue, Tag, typename meta::drop<meta::back, Symbols>::type>
+            base_type;
+        typedef typename meta::first<meta::back, Symbols>::type symbol_type;
 
-        static_assert (rime::equal_constant <rime::true_type,
-            decltype (symbol_type() == symbol_type())>::value,
+        static_assert(
+            rime::equal_constant<
+                rime::true_type,
+                decltype(symbol_type() == symbol_type())>::value,
             "Symbol should be a compile-time value and always compare equal.");
 
-        typedef typename std::make_unsigned <DenseValue>::type
-            unsigned_dense_type;
+        typedef
+            typename std::make_unsigned<DenseValue>::type unsigned_dense_type;
 
         // Use negative values for special symbols.
         // Perform the negation on unsigned_dense_type, because otherwise it
         // may not be well-defined.
         static DenseValue constexpr dense_value =
-            DenseValue (- unsigned_dense_type (meta::size <Symbols>::value));
+            DenseValue(-unsigned_dense_type(meta::size<Symbols>::value));
 
-        typedef dense_symbol <rime::constant <DenseValue, dense_value>, Tag>
+        typedef dense_symbol<rime::constant<DenseValue, dense_value>, Tag>
             dense_symbol_type;
 
-        typedef dense_symbol <DenseValue, Tag>
-            general_dense_symbol_type;
+        typedef dense_symbol<DenseValue, Tag> general_dense_symbol_type;
 
     protected:
         /**
         Compile-time list of symbol mappings as mpl::pair's.
         */
-        typedef typename meta::push <meta::back,
-                boost::mpl::pair <symbol_type, dense_symbol_type>,
-                typename base_type::special_symbol_mapping>::type
+        typedef typename meta::push<
+            meta::back, boost::mpl::pair<symbol_type, dense_symbol_type>,
+            typename base_type::special_symbol_mapping>::type
             special_symbol_mapping;
 
         struct default_constructible {};
 
     public:
         using base_type::get_dense;
+        using base_type::get_symbol;
         using base_type::is_special_symbol;
         using base_type::is_symbol_type;
-        using base_type::get_symbol;
         using base_type::visit_type;
 
         /// \cond DONT_DOCUMENT
@@ -404,11 +425,15 @@ namespace detail {
         This picks up only \a symbol_type.
         The base and derived classes pick up other types.
         */
-        dense_symbol_type get_dense (symbol_type const &) const
-        { return dense_symbol_type(); }
+        dense_symbol_type get_dense(symbol_type const &) const
+        {
+            return dense_symbol_type();
+        }
 
-        rime::true_type is_special_symbol (dense_symbol_type const &)
-        { return rime::true_; }
+        rime::true_type is_special_symbol(dense_symbol_type const &)
+        {
+            return rime::true_;
+        }
 
         /**
         \return true iff the dense symbol type maps onto a symbol of type
@@ -420,34 +445,47 @@ namespace detail {
         // the symbol is a run-time dense symbol.
         // The default_constructible parameters distinguishes it from base
         // and derived classes.
-        template <class SuspectedSymbol,
+        template <
+            class SuspectedSymbol,
             /// \cond DONT_DOCUMENT
-            class Enable = typename boost::enable_if <
-                std::is_same <SuspectedSymbol, symbol_type>>::type
+            class Enable = typename boost::enable_if<
+                std::is_same<SuspectedSymbol, symbol_type>>::type
             /// \endcond
-        > bool is_symbol_type (general_dense_symbol_type const & dense_symbol,
+            >
+        bool is_symbol_type(
+            general_dense_symbol_type const & dense_symbol,
             default_constructible = default_constructible()) const
-        { return dense_symbol.id() == dense_value; }
+        {
+            return dense_symbol.id() == dense_value;
+        }
 
         // Case 2: SuspectedSymbol is the one this class is supposed to handle;
         // the matching compile-time dense symbol.
-        template <class SuspectedSymbol,
+        template <
+            class SuspectedSymbol,
             /// \cond DONT_DOCUMENT
-            class Enable = typename boost::enable_if <
-                std::is_same <SuspectedSymbol, symbol_type>>::type
+            class Enable = typename boost::enable_if<
+                std::is_same<SuspectedSymbol, symbol_type>>::type
             /// \endcond
-        > rime::true_type is_symbol_type (dense_symbol_type const &) const
-        { return rime::true_; }
+            >
+        rime::true_type is_symbol_type(dense_symbol_type const &) const
+        {
+            return rime::true_;
+        }
 
         // Case 2: SuspectedSymbol is the one this class is supposed to handle;
         // the non-matching compile-time dense symbol.
-        template <class SuspectedSymbol,
+        template <
+            class SuspectedSymbol,
             /// \cond DONT_DOCUMENT
-            class Enable = typename boost::disable_if <
-                std::is_same <SuspectedSymbol, symbol_type>>::type
+            class Enable = typename boost::disable_if<
+                std::is_same<SuspectedSymbol, symbol_type>>::type
             /// \endcond
-        > rime::false_type is_symbol_type (dense_symbol_type const &) const
-        { return rime::false_; }
+            >
+        rime::false_type is_symbol_type(dense_symbol_type const &) const
+        {
+            return rime::false_;
+        }
 
         /**
         Get the symbol, assuming it is of type SuspectedSymbol.
@@ -455,36 +493,39 @@ namespace detail {
         general symbol.
         In other cases, a static assertion will fail.
         */
-        template <class SuspectedSymbol, class DenseSymbol2,
+        template <
+            class SuspectedSymbol, class DenseSymbol2,
             /// \cond DONT_DOCUMENT
-            class Enable = typename boost::enable_if <
-                std::is_same <SuspectedSymbol, symbol_type>>::type
+            class Enable = typename boost::enable_if<
+                std::is_same<SuspectedSymbol, symbol_type>>::type
             /// \endcond
-        > SuspectedSymbol get_symbol (
-            dense_symbol <DenseSymbol2, Tag> const & symbol,
+            >
+        SuspectedSymbol get_symbol(
+            dense_symbol<DenseSymbol2, Tag> const & symbol,
             default_constructible = default_constructible()) const
         {
-            rime::assert_ (is_symbol_type <SuspectedSymbol> (symbol));
+            rime::assert_(is_symbol_type<SuspectedSymbol>(symbol));
             return symbol_type();
         }
 
     protected:
         // Recursive visitor.
-        template <class Function>
-            void visit_general_type (Function && function,
-                general_dense_symbol_type const & dense) const
+        template <class Function> void visit_general_type(
+            Function && function, general_dense_symbol_type const & dense) const
         {
-            if (dense.id() == dense_value)
-                function (symbol_type_tag <symbol_type>(), dense);
-            else
-                base_type::visit_general_type (function, dense);
+            if (dense.id() == dense_value) {
+                function(symbol_type_tag<symbol_type>(), dense);
+            } else {
+                base_type::visit_general_type(function, dense);
+            }
         }
 
     public:
-        template <class Function>
-            void visit_type (Function && function,
-                dense_symbol_type const & dense) const
-        { function (symbol_type_tag <symbol_type>(), dense); }
+        template <class Function> void visit_type(
+            Function && function, dense_symbol_type const & dense) const
+        {
+            function(symbol_type_tag<symbol_type>(), dense);
+        }
 
         /// \endcond
     };
@@ -494,26 +535,32 @@ namespace detail {
     "using ...", but makes them as unreachable as possible.
     unusable_type can never be constructed or converted to.
     */
-    struct unusable_type { unusable_type() = delete; };
+    struct unusable_type
+    {
+        unusable_type() = delete;
+    };
 
     template <class DenseValue, class Tag>
-        class handle_special_symbols <DenseValue, Tag, meta::vector<>>
+    class handle_special_symbols<DenseValue, Tag, meta::vector<>>
     {
     protected:
         typedef meta::vector<> special_symbol_mapping;
+
     public:
-        void get_dense (unusable_type) const;
-        void is_special_symbol (unusable_type) const;
-        void is_symbol_type (unusable_type) const;
-        void get_symbol (unusable_type) const;
+        void get_dense(unusable_type) const;
+        void is_special_symbol(unusable_type) const;
+        void is_symbol_type(unusable_type) const;
+        void get_symbol(unusable_type) const;
 
     protected:
-        template <class Function, class Symbol> void visit_general_type (
-            Function && function, Symbol const &) const
-        { assert (false); }
+        template <class Function, class Symbol>
+        void visit_general_type(Function && function, Symbol const &) const
+        {
+            assert(false);
+        }
 
     public:
-        void visit_type (unusable_type, unusable_type) const;
+        void visit_type(unusable_type, unusable_type) const;
     };
 
     /**
@@ -522,67 +569,67 @@ namespace detail {
     Both template parameters must be meta::vector's.
     */
     template <class AugmentedSymbols, class Symbols>
-        struct augments_special_symbols
-    : boost::mpl::false_ {};
+    struct augments_special_symbols : boost::mpl::false_ {};
 
-    template <class First, class ... RestAugmented, class ... RestSymbols>
-        struct augments_special_symbols <
-            meta::vector <First, RestAugmented ...>,
-            meta::vector <First, RestSymbols ...>
-    > : augments_special_symbols <
-        meta::vector <RestAugmented ...>, meta::vector <RestSymbols ...>> {};
+    template <class First, class... RestAugmented, class... RestSymbols>
+    struct augments_special_symbols<
+        meta::vector<First, RestAugmented...>,
+        meta::vector<First, RestSymbols...>>
+    : augments_special_symbols<
+          meta::vector<RestAugmented...>, meta::vector<RestSymbols...>> {};
 
-    template <class ... Augmented> struct augments_special_symbols <
-        meta::vector <Augmented ...>, meta::vector <>>
+    template <class... Augmented>
+    struct augments_special_symbols<meta::vector<Augmented...>, meta::vector<>>
     : boost::mpl::true_ {};
 
-} // namespace detail
+}  // namespace detail
 
-template <class NormalSymbol, class Tag, std::size_t max_normal_symbol_num,
+template <
+    class NormalSymbol, class Tag, std::size_t max_normal_symbol_num,
     class SpecialSymbols, std::size_t special_symbol_headroom>
 class alphabet
 /// \cond DONT_DOCUMENT
-: public detail::handle_special_symbols <
-    typename detail::int_type_for <
-        max_normal_symbol_num + special_symbol_headroom>::type,
-    Tag, typename meta::as_vector <SpecialSymbols>::type>
+: public detail::handle_special_symbols<
+      typename detail::int_type_for<
+          max_normal_symbol_num + special_symbol_headroom>::type,
+      Tag, typename meta::as_vector<SpecialSymbols>::type>
 // \endcond
 {
 public:
-    typedef typename meta::as_vector <SpecialSymbols>::type special_symbols;
+    typedef typename meta::as_vector<SpecialSymbols>::type special_symbols;
+
 private:
     static std::size_t constexpr special_symbol_num =
-        meta::size <special_symbols>::value;
+        meta::size<special_symbols>::value;
 
-    static_assert (
+    static_assert(
         special_symbol_num <= special_symbol_headroom,
         "Not enough room reserved for special symbols."
         " Please increase special_symbol_headroom.");
 
 public:
     /// Signed integer type that is used for dense symbols.
-    typedef typename detail::int_type_for <
+    typedef typename detail::int_type_for<
         max_normal_symbol_num + special_symbol_headroom>::type dense_type;
-private:
 
+private:
     // Unsigned types are guaranteed to overflow sensibly.
     // (For signed types overflow yields undefined behaviour.)
-    typedef typename std::make_unsigned <dense_type>::type
-        unsigned_dense_type;
+    typedef typename std::make_unsigned<dense_type>::type unsigned_dense_type;
 
     /**
     The value below the special symbols.
     This value is more useful than the lowest special symbol, which may be 0.
     */
-    static const unsigned_dense_type below_special_symbol =
-        - unsigned_dense_type (special_symbol_num + 1);
+    static unsigned_dense_type const below_special_symbol =
+        -unsigned_dense_type(special_symbol_num + 1);
 
-    typedef detail::handle_special_symbols <dense_type, Tag,
-        special_symbols> handle_special_symbols;
+    typedef detail::handle_special_symbols<dense_type, Tag, special_symbols>
+        handle_special_symbols;
 
-    typedef detail::normal_symbol_mapping <NormalSymbol, unsigned_dense_type>
+    typedef detail::normal_symbol_mapping<NormalSymbol, unsigned_dense_type>
         symbol_mapping_type;
-    std::shared_ptr <symbol_mapping_type> normal_symbol_mapping;
+    std::shared_ptr<symbol_mapping_type> normal_symbol_mapping;
 
 public:
     /**
@@ -596,22 +643,26 @@ public:
     This is an object type, with inside the smallest integer type that can fit
     all symbols in the set.
     */
-    typedef dense_symbol <dense_type, Tag> dense_symbol_type;
+    typedef dense_symbol<dense_type, Tag> dense_symbol_type;
 
     /**
     Construct an alphabet that is empty apart from any special symbols.
     */
     alphabet()
-    : normal_symbol_mapping (
-        std::make_shared <symbol_mapping_type> (max_normal_symbol_num)) {}
+    : normal_symbol_mapping(
+          std::make_shared<symbol_mapping_type>(max_normal_symbol_num))
+    {}
 
-    template <class SpecialSymbols2>
-    alphabet (alphabet <NormalSymbol, Tag, max_normal_symbol_num,
-        SpecialSymbols2, special_symbol_headroom> const & other)
-    : normal_symbol_mapping (other.normal_symbol_mapping) {
-        static_assert (detail::augments_special_symbols <
-                special_symbols, typename
-                meta::as_vector <SpecialSymbols2>::type>::value,
+    template <class SpecialSymbols2> alphabet(
+        alphabet<
+            NormalSymbol, Tag, max_normal_symbol_num, SpecialSymbols2,
+            special_symbol_headroom> const & other)
+    : normal_symbol_mapping(other.normal_symbol_mapping)
+    {
+        static_assert(
+            detail::augments_special_symbols<
+                special_symbols,
+                typename meta::as_vector<SpecialSymbols2>::type>::value,
             "alphabet can only be initialised from another alphabet whose "
             "special symbols it augments.");
     }
@@ -621,16 +672,17 @@ public:
     \return The dense representation of the symbol.
     \throw alphabet_overflow if there is no room in the alphabet.
     */
-    dense_symbol_type add_symbol (NormalSymbol const & symbol) {
-        dense_type s = normal_symbol_mapping->add (symbol);
-        return dense_symbol_type (s);
+    dense_symbol_type add_symbol(NormalSymbol const & symbol)
+    {
+        dense_type s = normal_symbol_mapping->add(symbol);
+        return dense_symbol_type(s);
     }
 
     // Pull in functions from base classes to deal with special symbols.
     using handle_special_symbols::get_dense;
+    using handle_special_symbols::get_symbol;
     using handle_special_symbols::is_special_symbol;
     using handle_special_symbols::is_symbol_type;
-    using handle_special_symbols::get_symbol;
     using handle_special_symbols::visit_type;
 
     /**
@@ -639,9 +691,10 @@ public:
         This can be of the normal symbol type, or of any of the special symbol
         types.
     */
-    dense_symbol_type get_dense (NormalSymbol const & symbol) const {
-        dense_type s = normal_symbol_mapping->get_dense (symbol);
-        return dense_symbol_type (s);
+    dense_symbol_type get_dense(NormalSymbol const & symbol) const
+    {
+        dense_type s = normal_symbol_mapping->get_dense(symbol);
+        return dense_symbol_type(s);
     }
 
     /**
@@ -649,9 +702,10 @@ public:
     The dense symbol can be a general dense symbol, or have a specific value
     type.
     */
-    bool is_special_symbol (dense_symbol_type const & dense) const {
+    bool is_special_symbol(dense_symbol_type const & dense) const
+    {
         unsigned_dense_type id = dense.id();
-        assert (id < max_normal_symbol_num || id > below_special_symbol);
+        assert(id < max_normal_symbol_num || id > below_special_symbol);
         return id > below_special_symbol;
     }
 
@@ -668,13 +722,17 @@ public:
     The specialisations for compile-time symbols are in
     detail::handle_special_symbols, which this class derives from.
     */
-    template <class SuspectedSymbol,
+    template <
+        class SuspectedSymbol,
         /// \cond DONT_DOCUMENT
-        class Enable = typename boost::enable_if <
-            std::is_same <SuspectedSymbol, NormalSymbol>>::type
+        class Enable = typename boost::enable_if<
+            std::is_same<SuspectedSymbol, NormalSymbol>>::type
         /// \endcond
-    > bool is_symbol_type (dense_symbol_type const & dense) const
-    { return !is_special_symbol (dense); }
+        >
+    bool is_symbol_type(dense_symbol_type const & dense) const
+    {
+        return !is_special_symbol(dense);
+    }
 
     /**
     Retrieve the symbol represented by the dense symbol passed in.
@@ -686,16 +744,17 @@ public:
     \pre The dense symbol exists, at run time, in the alphabet.
         If this is not the case, symbol_not_found_of will be thrown.
     */
-    template <class SuspectedSymbol,
+    template <
+        class SuspectedSymbol,
         /// \cond DONT_DOCUMENT
-        class Enable = typename boost::enable_if <
-            std::is_same <SuspectedSymbol, NormalSymbol>>::type
+        class Enable = typename boost::enable_if<
+            std::is_same<SuspectedSymbol, NormalSymbol>>::type
         /// \endcond
-    > SuspectedSymbol const & get_symbol (dense_symbol_type const & dense)
-    const
+        >
+    SuspectedSymbol const & get_symbol(dense_symbol_type const & dense) const
     {
-        assert (!is_special_symbol (dense));
-        return normal_symbol_mapping->get_symbol (dense.id());
+        assert(!is_special_symbol(dense));
+        return normal_symbol_mapping->get_symbol(dense.id());
     }
 
     /**
@@ -703,79 +762,90 @@ public:
     symbol wrapped as an \a symbol_type object, and the original
     symbol.
     */
-    template <class Function> void visit_type (
-            Function && function, dense_symbol_type const & dense) const
+    template <class Function>
+    void visit_type(Function && function, dense_symbol_type const & dense) const
     {
-        if (is_special_symbol (dense))
-            handle_special_symbols::visit_general_type (function, dense);
-        else
-            function (symbol_type_tag <normal_symbol_type>(), dense);
+        if (is_special_symbol(dense)) {
+            handle_special_symbols::visit_general_type(function, dense);
+        } else {
+            function(symbol_type_tag<normal_symbol_type>(), dense);
+        }
     }
 
 private:
     /// \cond DONT_DOCUMENT
-    template <class Function> struct visitor {
+    template <class Function> struct visitor
+    {
         Function && function;
         alphabet const & a;
 
-        visitor (Function && function, alphabet const & a)
-        : function (std::forward <Function> (function)), a (a) {}
+        visitor(Function && function, alphabet const & a)
+        : function(std::forward<Function>(function)), a(a)
+        {}
 
-        template <class Type, class ActualSymbol>
-            void operator() (symbol_type_tag <Type>,
-                dense_symbol <ActualSymbol, Tag> const & dense) const
-        { function (a.get_symbol <Type> (dense)); }
+        template <class Type, class ActualSymbol> void operator()(
+            symbol_type_tag<Type>,
+            dense_symbol<ActualSymbol, Tag> const & dense) const
+        {
+            function(a.get_symbol<Type>(dense));
+        }
     };
     /// \endcond
 
 public:
-    template <class Function, class ActualSymbol>
-        void visit (Function && function,
-            dense_symbol <ActualSymbol, Tag> const & dense) const
+    template <class Function, class ActualSymbol> void visit(
+        Function && function,
+        dense_symbol<ActualSymbol, Tag> const & dense) const
     {
         // Wrap the function in a visitor object and call visit_type.
-        visit_type (visitor <Function> (function, *this), dense);
+        visit_type(visitor<Function>(function, *this), dense);
     }
 
 private:
-    template <class NormalSymbol2, class Tag2,
-            std::size_t max_normal_symbol_num2,
-            class SpecialSymbols2, std::size_t special_symbol_headroom2>
-        friend class alphabet;
+    template <
+        class NormalSymbol2, class Tag2, std::size_t max_normal_symbol_num2,
+        class SpecialSymbols2, std::size_t special_symbol_headroom2>
+    friend class alphabet;
 };
 
 /**
 Return a new alphabet with a new special symbol added to it.
 If the alphabet already contains the symbol, then return the alphabet itself.
 */
-template <class NewSpecialSymbol,
-    class NormalSymbol, class Tag, std::size_t max_normal_symbol_num,
-    class SpecialSymbols, std::size_t special_symbol_headroom,
+template <
+    class NewSpecialSymbol, class NormalSymbol, class Tag,
+    std::size_t max_normal_symbol_num, class SpecialSymbols,
+    std::size_t special_symbol_headroom,
     /// \cond DONT_DOCUMENT
-    class Enable = typename std::enable_if <
-        !meta::contains <NewSpecialSymbol, SpecialSymbols>::value>::type
+    class Enable = typename std::enable_if<
+        !meta::contains<NewSpecialSymbol, SpecialSymbols>::value>::type
     /// \endcond
-> inline auto
-add_special_symbol (alphabet <NormalSymbol, Tag, max_normal_symbol_num,
-    SpecialSymbols, special_symbol_headroom> const & a)
-RETURNS (alphabet <NormalSymbol, Tag, max_normal_symbol_num, typename
-        meta::push <meta::back, NewSpecialSymbol, SpecialSymbols>::type,
-        special_symbol_headroom> (a));
+    >
+inline auto add_special_symbol(
+    alphabet<
+        NormalSymbol, Tag, max_normal_symbol_num, SpecialSymbols,
+        special_symbol_headroom> const & a)
+    RETURNS(
+        alphabet<
+            NormalSymbol, Tag, max_normal_symbol_num,
+            typename meta::push<
+                meta::back, NewSpecialSymbol, SpecialSymbols>::type,
+            special_symbol_headroom>(a));
 
 // If the alphabet already contains the symbol, return the alphabet itself.
 /// \cond DONT_DOCUMENT
-template <class NewSpecialSymbol,
-    class NormalSymbol, class Tag, std::size_t max_normal_symbol_num,
-    class SpecialSymbols, std::size_t special_symbol_headroom
-    , class Enable = typename std::enable_if <
-        meta::contains <NewSpecialSymbol, SpecialSymbols>::value>::type
-    >
-inline auto
-add_special_symbol (alphabet <NormalSymbol, Tag, max_normal_symbol_num,
-    SpecialSymbols, special_symbol_headroom> const & a)
-RETURNS (a);
+template <
+    class NewSpecialSymbol, class NormalSymbol, class Tag,
+    std::size_t max_normal_symbol_num, class SpecialSymbols,
+    std::size_t special_symbol_headroom,
+    class Enable = typename std::enable_if<
+        meta::contains<NewSpecialSymbol, SpecialSymbols>::value>::type>
+inline auto add_special_symbol(
+    alphabet<
+        NormalSymbol, Tag, max_normal_symbol_num, SpecialSymbols,
+        special_symbol_headroom> const & a) RETURNS(a);
 /// \endcond
 
-} // namespace math
+}  // namespace math
 
-#endif // MATH_ALPHABET_HPP_INCLUDED
+#endif  // MATH_ALPHABET_HPP_INCLUDED

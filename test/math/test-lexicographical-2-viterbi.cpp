@@ -23,19 +23,19 @@ Test lexicographical.hpp with an example: the Viterbi semiring.
 
 #include "math/lexicographical.hpp"
 
-#include <string>
-#include <ostream>
 #include <iostream>
+#include <ostream>
+#include <string>
 
 #include <boost/mpl/assert.hpp>
 
 #include "range/std/string.hpp"
 
+#include "math/cost.hpp"
 #include "math/max_semiring.hpp"
 #include "math/sequence.hpp"
-#include "math/cost.hpp"
 
-BOOST_AUTO_TEST_SUITE (test_suite_lexicographical_viterbi)
+BOOST_AUTO_TEST_SUITE(test_suite_lexicographical_viterbi)
 
 /**
 Two paths diverge in a wood.
@@ -52,25 +52,28 @@ more travelled by.
 That complete path has (1/8, abe) as its label.
 The other path, at (1/16, cde), is worse.
 */
-BOOST_AUTO_TEST_CASE (test_viterbi) {
-    typedef math::lexicographical <math::over <
-        math::max_semiring <float>,
-        math::single_sequence <char>>> viterbi_semiring;
+BOOST_AUTO_TEST_CASE(test_viterbi)
+{
+    typedef math::lexicographical<
+        math::over<math::max_semiring<float>, math::single_sequence<char>>>
+        viterbi_semiring;
 
-    viterbi_semiring v_1_a (1, 'a');
-    viterbi_semiring v_0_5_b (0.5, 'b');
-    viterbi_semiring v_0_25_c (0.25, 'c');
-    viterbi_semiring v_1_d (1, 'd');
-    viterbi_semiring v_0_25_e (0.25, 'e');
+    viterbi_semiring v_1_a(1, 'a');
+    viterbi_semiring v_0_5_b(0.5, 'b');
+    viterbi_semiring v_0_25_c(0.25, 'c');
+    viterbi_semiring v_1_d(1, 'd');
+    viterbi_semiring v_0_25_e(0.25, 'e');
 
     auto result = ((v_1_a * v_0_5_b) + (v_0_25_c * v_1_d)) * v_0_25_e;
     std::cout << result << std::endl;
-    BOOST_MPL_ASSERT ((std::is_same <decltype (result),
-        math::lexicographical <math::over <
-            math::max_semiring <float>, math::sequence <char>>>>));
-    BOOST_CHECK_EQUAL (range::at_c <0> (result.components()).value(), .125);
-    BOOST_CHECK (range::at_c <1> (result.components())
-        == math::sequence <char> (std::string ("abe")));
+    BOOST_MPL_ASSERT((std::is_same<
+                      decltype(result),
+                      math::lexicographical<math::over<
+                          math::max_semiring<float>, math::sequence<char>>>>) );
+    BOOST_CHECK_EQUAL(range::at_c<0>(result.components()).value(), .125);
+    BOOST_CHECK(
+        range::at_c<1>(result.components())
+        == math::sequence<char>(std::string("abe")));
 }
 
 /**
@@ -80,25 +83,29 @@ We then take the path less travelled by.
 Its label is (1.5, cde).
 That is better than (1.75, abe).
 */
-BOOST_AUTO_TEST_CASE (test_cost) {
-    typedef math::lexicographical <math::over <
-        math::cost <float>,
-        math::single_sequence <char>>> cost_semiring;
+BOOST_AUTO_TEST_CASE(test_cost)
+{
+    typedef math::lexicographical<
+        math::over<math::cost<float>, math::single_sequence<char>>>
+        cost_semiring;
 
-    cost_semiring v_1_a (1, 'a');
-    cost_semiring v_0_5_b (0.5, 'b');
-    cost_semiring v_0_25_c (0.25, 'c');
-    cost_semiring v_1_d (1, 'd');
-    cost_semiring v_0_25_e (0.25, 'e');
+    cost_semiring v_1_a(1, 'a');
+    cost_semiring v_0_5_b(0.5, 'b');
+    cost_semiring v_0_25_c(0.25, 'c');
+    cost_semiring v_1_d(1, 'd');
+    cost_semiring v_0_25_e(0.25, 'e');
 
     auto result = ((v_1_a * v_0_5_b) + (v_0_25_c * v_1_d)) * v_0_25_e;
     std::cout << result << std::endl;
-    BOOST_MPL_ASSERT ((std::is_same <decltype (result),
-        math::lexicographical <math::over <
-            math::cost <float>, math::sequence <char>>>>));
-    BOOST_CHECK_EQUAL (range::at_c <0> (result.components()).value(), 1.5);
-    BOOST_CHECK (range::at_c <1> (result.components())
-        == math::sequence <char> (std::string ("cde")));
+    BOOST_MPL_ASSERT(
+        (std::is_same<
+            decltype(result),
+            math::lexicographical<
+                math::over<math::cost<float>, math::sequence<char>>>>) );
+    BOOST_CHECK_EQUAL(range::at_c<0>(result.components()).value(), 1.5);
+    BOOST_CHECK(
+        range::at_c<1>(result.components())
+        == math::sequence<char>(std::string("cde")));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

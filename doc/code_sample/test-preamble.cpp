@@ -25,9 +25,8 @@ Test code samples from the documentation.
 
 #include "range/std/vector.hpp"
 
-#include "math/magma.hpp"
 #include "math/arithmetic_magma.hpp"
 #include "math/check/check_magma.hpp"
+#include "math/magma.hpp"
 
-BOOST_AUTO_TEST_SUITE (test_code_samples)
-
+BOOST_AUTO_TEST_SUITE(test_code_samples)

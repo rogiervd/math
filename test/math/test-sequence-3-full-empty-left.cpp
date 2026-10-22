@@ -27,10 +27,8 @@ amount of memory used for compiling the test.
 
 #include "sequence-tests-slow.hpp"
 
-BOOST_AUTO_TEST_SUITE (test_suite_sequence_full_types_left)
+BOOST_AUTO_TEST_SUITE(test_suite_sequence_full_types_left)
 
-BOOST_AUTO_TEST_CASE (test_sequence_left) {
-    test_empty_sequence <math::left>();
-}
+BOOST_AUTO_TEST_CASE(test_sequence_left) { test_empty_sequence<math::left>(); }
 
 BOOST_AUTO_TEST_SUITE_END()

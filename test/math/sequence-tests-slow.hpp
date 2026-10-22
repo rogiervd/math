@@ -26,50 +26,52 @@ compiling takes a lot less memory and time.
 // Workaround for incorrect warnings on GCC 4.6 and 4.8.
 // The warnings occur in check_magma.hpp and only for optimized builds.
 #if defined __GNUC__
-#   if (__GNUC__ == 4 && __GNUC_MINOR__ == 8)
-#       pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-#   endif
-#   if (__GNUC__ == 4 && __GNUC_MINOR__ == 6)
-#       pragma GCC diagnostic ignored "-Wuninitialized"
-#   endif
+#    if (__GNUC__ == 4 && __GNUC_MINOR__ == 8)
+#        pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#    endif
+#    if (__GNUC__ == 4 && __GNUC_MINOR__ == 6)
+#        pragma GCC diagnostic ignored "-Wuninitialized"
+#    endif
 #endif
 
 #include "math/sequence.hpp"
 
 #include <string>
 
-#include "range/std/string.hpp"
 #include "range/std/list.hpp"
+#include "range/std/string.hpp"
 
 #include "range/tuple.hpp"
 
 #include "math/check/report_check_magma_boost_test.hpp"
 
 // Check for consistency.
-template <class Direction> void test_sequence_homogeneous() {
-    typedef math::sequence <char, Direction> sequence;
+template <class Direction> void test_sequence_homogeneous()
+{
+    typedef math::sequence<char, Direction> sequence;
 
     // With runtime types.
-    std::vector <sequence> examples;
-    examples.push_back (sequence (std::string ("")));
-    examples.push_back (sequence (std::string ("a")));
-    examples.push_back (sequence (std::string ("b")));
-    examples.push_back (sequence (std::string ("c")));
-    examples.push_back (sequence (std::string ("ab")));
-    examples.push_back (sequence (std::string ("ba")));
-    examples.push_back (sequence (std::string ("abc")));
-    examples.push_back (sequence (std::string ("cba")));
+    std::vector<sequence> examples;
+    examples.push_back(sequence(std::string("")));
+    examples.push_back(sequence(std::string("a")));
+    examples.push_back(sequence(std::string("b")));
+    examples.push_back(sequence(std::string("c")));
+    examples.push_back(sequence(std::string("ab")));
+    examples.push_back(sequence(std::string("ba")));
+    examples.push_back(sequence(std::string("abc")));
+    examples.push_back(sequence(std::string("cba")));
 
-    math::report_check_semiring <sequence, Direction> (
+    math::report_check_semiring<sequence, Direction>(
         math::times, math::plus, examples, examples);
-    math::report_check_magma <sequence> (math::times, math::choose,
-        examples, examples);
+    math::report_check_magma<sequence>(
+        math::times, math::choose, examples, examples);
 }
 
-template <class Direction> void test_empty_sequence() {
-    typedef math::empty_sequence <char, Direction> sequence;
-    std::vector <sequence> examples;
-    examples.push_back (math::empty_sequence <char, Direction>());
+template <class Direction> void test_empty_sequence()
+{
+    typedef math::empty_sequence<char, Direction> sequence;
+    std::vector<sequence> examples;
+    examples.push_back(math::empty_sequence<char, Direction>());
 
     // It is impossible to check is_annihilator at all, so switch that test off.
     {
@@ -79,13 +81,11 @@ template <class Direction> void test_empty_sequence() {
         math::two_operations_checklist times_plus_checks;
         math::two_operations_checklist plus_times_checks;
 
-        plus_checks.do_not_check (
-            math::operation_properties::is_annihilator);
+        plus_checks.do_not_check(math::operation_properties::is_annihilator);
 
-        math::report_check_semiring <sequence, Direction> (
-            math::times, math::plus, examples, examples,
-            type_checks, times_checks, plus_checks,
-            times_plus_checks, plus_times_checks);
+        math::report_check_semiring<sequence, Direction>(
+            math::times, math::plus, examples, examples, type_checks,
+            times_checks, plus_checks, times_plus_checks, plus_times_checks);
     }
     {
         math::type_checklist type_checks;
@@ -94,43 +94,44 @@ template <class Direction> void test_empty_sequence() {
         math::two_operations_checklist times_plus_checks;
         math::two_operations_checklist plus_times_checks;
 
-        plus_checks.do_not_check (
-            math::operation_properties::is_annihilator);
+        plus_checks.do_not_check(math::operation_properties::is_annihilator);
 
-        math::report_check_magma <sequence> (
-            math::times, math::choose, examples, examples,
-            type_checks, times_checks, plus_checks,
-            times_plus_checks, plus_times_checks);
+        math::report_check_magma<sequence>(
+            math::times, math::choose, examples, examples, type_checks,
+            times_checks, plus_checks, times_plus_checks, plus_times_checks);
     }
 }
 
-template <class Direction> void test_single_sequence() {
-    typedef math::single_sequence <char, Direction> sequence;
-    std::vector <sequence> examples;
-    examples.push_back (math::single_sequence <char, Direction> ('a'));
-    examples.push_back (math::single_sequence <char, Direction> ('b'));
-    math::report_check_semiring <sequence, Direction> (
+template <class Direction> void test_single_sequence()
+{
+    typedef math::single_sequence<char, Direction> sequence;
+    std::vector<sequence> examples;
+    examples.push_back(math::single_sequence<char, Direction>('a'));
+    examples.push_back(math::single_sequence<char, Direction>('b'));
+    math::report_check_semiring<sequence, Direction>(
         math::times, math::plus, examples, examples);
-    math::report_check_magma <sequence> (
+    math::report_check_magma<sequence>(
         math::times, math::choose, examples, examples);
 }
 
-template <class Direction> void test_optional_sequence() {
-    typedef math::optional_sequence <char, Direction> sequence;
-    std::vector <sequence> examples;
-    examples.push_back (math::optional_sequence <char, Direction>());
-    examples.push_back (math::optional_sequence <char, Direction> ('a'));
-    examples.push_back (math::optional_sequence <char, Direction> ('b'));
-    math::report_check_semiring <sequence, Direction> (
+template <class Direction> void test_optional_sequence()
+{
+    typedef math::optional_sequence<char, Direction> sequence;
+    std::vector<sequence> examples;
+    examples.push_back(math::optional_sequence<char, Direction>());
+    examples.push_back(math::optional_sequence<char, Direction>('a'));
+    examples.push_back(math::optional_sequence<char, Direction>('b'));
+    math::report_check_semiring<sequence, Direction>(
         math::times, math::plus, examples, examples);
-    math::report_check_magma <sequence> (
+    math::report_check_magma<sequence>(
         math::times, math::choose, examples, examples);
 }
 
-template <class Direction> void test_sequence_annihilator() {
-    typedef math::sequence_annihilator <char, Direction> sequence;
-    std::vector <sequence> examples;
-    examples.push_back (math::sequence_annihilator <char, Direction>());
+template <class Direction> void test_sequence_annihilator()
+{
+    typedef math::sequence_annihilator<char, Direction> sequence;
+    std::vector<sequence> examples;
+    examples.push_back(math::sequence_annihilator<char, Direction>());
     // The annihilator is not an additive annihilator so switch that test off.
     {
         math::type_checklist type_checks;
@@ -139,13 +140,11 @@ template <class Direction> void test_sequence_annihilator() {
         math::two_operations_checklist times_plus_checks;
         math::two_operations_checklist plus_times_checks;
 
-        plus_checks.do_not_check (
-            math::operation_properties::is_annihilator);
+        plus_checks.do_not_check(math::operation_properties::is_annihilator);
 
-        math::report_check_semiring <sequence, Direction> (
-            math::times, math::plus, examples, examples,
-            type_checks, times_checks, plus_checks,
-            times_plus_checks, plus_times_checks);
+        math::report_check_semiring<sequence, Direction>(
+            math::times, math::plus, examples, examples, type_checks,
+            times_checks, plus_checks, times_plus_checks, plus_times_checks);
     }
     {
         math::type_checklist type_checks;
@@ -154,13 +153,11 @@ template <class Direction> void test_sequence_annihilator() {
         math::two_operations_checklist times_plus_checks;
         math::two_operations_checklist plus_times_checks;
 
-        plus_checks.do_not_check (
-            math::operation_properties::is_annihilator);
+        plus_checks.do_not_check(math::operation_properties::is_annihilator);
 
-        math::report_check_magma <sequence> (
-            math::times, math::choose, examples, examples,
-            type_checks, times_checks, plus_checks,
-            times_plus_checks, plus_times_checks);
+        math::report_check_magma<sequence>(
+            math::times, math::choose, examples, examples, type_checks,
+            times_checks, plus_checks, times_plus_checks, plus_times_checks);
     }
 }
 
@@ -171,24 +168,25 @@ template <class Direction> void test_sequence_annihilator() {
 //
 
 // Sequences form a semiring with plus.
-template <class Direction> struct check_plus {
-    template <class UnequalExamples, class Examples>
-        void operator() (UnequalExamples const & unequal_examples,
-            Examples const & examples) const
+template <class Direction> struct check_plus
+{
+    template <class UnequalExamples, class Examples> void operator()(
+        UnequalExamples const & unequal_examples,
+        Examples const & examples) const
     {
-        math::report_check_semiring <
-                math::sequence <char, Direction>, Direction> (
+        math::report_check_semiring<math::sequence<char, Direction>, Direction>(
             math::times, math::plus, unequal_examples, examples);
     }
 };
 
 // Sequences form a not-quitesemiring with choose.
-template <class Direction> struct check_choose {
-    template <class UnequalExamples, class Examples>
-        void operator() (UnequalExamples const & unequal_examples,
-            Examples const & examples) const
+template <class Direction> struct check_choose
+{
+    template <class UnequalExamples, class Examples> void operator()(
+        UnequalExamples const & unequal_examples,
+        Examples const & examples) const
     {
-        math::report_check_magma <math::sequence <char, Direction>> (
+        math::report_check_magma<math::sequence<char, Direction>>(
             math::times, math::choose, unequal_examples, examples);
     }
 };
@@ -196,32 +194,30 @@ template <class Direction> struct check_choose {
 // To make this feasible to compile within reasonable memory, all types are
 // always represented in the same order, but the values are different.
 template <class Direction, class Check>
-    void test_sequence_heterogeneous (Check const & check)
+void test_sequence_heterogeneous(Check const & check)
 {
-    typedef math::sequence <char, Direction> sequence;
-    typedef math::empty_sequence <char, Direction> empty_sequence;
-    typedef math::single_sequence <char, Direction> single_sequence;
-    typedef math::optional_sequence <char, Direction> optional_sequence;
+    typedef math::sequence<char, Direction> sequence;
+    typedef math::empty_sequence<char, Direction> empty_sequence;
+    typedef math::single_sequence<char, Direction> single_sequence;
+    typedef math::optional_sequence<char, Direction> optional_sequence;
     // Do not include annihilator or the memory requirements for compiling go
     // over 2GB.
     // typedef math::sequence_annihilator <char, Direction> annihilator;
 
-    auto unequal_examples = range::make_tuple (
-        empty_sequence(),
-        single_sequence ('a'), single_sequence ('b'),
-        optional_sequence ('c'),
-        sequence (std::string ("d")), sequence (std::string ("ab")),
-        sequence (std::string ("abc")), sequence (std::string ("cde")));
+    auto unequal_examples = range::make_tuple(
+        empty_sequence(), single_sequence('a'), single_sequence('b'),
+        optional_sequence('c'), sequence(std::string("d")),
+        sequence(std::string("ab")), sequence(std::string("abc")),
+        sequence(std::string("cde")));
 
-    auto examples = range::make_tuple (
-        empty_sequence(),
-        single_sequence ('a'), single_sequence ('b'),
-        optional_sequence(), optional_sequence ('a'),
-        sequence (std::string ("")), sequence (std::string ("a")),
-        sequence (std::string ("b")), sequence (std::string ("ab")),
-        sequence (std::string ("cab")), sequence (std::string ("cde")));
+    auto examples = range::make_tuple(
+        empty_sequence(), single_sequence('a'), single_sequence('b'),
+        optional_sequence(), optional_sequence('a'), sequence(std::string("")),
+        sequence(std::string("a")), sequence(std::string("b")),
+        sequence(std::string("ab")), sequence(std::string("cab")),
+        sequence(std::string("cde")));
 
-    check (unequal_examples, examples);
+    check(unequal_examples, examples);
 }
 
-#endif // MATH_TEST_MATH_TEST_SEQUENCE_TESTS_SLOW_HPP_INCLUDED
+#endif  // MATH_TEST_MATH_TEST_SEQUENCE_TESTS_SLOW_HPP_INCLUDED

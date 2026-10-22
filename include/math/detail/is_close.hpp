@@ -25,30 +25,34 @@ limitations under the License.
 
 namespace math { namespace detail {
 
-template <class Type, class Tolerance, class Enable =
-    typename boost::disable_if <is_log_float <Type>>::type>
-inline bool is_close (
-    Type const & left, Type const & right, Tolerance const & tolerance)
-{
-    using std::abs;
-    if (left == right)
-        return true;
-    else {
-        auto difference = abs (left - right);
-        return difference <= tolerance * abs (left)
-            && difference <= tolerance * abs (right);
+    template <
+        class Type, class Tolerance,
+        class Enable = typename boost::disable_if<is_log_float<Type>>::type>
+    inline bool is_close(
+        Type const & left, Type const & right, Tolerance const & tolerance)
+    {
+        using std::abs;
+        if (left == right) {
+            return true;
+        } else {
+            auto difference = abs(left - right);
+            return difference <= tolerance * abs(left)
+                && difference <= tolerance * abs(right);
+        }
     }
-}
 
-// log_float: compare exponents.
-template <class Type, class Tolerance, class Enable =
-    typename boost::enable_if <is_log_float <Type>>::type>
-inline bool is_close (
-    Type const & left, Type const & right, Tolerance const & tolerance,
-    // Dummy argument to distinguish this overloads from the one above.
-    void * = 0)
-{ return is_close (left.exponent(), right.exponent(), tolerance); }
+    // log_float: compare exponents.
+    template <
+        class Type, class Tolerance,
+        class Enable = typename boost::enable_if<is_log_float<Type>>::type>
+    inline bool is_close(
+        Type const & left, Type const & right, Tolerance const & tolerance,
+        // Dummy argument to distinguish this overloads from the one above.
+        void * = 0)
+    {
+        return is_close(left.exponent(), right.exponent(), tolerance);
+    }
 
-}} // namespace math::detail
+}}  // namespace math::detail
 
-#endif // MATH_DETAIL_IS_CLOSE_HPP
+#endif  // MATH_DETAIL_IS_CLOSE_HPP

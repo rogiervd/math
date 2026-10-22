@@ -27,10 +27,11 @@ amount of memory used for compiling the test.
 
 #include "sequence-tests-slow.hpp"
 
-BOOST_AUTO_TEST_SUITE (test_suite_sequence_full_homogeneous_right)
+BOOST_AUTO_TEST_SUITE(test_suite_sequence_full_homogeneous_right)
 
-BOOST_AUTO_TEST_CASE (test_sequence_right) {
-    test_sequence_homogeneous <math::right>();
+BOOST_AUTO_TEST_CASE(test_sequence_right)
+{
+    test_sequence_homogeneous<math::right>();
 }
 
 BOOST_AUTO_TEST_SUITE_END()
