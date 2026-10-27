@@ -2373,6 +2373,10 @@ Before calling this, check whether the following are defined correctly:
 \param operation The operation of the magma, e.g. math::times or math::plus.
 \param examples
     The examples, as a range.
+\param type_checks
+    Checklist for the type.
+\param operation_checks
+    Checklist for the operation.
 */
 template <class Magma, class Operation, class Examples> void check_magma(
     Operation operation, Examples const & examples,
@@ -2398,6 +2402,16 @@ check_magma, and the following property are defined correctly:
 \param examples
     The examples, as a range.
     They can have different types.
+\param type_checks
+    Checklist for the type.
+\param operation1_checks
+    Checklist for operation1.
+\param operation2_checks
+    Checklist for operation2.
+\param two_operation1_checks
+    Checklist for operation1 with operation2.
+\param two_operation2_checks
+    Checklist for operation2 with operation1.
 */
 template <class Magma, class Operation1, class Operation2, class Examples>
 void check_magma(
@@ -2441,6 +2455,16 @@ It also calls check_magma with the two operations.
 \param addition The addition operation, e.g. math::plus.
 \param examples
     The examples, as a range.
+\param type_checks
+    Checklist for the type.
+\param operation1_checks
+    Checklist for operation1.
+\param operation2_checks
+    Checklist for operation2.
+\param two_operation1_checks
+    Checklist for operation1 with operation2.
+\param two_operation2_checks
+    Checklist for operation2 with operation1.
 */
 template <
     class Magma, class Direction, class Multiplication, class Addition,
