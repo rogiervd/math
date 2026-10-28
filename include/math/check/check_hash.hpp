@@ -99,6 +99,9 @@ is exceedingly unlikely.
 If that happens, though, it is best to use slightly different values to test on
 until the spurious error goes away.
 
+\param report_hash_mismatch
+    A function to report errors, taking
+    (example1, example2, equal, hash_equal).
 \param examples
     The examples to test.
     Include in particular values that are different somehow but compare equal.

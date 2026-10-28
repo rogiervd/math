@@ -1144,7 +1144,7 @@ standard floating-point types.
 
 \param value.
 */
-static auto const is_member = callable::is_member();
+inline constexpr auto is_member = callable::is_member();
 
 /**
 \return Whether \c value is an annihilator for \a Operation.
@@ -1174,7 +1174,7 @@ This should normally correspond to <c> operator==</c>.
 \param left
 \param right
 */
-static auto const equal = callable::equal();
+inline constexpr auto equal = callable::equal();
 
 /**
 \return Whether \a left and \a right are not equal.
@@ -1182,7 +1182,7 @@ This should normally correspond to <c> operator!=</c>.
 \param left
 \param right
 */
-static auto const not_equal = callable::not_equal();
+inline constexpr auto not_equal = callable::not_equal();
 
 /**
 \return Whether \a left and \a right are approximately equal.
@@ -1190,7 +1190,7 @@ static auto const not_equal = callable::not_equal();
 \param right
 \todo Is there a requirement with respect to timing?
 */
-static auto const approximately_equal = callable::approximately_equal();
+inline constexpr auto approximately_equal = callable::approximately_equal();
 
 /**
 \return A non-member of the same magma as Magma.
@@ -1311,7 +1311,7 @@ This returns \c false for both orders of arguments iff equal returns \a true.
 \param magma1
 \param magma2
 */
-static auto const compare = callable::compare();
+inline constexpr auto compare = callable::compare();
 
 /**
 Return whether operation \a Operation will return \a magma1, or \a magma2.
@@ -1370,28 +1370,28 @@ either argument.
 \param magma1
 \param magma2
 */
-static auto const pick = callable::pick();
+inline constexpr auto pick = callable::pick();
 
 /**
 \return The most preferable out of \a magma1 and \a magma2.
 \param magma1
 \param magma2
 */
-static auto const choose = callable::choose();
+inline constexpr auto choose = callable::choose();
 
 /**
 \return The product of \a magma1 and \a magma2.
 \param magma1
 \param magma2
 */
-static auto const times = callable::times();
+inline constexpr auto times = callable::times();
 
 /**
 \return The sum of \a magma1 and \a magma2.
 \param magma1
 \param magma2
 */
-static auto const plus = callable::plus();
+inline constexpr auto plus = callable::plus();
 
 /**
 \return The division of dividend and divisor.
@@ -1587,7 +1587,7 @@ Output a human-readable representation of the magma to a stream.
 \param stream The output stream to write to.
 \param magma The value to output the representation of.
 */
-static auto const print = callable::print();
+inline constexpr auto print = callable::print();
 
 /**
 Return the inverse of the operation.
