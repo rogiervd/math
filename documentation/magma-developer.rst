@@ -215,8 +215,8 @@ Magmas (and semirings) can be tested.
 The properties must be set up (and checked) in advance, examples must be produced, and then the following functions can be used:
 
 .. doxygenfunction:: math::check_equal_on
-.. doxygenfunction:: math::check_magma(Operation, Examples const &)
-.. doxygenfunction:: math::check_magma(Operation1, Operation2, Examples const &)
+.. doxygenfunction:: math::check_magma(Operation, Examples const &, type_checklist &, operation_checklist &)
+.. doxygenfunction:: math::check_magma(Operation1, Operation2, Examples const &, type_checklist &, operation_checklist &, operation_checklist &, two_operations_checklist &, two_operations_checklist &)
 .. doxygenfunction:: math::check_semiring
 
 Useful classes
