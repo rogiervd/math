@@ -9,11 +9,11 @@ Operations
 
 Querying properties of objects:
 
-*   :cpp:type:`math::is_member`: test wether an object of the magma type is in the magma.
-*   :cpp:type:`math::equal`: test whether two objects are equal.
-*   :cpp:type:`math::not_equal`: test whether two objects are not equal.
-*   :cpp:type:`math::approximately_equal`: test whether two objects are approximately equal.
-*   :cpp:type:`math::compare`: compare two objects with a strict weak ordering.
+*   :cpp:var:`math::is_member`: test wether an object of the magma type is in the magma.
+*   :cpp:var:`math::equal`: test whether two objects are equal.
+*   :cpp:var:`math::not_equal`: test whether two objects are not equal.
+*   :cpp:var:`math::approximately_equal`: test whether two objects are approximately equal.
+*   :cpp:var:`math::compare`: compare two objects with a strict weak ordering.
 *   :cpp:func:`math::order`: compare two objects with an ordering implied by a path operation.
 
 Producing objects:
@@ -29,12 +29,10 @@ Producing objects:
 
 Binary operations:
 
-..  There seems to be no role ":cpp:variable:"!
-
-*   :cpp:type:`math::pick`: return one value or the other, depending on a condition.
-*   :cpp:type:`math::choose`: return the most preferable of two values.
-*   :cpp:type:`math::times`: multiply two values.
-*   :cpp:type:`math::plus`: add two values.
+*   :cpp:var:`math::pick`: return one value or the other, depending on a condition.
+*   :cpp:var:`math::choose`: return the most preferable of two values.
+*   :cpp:var:`math::times`: multiply two values.
+*   :cpp:var:`math::plus`: add two values.
 *   :cpp:func:`math::divide`: divide one value by another.
     For some magmas, left and right division are distinguished.
 *   :cpp:func:`math::minus`: subtract one value from another.
@@ -45,7 +43,7 @@ Unary operations:
 *   :cpp:func:`math::invert`: return the inverse of an element under an operation.
     This is not available for all magmas, even if the inverse operation is available.
 *   :cpp:func:`math::reverse`: return the reverse of an element under an operation.
-*   :cpp:type:`math::print`: output the element to a stream.
+*   :cpp:var:`math::print`: output the element to a stream.
 
 .. *   :cpp:func:`math::closure` - with operation
 
@@ -101,10 +99,10 @@ Operations on magmas
 .. doxygenvariable:: math::approximately_equal
 
 To support composite magmas (such as :cpp:class:`math::lexicographical`), different comparison operations are available.
-:cpp:func:`math::compare`, if implemented, gives a strict weak ordering, and is often equaivalent to ``operator<``.
+:cpp:var:`math::compare`, if implemented, gives a strict weak ordering, and is often equaivalent to ``operator<``.
 ``order <...>`` also implements a comparison, which may be related to ``compare``, but this is not necessary.
 ``order <choose>``, if defined, returns ``true`` if the left value is better, in some sense, than the right value.
-If it is defined, then :cpp:func:`math::choose` will return the better of two values.
+If it is defined, then :cpp:var:`math::choose` will return the better of two values.
 
 Some magmas, ``cost``, for example, implement the same behaviour with the operation ``plus``.
 ``order <plus>`` then compares two values; ``plus`` itself returns the best (in this case, lowest-cost) of two.

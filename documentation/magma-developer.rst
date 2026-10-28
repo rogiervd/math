@@ -66,7 +66,7 @@ The specialisation of ``times`` in namespace ``math::operation`` might look as f
         { return cost (left.value() + right.value()); }
     };
 
-This is a specialisation for ``cost_tag``, so when :cpp:type:`math::times` is called with arguments of type ``cost``, it knows to forward to this specialisation.
+This is a specialisation for ``cost_tag``, so when :cpp:var:`math::times` is called with arguments of type ``cost``, it knows to forward to this specialisation.
 It defines an ``operator()`` which takes the left and right operand, and returns the result.
 In general, the specialisation must have an operator() which takes any arguments that the specialisation is for.
 If a multiple types constitute a magma, then the operation must be implemented for all of the types.
