@@ -86,7 +86,6 @@ Compile-time helpers
 .. doxygenstruct:: math::right
 .. doxygenstruct:: math::either
 
-.. doxygenstruct:: math::magma_tag
 .. doxygenstruct:: math::is_magma
 
 .. doxygenstruct:: math::merge_magma
