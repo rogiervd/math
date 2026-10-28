@@ -31,6 +31,9 @@ lock(
 
 # Build the API documentation from C++ source code with Doxygen, for Breathe
 # to pick up.
+# This generates XML for everything, without complaining about undocumented
+# elements, so the choice what to include in the final output is made in the
+# .rst files.
 doxygen(
     name = "doxygen_xml",
     # Explicitly depend on the relevant files, as a filegroup in ../BUILD.bazel.
@@ -50,8 +53,7 @@ doxygen(
     # Extract everything, but do not warn about functions and classes without documentation.
     extract_all = True,
     generate_html = False,
-    # LaTeX output is enabled by default, but it is not needed, and it would
-    # need epstopdf to convert class diagrams.
+    # Leaving LaTeX output on would require epstopdf.
     generate_latex = False,
     # The XML output is used by Breathe to generate the Sphinx documentation.
     generate_xml = True,
