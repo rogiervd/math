@@ -10,7 +10,7 @@
 # for building the documentation.
 
 # Generating ./requirements.txt:
-#   bazel run //documentation:requirements
+#   bazel run //documentation:requirements.update
 # Building the documentation:
 #   bazel build //documentation:documentation
 # Building and locally serving the documentation:
@@ -22,7 +22,7 @@ load("@sphinxdocs//sphinxdocs:sphinx.bzl", "sphinx_build_binary", "sphinx_docs")
 load("@sphinxdocs//sphinxdocs:sphinx_docs_library.bzl", "sphinx_docs_library")
 
 # Regenerate requirements.txt from requirements.in with:
-#   bazel run //documentation:requirements
+#   bazel run //documentation:requirements.update
 lock(
     name = "requirements",
     srcs = ["requirements.in"],
