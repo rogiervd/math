@@ -223,3 +223,9 @@ cc_test(
         "test-lexicographical-3-full-homogeneous",
     ]
 ]
+
+# Run the examples from the documentation with the unit tests.
+test_suite(
+    name = "documentation_examples",
+    tests = ["//documentation/example:examples"],
+)
