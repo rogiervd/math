@@ -15,7 +15,7 @@ copyright = "2012-2015 Rogier van Dalen"
 # Add any Sphinx extension module names here, as strings.
 # They also need to be added in ./BUILD.bazel to sphinx_build_binary(deps=...).
 
-extensions = ["sphinx.ext.imgmath", "sphinx.ext.todo", "breathe"
+extensions = ["sphinx.ext.mathjax", "sphinx.ext.todo", "breathe"
 # TODO "intersphinx"
 ]
 
