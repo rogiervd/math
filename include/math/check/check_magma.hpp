@@ -1850,16 +1850,9 @@ namespace check_detail {
             type_checklist & checks, Examples const & examples) const
         {
             range::for_each(examples, [&](auto const & example1) {
-                (*this)(checks, examples, example1);
-            });
-        }
-
-        template <class Example1> void operator()(
-            type_checklist & checks, Examples const & examples,
-            Example1 const & example1) const
-        {
-            range::for_each(examples, [&](auto const & example2) {
-                (*this)(checks, example1, example2);
+                range::for_each(examples, [&](auto const & example2) {
+                    (*this)(checks, example1, example2);
+                });
             });
         }
 
