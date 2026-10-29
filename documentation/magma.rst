@@ -24,7 +24,11 @@ Examples are :cpp:class:`math::callable::times` and :cpp:class:`math::callable::
 For convenience, static variables of these classes are ``math::times`` and ``math::plus``.
 After ``#include "math/arithmetic_magma.hpp"``, this should compile:
 
-.. literalinclude:: code_sample/magma/callable.ipp
+.. literalinclude:: example/magma-examples.cpp
+   :language: cpp
+   :start-after: [start-callable]
+   :end-before: [end-callable]
+   :dedent:
 
 You may think that this does not give much of an advantage over using operators that are built-in or overloaded.
 However, read on.
@@ -35,7 +39,11 @@ For example, multiplying any number by ``1`` yields the original number.
 Similarly, ``0`` is the identity element for addition.
 This should compile:
 
-.. literalinclude:: code_sample/magma/zero.ipp
+.. literalinclude:: example/magma-examples.cpp
+   :language: cpp
+   :start-after: [start-zero]
+   :end-before: [end-zero]
+   :dedent:
 
 ``math::zero`` and ``math::one`` are shorthands for the identity of plus and times.
 
@@ -43,7 +51,11 @@ An operation can have an inverse operation.
 This inverse of an operation is the binary operation that undoes it.
 For example, since ``2. * 3.`` equals ``6.``:
 
-.. literalinclude:: code_sample/magma/inverse_operation.ipp
+.. literalinclude:: example/magma-examples.cpp
+   :language: cpp
+   :start-after: [start-inverse_operation]
+   :end-before: [end-inverse_operation]
+   :dedent:
 
 ``math::inverse_operation (math::times)`` simply returns an object of type :cpp:class:`math::callable::divide`.
 Note that this is possible for real numbers.
@@ -54,7 +66,11 @@ Division removes elements from either the front or the back, which is *left divi
 It is possible to differentiate between left and right division with the tag classes :cpp:class:`math::left` and :cpp:class:`math::right`.
 For example,
 
-.. literalinclude:: code_sample/magma/left_right.ipp
+.. literalinclude:: example/magma-examples.cpp
+   :language: cpp
+   :start-after: [start-left_right]
+   :end-before: [end-left_right]
+   :dedent:
 
 For real numbers, left and right division perform the same operation, but for sequence semirings they are different.
 :cpp:struct:`math::either`, the default argument for direction, indicates that they are the same.
@@ -62,7 +78,11 @@ For real numbers, left and right division perform the same operation, but for se
 Another use of function classes is to query properties.
 Thus,
 
-.. literalinclude:: code_sample/magma/properties.ipp
+.. literalinclude:: example/magma-examples.cpp
+   :language: cpp
+   :start-after: [start-properties]
+   :end-before: [end-properties]
+   :dedent:
 
 Notice that a cute syntax is used where classes in namespace ``math::callable`` are used to indicate function calls.
 This goes for ``math::has`` and ``math::result_of`` as well.
@@ -72,7 +92,11 @@ All these properties must be implemented explicitly.
 To help with this, such functions as :cpp:func:`math::check_semiring` exist (after saying ``#include "math/check/check_magma.hpp"``).
 This checks, on a list of examples, that ``float`` is indeed a semiring:
 
-.. literalinclude:: code_sample/magma/check_semiring.ipp
+.. literalinclude:: example/magma-examples.cpp
+   :language: cpp
+   :start-after: [start-check_semiring]
+   :end-before: [end-check_semiring]
+   :dedent:
 
 Functions in namespace ``math`` work only on one magma.
 E.g. ``math::times (3., 8.f)``, which tries to multiple a ``double`` with a ``float``, does not work.

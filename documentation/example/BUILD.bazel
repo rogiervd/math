@@ -1,0 +1,41 @@
+# SPDX-FileCopyrightText: Copyright 2026 Rogier van Dalen
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# Allow the examples that are used in the documentation to be run in tests.
+# These can be run separately by saying
+#   bazel test //documentation/example:examples
+# but they should be referenced in test/BUILD.bazel so they run with the unit
+# tests.
+
+load("@rules_cc//cc:defs.bzl", "cc_test")
+
+[
+    cc_test(
+        name = "test_" + example_file_name.removesuffix(".cpp"),
+        size = "small",
+        srcs = [example_file_name],
+        # The examples will often use assert().
+        # In release builds, assert() is disabled, leading to errors about unused variables.
+        # So undefine NDEBUG.
+        copts = ["-UNDEBUG"],
+        deps = [
+            "//:math",
+            "//:math_check",
+        ],
+    )
+    for example_file_name in glob(["*.cpp"])
+]
+
+# The examples, for Doxygen and Sphinx to include.
+filegroup(
+    name = "sources",
+    srcs = glob(["*.cpp"]),
+    visibility = ["//documentation:__pkg__"],
+)
+
+# All tests in this package.
+test_suite(
+    name = "examples",
+    visibility = ["//test:__subpackages__"],
+)
