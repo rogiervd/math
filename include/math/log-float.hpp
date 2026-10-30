@@ -20,8 +20,8 @@ Define the log_float and signed_log_float classes.
 #include <type_traits>
 #include <utility>
 
-#include <boost/functional/hash_fwd.hpp>
-#include <boost/utility/enable_if.hpp>
+#include "boost/functional/hash_fwd.hpp"
+#include "boost/utility/enable_if.hpp"
 
 #include "detail/log-float_arithmetic.hpp"
 #include "detail/log-float_base.hpp"

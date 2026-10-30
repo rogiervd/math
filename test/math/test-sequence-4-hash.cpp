@@ -3,14 +3,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #define BOOST_TEST_MODULE test_sequence_hash
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
 #include "math/sequence.hpp"
 
 #include <string>
 #include <vector>
 
-#include <boost/functional/hash.hpp>
+#include "boost/functional/hash.hpp"
 
 #include "range/std/string.hpp"
 #include "range/std/vector.hpp"

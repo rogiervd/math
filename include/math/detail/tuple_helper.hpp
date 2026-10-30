@@ -11,10 +11,10 @@ Define helpers for magmas that consist of other magmas.
 
 #include <type_traits>
 
-#include <boost/utility/enable_if.hpp>
+#include "boost/utility/enable_if.hpp"
 
-#include <boost/mpl/and.hpp>
-#include <boost/mpl/not.hpp>
+#include "boost/mpl/and.hpp"
+#include "boost/mpl/not.hpp"
 
 #include "meta/all_of_c.hpp"
 #include "meta/any_of_c.hpp"

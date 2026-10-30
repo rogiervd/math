@@ -9,11 +9,11 @@ Define a Cartesian product of magmas.
 #ifndef MATH_PRODUCT_HPP_INCLUDED
 #define MATH_PRODUCT_HPP_INCLUDED
 
-#include <boost/mpl/and.hpp>
-#include <boost/mpl/not.hpp>
+#include "boost/mpl/and.hpp"
+#include "boost/mpl/not.hpp"
 
-#include <boost/functional/hash_fwd.hpp>
-#include <boost/utility/enable_if.hpp>
+#include "boost/functional/hash_fwd.hpp"
+#include "boost/utility/enable_if.hpp"
 
 #include "meta/all_of_c.hpp"
 #include "meta/vector.hpp"

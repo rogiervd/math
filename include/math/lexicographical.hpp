@@ -12,10 +12,10 @@ the two values according to a lexicographical ordering.
 
 #include <type_traits>
 
-#include <boost/mpl/and.hpp>
+#include "boost/mpl/and.hpp"
 
-#include <boost/functional/hash_fwd.hpp>
-#include <boost/utility/enable_if.hpp>
+#include "boost/functional/hash_fwd.hpp"
+#include "boost/utility/enable_if.hpp"
 
 #include "meta/all_of_c.hpp"
 #include "meta/vector.hpp"

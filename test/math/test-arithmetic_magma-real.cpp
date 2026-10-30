@@ -8,7 +8,7 @@ This performs tests on floating-point numbers.
 */
 
 #define BOOST_TEST_MODULE test_arithmetic_magma
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
 #include "math/arithmetic_magma.hpp"
 

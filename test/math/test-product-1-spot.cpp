@@ -7,14 +7,14 @@ Test product.hpp.
 */
 
 #define BOOST_TEST_MODULE test_math_product
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
 #include "math/product.hpp"
 
 #include <string>
 #include <vector>
 
-#include <boost/mpl/assert.hpp>
+#include "boost/mpl/assert.hpp"
 
 #include "range/std/string.hpp"
 

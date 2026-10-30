@@ -11,10 +11,10 @@ Tests for arithmetic_magma on reals.
 
 #include "math/arithmetic_magma.hpp"
 
-#include <boost/math/special_functions/next.hpp>
-#include <boost/test/tools/floating_point_comparison.hpp>
+#include "boost/math/special_functions/next.hpp"
+#include "boost/test/tools/floating_point_comparison.hpp"
 
-#include <boost/mpl/assert.hpp>
+#include "boost/mpl/assert.hpp"
 
 #include "range/std/vector.hpp"
 

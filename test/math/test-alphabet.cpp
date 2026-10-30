@@ -3,14 +3,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #define BOOST_TEST_MODULE test_math_alphabet
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
 #include "math/alphabet.hpp"
 
 #include <string>
 
-#include <boost/functional/hash.hpp>
-#include <boost/mpl/assert.hpp>
+#include "boost/functional/hash.hpp"
+#include "boost/mpl/assert.hpp"
 
 #define CHECK_CONSTANT(expression) \
     BOOST_MPL_ASSERT(              \

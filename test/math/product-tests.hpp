@@ -15,7 +15,7 @@ Tests for math::product.
 #include <type_traits>
 #include <vector>
 
-#include <boost/mpl/assert.hpp>
+#include "boost/mpl/assert.hpp"
 
 #include "range/std/string.hpp"
 
