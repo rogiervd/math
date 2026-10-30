@@ -9,9 +9,9 @@
 #include <limits>
 #include <type_traits>
 
-#include <boost/mpl/bool.hpp>
+#include "boost/mpl/bool.hpp"
 
-#include <boost/functional/hash_fwd.hpp>
+#include "boost/functional/hash_fwd.hpp"
 
 #include "magma.hpp"
 

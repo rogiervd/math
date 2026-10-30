@@ -12,7 +12,7 @@ The following therefore end up testing the main parts of magma.hpp:
 */
 
 #define BOOST_TEST_MODULE test_magma
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
 #include "math/magma.hpp"
 

@@ -14,7 +14,7 @@ Tests for arithmetic_magma.hpp for integer types.
 #include <iostream>
 #include <typeinfo>
 
-#include <boost/mpl/assert.hpp>
+#include "boost/mpl/assert.hpp"
 
 #include "range/std/vector.hpp"
 

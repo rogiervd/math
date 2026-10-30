@@ -7,7 +7,7 @@ Test product.hpp.
 */
 
 #define BOOST_TEST_MODULE test_math_product_full_homogeneous
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
 #include "product-tests.hpp"
 

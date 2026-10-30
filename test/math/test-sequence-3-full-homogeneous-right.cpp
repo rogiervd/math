@@ -11,7 +11,7 @@ amount of memory used for compiling the test.
 */
 
 #define BOOST_TEST_MODULE test_sequence_full_homogeneous_right
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
 #include "sequence-tests-slow.hpp"
 

@@ -7,13 +7,13 @@ Test cost.hpp.
 */
 
 #define BOOST_TEST_MODULE test_cost
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
-#include <boost/test/tools/floating_point_comparison.hpp>
+#include "boost/test/tools/floating_point_comparison.hpp"
 
 #include "math/cost.hpp"
 
-#include <boost/mpl/assert.hpp>
+#include "boost/mpl/assert.hpp"
 
 #include "range/std/vector.hpp"
 

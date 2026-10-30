@@ -11,7 +11,7 @@ be run first.
 */
 
 #define BOOST_TEST_MODULE test_sequence_fast_left_properties
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
 #include "sequence-tests-fast-properties.hpp"
 

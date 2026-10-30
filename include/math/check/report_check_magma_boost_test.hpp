@@ -13,9 +13,9 @@ Wrapper for check_magma et al. that produces Boost.Test error messages.
 #include <ostream>
 #include <string>
 
-#include <boost/test/test_tools.hpp>
+#include "boost/test/test_tools.hpp"
 // For demangling type names.
-#include <boost/units/detail/utility.hpp>
+#include "boost/units/detail/utility.hpp"
 
 #include "math/check/check_hash.hpp"
 #include "math/check/check_magma.hpp"

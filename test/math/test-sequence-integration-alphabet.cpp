@@ -7,7 +7,7 @@ Integration check to see whether using dense symbols in a sequence works.
 */
 
 #define BOOST_TEST_MODULE test_sequence_alphabet
-#include <boost/test/unit_test.hpp>
+#include "boost/test/unit_test.hpp"
 
 #include "math/alphabet.hpp"
 #include "math/sequence.hpp"
