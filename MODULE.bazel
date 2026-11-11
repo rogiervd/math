@@ -46,8 +46,8 @@ git_override(
 
 # Python packages, which are solely for generating documentation with Sphinx.
 # See documentation/BUILD.bazel.
-bazel_dep(name = "rules_python", version = "2.4.1")
-bazel_dep(name = "sphinxdocs", version = "2.4.1")
+bazel_dep(name = "rules_python", version = "2.4.3")
+bazel_dep(name = "sphinxdocs", version = "2.4.3")
 bazel_dep(name = "platforms", version = "1.1.0")
 
 # Python toolchain
