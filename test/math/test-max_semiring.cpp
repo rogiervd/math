@@ -11,7 +11,6 @@ Test max_semiring.hpp.
 
 #include "math/max_semiring.hpp"
 
-#include "boost/mpl/assert.hpp"
 
 #include "range/std/vector.hpp"
 

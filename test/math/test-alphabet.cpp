@@ -3,6 +3,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 #define BOOST_TEST_MODULE test_math_alphabet
+#include <type_traits>
+
 #include "boost/test/unit_test.hpp"
 
 #include "math/alphabet.hpp"
@@ -10,11 +12,10 @@
 #include <string>
 
 #include "boost/functional/hash.hpp"
-#include "boost/mpl/assert.hpp"
 
 #define CHECK_CONSTANT(expression) \
-    BOOST_MPL_ASSERT(              \
-        (rime::equal_constant<decltype(expression), rime::true_type>) );
+    static_assert(                 \
+        rime::equal_constant<decltype(expression), rime::true_type>::value);
 
 BOOST_AUTO_TEST_SUITE(test_suite_math_alphabet)
 
@@ -142,11 +143,11 @@ BOOST_AUTO_TEST_CASE(test_math_alphabet)
 
     {
         auto empty_again = alphabet2.get_symbol<empty>(dense_symbol_for_empty);
-        BOOST_MPL_ASSERT((std::is_same<decltype(empty_again), empty>) );
+        static_assert(std::is_same_v<decltype(empty_again), empty>);
     }
 
-    BOOST_MPL_ASSERT(
-        (rime::is_constant<decltype(dense_symbol_for_empty.id())>) );
+    static_assert(
+        rime::is_constant<decltype(dense_symbol_for_empty.id())>::value);
     typedef decltype(dense_symbol_for_empty.id()) dense_id_for_empty_type;
     static_assert(
         dense_id_for_empty_type::value
@@ -175,21 +176,22 @@ BOOST_AUTO_TEST_CASE(test_math_alphabet)
         auto alphabet3 = math::add_special_symbol<empty>(alphabet2);
         auto dense_symbol_for_empty_3 = alphabet2.get_dense(empty());
         CHECK_CONSTANT(alphabet3.is_special_symbol(dense_symbol_for_empty_3));
-        BOOST_MPL_ASSERT((std::is_same<
-                          decltype(dense_symbol_for_empty),
-                          decltype(dense_symbol_for_empty_3)>) );
+        static_assert(std::is_same_v<
+                      decltype(dense_symbol_for_empty),
+                      decltype(dense_symbol_for_empty_3)>);
         (void) (dense_symbol_for_empty == dense_symbol_for_empty_3);
-        BOOST_MPL_ASSERT(
-            (rime::equal_constant<
+        static_assert(
+            rime::equal_constant<
                 decltype(dense_symbol_for_empty == dense_symbol_for_empty_3),
-                rime::true_type>) );
+                rime::true_type>::value);
     }
 
     /* Add a new special symbol. */
     auto alphabet4 = math::add_special_symbol<phi>(alphabet2);
     auto dense_symbol_for_phi = alphabet4.get_dense(phi());
     CHECK_CONSTANT(alphabet4.is_special_symbol(dense_symbol_for_phi));
-    BOOST_MPL_ASSERT((rime::is_constant<decltype(dense_symbol_for_phi.id())>) );
+    static_assert(
+        rime::is_constant<decltype(dense_symbol_for_phi.id())>::value);
     typedef decltype(dense_symbol_for_phi.id()) dense_symbol_for_phi_type;
     static_assert(
         dense_symbol_for_phi_type::value
@@ -240,20 +242,20 @@ BOOST_AUTO_TEST_CASE(test_math_alphabet)
 
     {
         auto empty_again = alphabet4.get_symbol<empty>(dense_symbol_for_empty);
-        BOOST_MPL_ASSERT((std::is_same<decltype(empty_again), empty>) );
+        static_assert(std::is_same_v<decltype(empty_again), empty>);
     }
     {
         auto empty_again =
             alphabet4.get_symbol<empty>(general_symbol_for_empty);
-        BOOST_MPL_ASSERT((std::is_same<decltype(empty_again), empty>) );
+        static_assert(std::is_same_v<decltype(empty_again), empty>);
     }
     {
         auto phi_again = alphabet4.get_symbol<phi>(dense_symbol_for_phi);
-        BOOST_MPL_ASSERT((std::is_same<decltype(phi_again), phi>) );
+        static_assert(std::is_same_v<decltype(phi_again), phi>);
     }
     {
         auto phi_again = alphabet4.get_symbol<phi>(general_symbol_for_phi);
-        BOOST_MPL_ASSERT((std::is_same<decltype(phi_again), phi>) );
+        static_assert(std::is_same_v<decltype(phi_again), phi>);
     }
 
     // This triggers a static assertion, because room for only 2 special symbols
@@ -307,7 +309,7 @@ BOOST_AUTO_TEST_CASE(test_math_alphabet_tag)
     alphabet_type alphabet;
 
     typedef math::dense_symbol<std::int_least32_t, word> dense_symbol;
-    BOOST_MPL_ASSERT((std::is_convertible<dense_symbol, dense_symbol>) );
+    static_assert(std::is_convertible_v<dense_symbol, dense_symbol>);
 
     auto dense_1 = alphabet.add_symbol("four");
     // Use dense_1 to prevent a compiler error.
@@ -315,8 +317,7 @@ BOOST_AUTO_TEST_CASE(test_math_alphabet_tag)
 
     typedef math::dense_symbol<std::int_least32_t, int> dense_symbol_wrong_tag;
     // Symbols with different tags should not be convertible.
-    BOOST_MPL_ASSERT_NOT(
-        (std::is_convertible<dense_symbol, dense_symbol_wrong_tag>) );
+    static_assert(!std::is_convertible_v<dense_symbol, dense_symbol_wrong_tag>);
 
     // Try to compare symbols with different tags: compiler error.
     // dense_symbol_wrong_tag() == dense_2;

@@ -11,11 +11,12 @@ compiling takes a lot less memory and time.
 #ifndef MATH_TEST_MATH_TEST_SEQUENCE_TESTS_FAST_HPP_INCLUDED
 #define MATH_TEST_MATH_TEST_SEQUENCE_TESTS_FAST_HPP_INCLUDED
 
+#include <type_traits>
+
 #include "math/sequence.hpp"
 
 #include <string>
 
-#include "boost/mpl/assert.hpp"
 
 #include "range/std/list.hpp"
 #include "range/std/string.hpp"
@@ -105,11 +106,11 @@ template <class Direction> void test_construction()
 
 /* Check operations. */
 
-#define CHECK_OPERATOR_TYPE(operation, left_type, right_type, result_type)    \
-    BOOST_MPL_ASSERT((std::is_same<                                           \
-                      typename std::decay<typename math::result_of<operation( \
-                          left_type, right_type)>::type>::type,               \
-                      result_type>) )
+#define CHECK_OPERATOR_TYPE(operation, left_type, right_type, result_type) \
+    static_assert(std::is_same_v<                                          \
+                  typename std::decay<typename math::result_of<operation(  \
+                      left_type, right_type)>::type>::type,                \
+                  result_type>)
 
 #define CHECK_TIMES_TYPE(left_type, right_type, result_type) \
     CHECK_OPERATOR_TYPE(                                     \
@@ -120,11 +121,11 @@ template <class Direction> void test_construction()
         math::callable::plus, left_type, right_type, result_type)
 
 #define CHECK_PICK_TYPE(condition_type, left_type, right_type, result_type)    \
-    BOOST_MPL_ASSERT(                                                          \
-        (std::is_same<                                                         \
+    static_assert(                                                             \
+        std::is_same_v<                                                        \
             typename std::decay<typename math::result_of<math::callable::pick( \
                 condition_type, left_type, right_type)>::type>::type,          \
-            result_type>) )
+            result_type>)
 
 #define CHECK_CHOOSE_TYPE(left_type, right_type, result_type) \
     CHECK_OPERATOR_TYPE(                                      \

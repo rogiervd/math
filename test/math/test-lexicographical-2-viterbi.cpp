@@ -7,6 +7,8 @@ Test lexicographical.hpp with an example: the Viterbi semiring.
 */
 
 #define BOOST_TEST_MODULE test_math_lexicographical_fast
+#include <type_traits>
+
 #include "boost/test/unit_test.hpp"
 
 #include "math/lexicographical.hpp"
@@ -15,7 +17,6 @@ Test lexicographical.hpp with an example: the Viterbi semiring.
 #include <ostream>
 #include <string>
 
-#include "boost/mpl/assert.hpp"
 
 #include "range/std/string.hpp"
 
@@ -54,10 +55,11 @@ BOOST_AUTO_TEST_CASE(test_viterbi)
 
     auto result = ((v_1_a * v_0_5_b) + (v_0_25_c * v_1_d)) * v_0_25_e;
     std::cout << result << std::endl;
-    BOOST_MPL_ASSERT((std::is_same<
-                      decltype(result),
-                      math::lexicographical<math::over<
-                          math::max_semiring<float>, math::sequence<char>>>>) );
+    static_assert(
+        std::is_same_v<
+            decltype(result),
+            math::lexicographical<
+                math::over<math::max_semiring<float>, math::sequence<char>>>>);
     BOOST_CHECK_EQUAL(range::at_c<0>(result.components()).value(), .125);
     BOOST_CHECK(
         range::at_c<1>(result.components())
@@ -85,11 +87,10 @@ BOOST_AUTO_TEST_CASE(test_cost)
 
     auto result = ((v_1_a * v_0_5_b) + (v_0_25_c * v_1_d)) * v_0_25_e;
     std::cout << result << std::endl;
-    BOOST_MPL_ASSERT(
-        (std::is_same<
-            decltype(result),
-            math::lexicographical<
-                math::over<math::cost<float>, math::sequence<char>>>>) );
+    static_assert(std::is_same_v<
+                  decltype(result),
+                  math::lexicographical<
+                      math::over<math::cost<float>, math::sequence<char>>>>);
     BOOST_CHECK_EQUAL(range::at_c<0>(result.components()).value(), 1.5);
     BOOST_CHECK(
         range::at_c<1>(result.components())
