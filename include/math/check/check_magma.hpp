@@ -1837,25 +1837,16 @@ namespace check_detail {
         }
     };
 
-    using std::bind;
-    using std::ref;
-    using std::placeholders::_1;
-
     template <class Examples> struct check_equal_on
     {
         void operator()(
             type_checklist & checks, Examples const & examples) const
         {
-            range::for_each(
-                examples, bind(ref(*this), ref(checks), ref(examples), _1));
-        }
-
-        template <class Example1> void operator()(
-            type_checklist & checks, Examples const & examples,
-            Example1 const & example1) const
-        {
-            range::for_each(
-                examples, bind(ref(*this), ref(checks), ref(example1), _1));
+            range::for_each(examples, [&](auto const & example1) {
+                range::for_each(examples, [&](auto const & example2) {
+                    (*this)(checks, example1, example2);
+                });
+            });
         }
 
         template <class Example1, class Example2> void operator()(
@@ -1929,11 +1920,11 @@ namespace check_detail {
             static_assert(math::has<callable::is_member(Magma)>::value);
 
             // Check with each example.
-            range::for_each(
-                examples,
-                bind(
-                    ref(*this), ref(type_checks), ref(operation_checks),
-                    ref(operation), ref(examples), _1));
+            range::for_each(examples, [&](auto const & example1) {
+                (*this)(
+                    type_checks, operation_checks, operation, examples,
+                    example1);
+            });
         }
 
         // One example: check is_member, operation, identity, invert, reverse.
@@ -2014,12 +2005,11 @@ namespace check_detail {
                 example1);
 
             // Check with each combination of two examples.
-            // _1 will be example2.
-            range::for_each(
-                examples,
-                bind(
-                    ref(*this), ref(type_checks), ref(operation_checks),
-                    ref(operation), ref(examples), ref(example1), _1));
+            range::for_each(examples, [&](auto const & example2) {
+                (*this)(
+                    type_checks, operation_checks, operation, examples,
+                    example1, example2);
+            });
         }
 
         template <class Example1, class Example2> void operator()(
@@ -2129,11 +2119,11 @@ namespace check_detail {
                               decltype(example1), decltype(example2))>::value);
 
             // Check with each combination of three examples.
-            range::for_each(
-                examples,
-                bind(
-                    ref(*this), ref(type_checks), ref(operation_checks),
-                    ref(operation), ref(example1), ref(example2), _1));
+            range::for_each(examples, [&](auto const & example3) {
+                (*this)(
+                    type_checks, operation_checks, operation, example1,
+                    example2, example3);
+            });
         }
 
         template <class Example1, class Example2, class Example3>
@@ -2176,12 +2166,11 @@ namespace check_detail {
             Examples const & examples) const
         {
             // Check with each example.
-            range::for_each(
-                examples,
-                bind(
-                    ref(*this), ref(type_checks), ref(operation_checks),
-                    ref(two_operations_checks), ref(operation1),
-                    ref(operation2), ref(examples), _1));
+            range::for_each(examples, [&](auto const & example1) {
+                (*this)(
+                    type_checks, operation_checks, two_operations_checks,
+                    operation1, operation2, examples, example1);
+            });
         }
 
         // One example: check is_member, operation, and identity.
@@ -2203,11 +2192,11 @@ namespace check_detail {
                 operation1, operation2, example1);
 
             // Check with each combination of two examples.
-            range::for_each(
-                examples,
-                bind(
-                    ref(*this), ref(two_operations_checks), ref(operation1),
-                    ref(operation2), ref(examples), ref(example1), _1));
+            range::for_each(examples, [&](auto const & example2) {
+                (*this)(
+                    two_operations_checks, operation1, operation2, examples,
+                    example1, example2);
+            });
         }
 
         template <class Example1, class Example2> void operator()(
@@ -2216,11 +2205,11 @@ namespace check_detail {
             Example1 const & example1, Example2 const & example2) const
         {
             // Check with each combination of three examples.
-            range::for_each(
-                examples,
-                bind(
-                    ref(*this), ref(checks), ref(operation1), ref(operation2),
-                    ref(example1), ref(example2), _1));
+            range::for_each(examples, [&](auto const & example3) {
+                (*this)(
+                    checks, operation1, operation2, example1, example2,
+                    example3);
+            });
         }
 
         template <class Example1, class Example2, class Example3>
@@ -2285,12 +2274,11 @@ namespace check_detail {
                 "addition.");
 
             // Check with each example.
-            range::for_each(
-                examples,
-                bind(
-                    ref(*this), ref(type_checks), ref(operation_checks),
-                    ref(two_operations_checks), ref(multiplication),
-                    ref(addition), _1));
+            range::for_each(examples, [&](auto const & example1) {
+                (*this)(
+                    type_checks, operation_checks, two_operations_checks,
+                    multiplication, addition, example1);
+            });
         }
 
         // One example: check that the additive identity is the multiplicative
