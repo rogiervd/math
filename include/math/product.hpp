@@ -9,11 +9,12 @@ Define a Cartesian product of magmas.
 #ifndef MATH_PRODUCT_HPP_INCLUDED
 #define MATH_PRODUCT_HPP_INCLUDED
 
+#include <type_traits>
+
 #include "boost/mpl/and.hpp"
 #include "boost/mpl/not.hpp"
 
 #include "boost/functional/hash_fwd.hpp"
-#include "boost/utility/enable_if.hpp"
 
 #include "meta/all_of_c.hpp"
 #include "meta/vector.hpp"
@@ -116,8 +117,8 @@ public:
     // All elements explicitly convertible: implicit constructor.
     template <
         class... Arguments,
-        class Enable = typename boost::enable_if<utility::are_constructible<
-            meta::vector<Components...>, meta::vector<Arguments...>>>::type>
+        class Enable = std::enable_if_t<utility::are_constructible<
+            meta::vector<Components...>, meta::vector<Arguments...>>::value>>
     explicit product(Arguments &&... arguments)
     : components_(std::forward<Arguments>(arguments)...)
     {}
@@ -133,9 +134,9 @@ public:
     */
     template <
         class... OtherComponents,
-        class Enable = typename boost::enable_if<utility::are_convertible<
+        class Enable = std::enable_if_t<utility::are_convertible<
             meta::vector<OtherComponents const &...>,
-            meta::vector<Components...>>>::type>
+            meta::vector<Components...>>::value>>
     product(product<over<OtherComponents...>, Inverse> const & other)
     : components_(other.components())
     {}
@@ -150,11 +151,11 @@ public:
     */
     template <class... OtherComponents> explicit product(
         product<over<OtherComponents...>, Inverse> const & other,
-        typename boost::enable_if<
+        std::enable_if_t<
             tuple_helper::components_constructible_only<
                 meta::vector<Components...>,
-                meta::vector<OtherComponents const &...>>,
-            dummy_type>::type = dummy_type())
+                meta::vector<OtherComponents const &...>>::value,
+            dummy_type> = dummy_type())
     : components_(other.components())
     {}
 
@@ -275,19 +276,19 @@ namespace operation {
     // compare.
     template <class... ComponentTags> struct compare<
         product_tag<over<ComponentTags...>, with_inverse<>>,
-        typename boost::enable_if<meta::all_of_c<
-            is_implemented<compare<ComponentTags>>::value...>>::type>
+        std::enable_if_t<meta::all_of_c<
+            is_implemented<compare<ComponentTags>>::value...>::value>>
     : tuple_helper::compare_components<math::callable::compare> {};
 
     // With inverse: annihilators go at the end.
     template <class... ComponentTags, class Operation> struct compare<
         product_tag<over<ComponentTags...>, with_inverse<Operation>>,
-        typename boost::enable_if<boost::mpl::and_<
+        std::enable_if_t<boost::mpl::and_<
             meta::all_of_c<is_implemented<compare<ComponentTags>>::value...>,
             // Only instantiate this if the Operation is not void.
             // GCC 4.6 requires this, or it won't realise the the
             // specialisation above is better.
-            boost::mpl::not_<std::is_same<Operation, void>>>>::type>
+            boost::mpl::not_<std::is_same<Operation, void>>>::value>>
     : tuple_helper::compare_if_annihilator<
           Operation,
           tuple_helper::compare_components<math::callable::compare>> {};
@@ -319,8 +320,8 @@ namespace operation {
     template <class... Tags, class Inverses, class Operation>
     struct annihilator<
         product_tag<over<Tags...>, Inverses>, Operation,
-        typename boost::enable_if<meta::all_of_c<
-            is_implemented<annihilator<Tags, Operation>>::value...>>::type>
+        std::enable_if_t<meta::all_of_c<
+            is_implemented<annihilator<Tags, Operation>>::value...>::value>>
     : tuple_helper::nullary_operation<
           callable::make_product<Inverses>,
           meta::vector<annihilator<Tags, Operation>...>> {};

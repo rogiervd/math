@@ -5,13 +5,14 @@
 #ifndef MATH_COST_HPP_INCLUDED
 #define MATH_COST_HPP_INCLUDED
 
+#include <type_traits>
+
 #include <algorithm>
 #include <functional>
 #include <iosfwd>
 #include <limits>
 
 #include "boost/functional/hash_fwd.hpp"
-#include "boost/utility/enable_if.hpp"
 
 #include "magma.hpp"
 
@@ -91,8 +92,7 @@ namespace operation {
 
     template <class Type> struct is_member<
         cost_tag<Type>,
-        typename boost::enable_if_c<
-            std::numeric_limits<Type>::has_quiet_NaN>::type>
+        std::enable_if_t<std::numeric_limits<Type>::has_quiet_NaN>>
     {
         // Detect NaN.
         bool operator()(cost<Type> const & v) const { return v == v; }
@@ -136,8 +136,7 @@ namespace operation {
     // Return the not-a-number value, not-a-number, if it is available.
     template <class Type> struct non_member<
         cost_tag<Type>,
-        typename boost::enable_if_c<
-            std::numeric_limits<Type>::has_quiet_NaN>::type>
+        std::enable_if_t<std::numeric_limits<Type>::has_quiet_NaN>>
     {
         cost<Type> operator()() const
         {

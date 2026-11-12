@@ -15,7 +15,6 @@ the two values according to a lexicographical ordering.
 #include "boost/mpl/and.hpp"
 
 #include "boost/functional/hash_fwd.hpp"
-#include "boost/utility/enable_if.hpp"
 
 #include "meta/all_of_c.hpp"
 #include "meta/vector.hpp"
@@ -180,8 +179,8 @@ public:
     */
     template <
         class... Arguments,
-        class Enable = typename boost::enable_if<utility::are_constructible<
-            meta::vector<Components...>, meta::vector<Arguments...>>>::type>
+        class Enable = std::enable_if_t<utility::are_constructible<
+            meta::vector<Components...>, meta::vector<Arguments...>>::value>>
     explicit lexicographical(Arguments &&... arguments)
     : components_(std::forward<Arguments>(arguments)...)
     {}
@@ -197,9 +196,9 @@ public:
     */
     template <class... OtherComponents> lexicographical(
         lexicographical<over<OtherComponents...>> const & other,
-        typename boost::enable_if<utility::are_convertible<
+        std::enable_if_t<utility::are_convertible<
             meta::vector<OtherComponents const &...>,
-            meta::vector<Components...>>>::type * = 0)
+            meta::vector<Components...>>::value> * = 0)
     : components_(other.components())
     {}
 
@@ -211,9 +210,9 @@ public:
     */
     template <class... OtherComponents> explicit lexicographical(
         lexicographical<over<OtherComponents...>> const & other,
-        typename boost::enable_if<tuple_helper::components_constructible_only<
+        std::enable_if_t<tuple_helper::components_constructible_only<
             meta::vector<Components...>,
-            meta::vector<OtherComponents const &...>>>::type * = 0)
+            meta::vector<OtherComponents const &...>>::value> * = 0)
     : components_(other.components())
     {}
 

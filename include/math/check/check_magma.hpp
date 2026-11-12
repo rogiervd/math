@@ -5,6 +5,8 @@
 #ifndef MATH_CHECK_CHECK_MAGMA_HPP_INCLUDED
 #define MATH_CHECK_CHECK_MAGMA_HPP_INCLUDED
 
+#include <type_traits>
+
 #include <bitset>
 #include <cassert>
 #include <functional>
@@ -16,7 +18,6 @@
 
 #include "boost/format.hpp"
 #include "boost/mpl/bool.hpp"
-#include "boost/utility/enable_if.hpp"
 
 #include "meta/any_of.hpp"
 #include "meta/transform.hpp"
@@ -196,8 +197,8 @@ namespace check_detail {
 
     template <
         class Magma,
-        typename Enable = typename boost::disable_if<
-            has<callable::print(std::ostream &, Magma)>>::type>
+        typename Enable = std::enable_if_t<
+            !has<callable::print(std::ostream &, Magma)>::value>>
     inline char const * describe_magma(Magma const & magma, void * = 0)
     {
         return "[magma value]";
@@ -205,8 +206,8 @@ namespace check_detail {
 
     template <
         class Magma,
-        typename Enable = typename boost::enable_if<
-            has<callable::print(std::ostream &, Magma)>>::type>
+        typename Enable = std::enable_if_t<
+            has<callable::print(std::ostream &, Magma)>::value>>
     inline Magma describe_magma(Magma const & magma)
     {
         return magma;
@@ -453,23 +454,23 @@ not realise that.
 Note that these must be defined before they are used below.
 */
 template <class Type1, class Type2>
-typename boost::enable_if<std::is_same<Type1, void>, bool>::type operator==(
+std::enable_if_t<std::is_same_v<Type1, void>, bool> operator==(
     Type1 const &, Type2 const &);
 
 template <class Type1, class Type2>
-typename boost::enable_if<std::is_same<Type1, void>, bool>::type operator*(
+std::enable_if_t<std::is_same_v<Type1, void>, bool> operator*(
     Type1 const &, Type2 const &);
 
 template <class Type1, class Type2>
-typename boost::enable_if<std::is_same<Type1, void>, bool>::type operator+(
+std::enable_if_t<std::is_same_v<Type1, void>, bool> operator+(
     Type1 const &, Type2 const &);
 
 template <class Type1, class Type2>
-typename boost::enable_if<std::is_same<Type1, void>, bool>::type operator/(
+std::enable_if_t<std::is_same_v<Type1, void>, bool> operator/(
     Type1 const &, Type2 const &);
 
 template <class Type1, class Type2>
-typename boost::enable_if<std::is_same<Type1, void>, bool>::type operator-(
+std::enable_if_t<std::is_same_v<Type1, void>, bool> operator-(
     Type1 const &, Type2 const &);
 
 
@@ -550,8 +551,8 @@ template <class Magma1, class Magma2> void check_operator(
 }
 
 template <class Magma1, class Magma2>
-typename boost::disable_if<math::check_detail::strange_behaviour<
-    math::callable::plus, Magma1, Magma2>>::type
+std::enable_if_t<!math::check_detail::strange_behaviour<
+    math::callable::plus, Magma1, Magma2>::value>
     check_operator(
         math::operation_checklist & checks, math::callable::plus plus,
         Magma1 const & m1, Magma2 const & m2)

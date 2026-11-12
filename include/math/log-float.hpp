@@ -21,7 +21,6 @@ Define the log_float and signed_log_float classes.
 #include <utility>
 
 #include "boost/functional/hash_fwd.hpp"
-#include "boost/utility/enable_if.hpp"
 
 #include "detail/log-float_arithmetic.hpp"
 #include "detail/log-float_base.hpp"
@@ -305,8 +304,8 @@ public:
     /// Multiply with another log_float or signed_log_float in place.
     template <
         class LogFloat, typename OtherExponentType,
-        class Enable = typename boost::enable_if<
-            std::is_same<typename LogFloat::policy_type, Policy>>::type>
+        class Enable = std::enable_if_t<
+            std::is_same_v<typename LogFloat::policy_type, Policy>>>
     signed_log_float & operator*=(
         detail::log_float_base<LogFloat, OtherExponentType> const & other)
     {
@@ -319,8 +318,8 @@ public:
     /// Divide by another log_float or signed_log_float in place.
     template <
         class LogFloat, typename OtherExponentType,
-        class Enable = typename boost::enable_if<
-            std::is_same<typename LogFloat::policy_type, Policy>>::type>
+        class Enable = std::enable_if_t<
+            std::is_same_v<typename LogFloat::policy_type, Policy>>>
     signed_log_float & operator/=(
         detail::log_float_base<LogFloat, OtherExponentType> const & other)
     {
@@ -333,8 +332,8 @@ public:
     /// Add another log_float or signed_log_float in place.
     template <
         class LogFloat, typename OtherExponentType,
-        class Enable = typename boost::enable_if<
-            std::is_same<typename LogFloat::policy_type, Policy>>::type>
+        class Enable = std::enable_if_t<
+            std::is_same_v<typename LogFloat::policy_type, Policy>>>
     signed_log_float & operator+=(
         detail::log_float_base<LogFloat, OtherExponentType> const & other)
     {
@@ -347,8 +346,8 @@ public:
     /// Subtract another log_float or signed_log_float in place.
     template <
         class LogFloat, typename OtherExponentType,
-        class Enable = typename boost::enable_if<
-            std::is_same<typename LogFloat::policy_type, Policy>>::type>
+        class Enable = std::enable_if_t<
+            std::is_same_v<typename LogFloat::policy_type, Policy>>>
     signed_log_float & operator-=(
         detail::log_float_base<LogFloat, OtherExponentType> const & other)
     {
@@ -506,9 +505,9 @@ inline bool operator!=(
 #define MATH_LOG_FLOAT_DEFINE_COMPARISON(operation)                         \
     template <                                                              \
         class LogFloat, typename Exponent, typename Scalar,                 \
-        class Enable = typename boost::enable_if_c<                         \
+        class Enable = std::enable_if_t<                                    \
             std::numeric_limits<Scalar>::is_specialized                     \
-            && !is_log_float<Scalar>::value>::type>                         \
+            && !is_log_float<Scalar>::value>>                               \
     inline bool operator operation(                                         \
         detail::log_float_base<LogFloat, Exponent> const & left,            \
         Scalar const & right)                                               \
@@ -521,9 +520,9 @@ inline bool operator!=(
                                                                             \
     template <                                                              \
         class LogFloat, typename Exponent, typename Scalar,                 \
-        class Enable = typename boost::enable_if_c<                         \
+        class Enable = std::enable_if_t<                                    \
             std::numeric_limits<Scalar>::is_specialized                     \
-            && !is_log_float<Scalar>::value>::type>                         \
+            && !is_log_float<Scalar>::value>>                               \
     inline bool operator operation(                                         \
         Scalar const & left,                                                \
         detail::log_float_base<LogFloat, Exponent> const & right)           \
@@ -568,9 +567,9 @@ The result is always signed, and therefore of type signed_log_float.
 template <
     class LogFloatLeft, typename ExponentLeft, class LogFloatRight,
     typename ExponentRight,
-    class Enable = typename boost::enable_if<std::is_same<
+    class Enable = std::enable_if_t<std::is_same_v<
         typename LogFloatLeft::policy_type,
-        typename LogFloatRight::policy_type>>::type>
+        typename LogFloatRight::policy_type>>>
 inline signed_log_float<
     typename promote_args<ExponentLeft, ExponentLeft>::type,
     typename LogFloatLeft::policy_type>
@@ -611,9 +610,9 @@ The result is always signed, and therefore of type signed_log_float.
 template <
     class LogFloatLeft, typename ExponentLeft, class LogFloatRight,
     typename ExponentRight,
-    class Enable = typename boost::enable_if<std::is_same<
+    class Enable = std::enable_if_t<std::is_same_v<
         typename LogFloatLeft::policy_type,
-        typename LogFloatRight::policy_type>>::type>
+        typename LogFloatRight::policy_type>>>
 inline signed_log_float<
     typename promote_args<ExponentLeft, ExponentLeft>::type,
     typename LogFloatLeft::policy_type>
@@ -654,9 +653,9 @@ The result is always signed, and therefore of type signed_log_float.
 template <
     class LogFloatLeft, typename ExponentLeft, class LogFloatRight,
     typename ExponentRight,
-    class Enable = typename boost::enable_if<std::is_same<
+    class Enable = std::enable_if_t<std::is_same_v<
         typename LogFloatLeft::policy_type,
-        typename LogFloatRight::policy_type>>::type>
+        typename LogFloatRight::policy_type>>>
 inline signed_log_float<
     typename promote_args<ExponentLeft, ExponentLeft>::type,
     typename LogFloatLeft::policy_type>
@@ -681,9 +680,9 @@ The result is always signed, and therefore of type signed_log_float.
 template <
     class LogFloatLeft, typename ExponentLeft, class LogFloatRight,
     typename ExponentRight,
-    class Enable = typename boost::enable_if<std::is_same<
+    class Enable = std::enable_if_t<std::is_same_v<
         typename LogFloatLeft::policy_type,
-        typename LogFloatRight::policy_type>>::type>
+        typename LogFloatRight::policy_type>>>
 inline signed_log_float<
     typename promote_args<ExponentLeft, ExponentLeft>::type,
     typename LogFloatLeft::policy_type>
@@ -720,9 +719,9 @@ inline signed_log_float<Exponent, typename LogFloat::policy_type> operator-(
 #define MATH_LOG_FLOAT_DEFINE_BINARY_OPERATION(operation)                   \
     template <                                                              \
         class LogFloat, typename Exponent, typename Scalar,                 \
-        class Enable = typename boost::enable_if_c<                         \
+        class Enable = std::enable_if_t<                                    \
             std::numeric_limits<Scalar>::is_specialized                     \
-            && !is_log_float<Scalar>::value>::type>                         \
+            && !is_log_float<Scalar>::value>>                               \
     inline signed_log_float<                                                \
         typename promote_args<Exponent, Scalar>::type,                      \
         typename LogFloat::policy_type>                                     \
@@ -738,9 +737,9 @@ inline signed_log_float<Exponent, typename LogFloat::policy_type> operator-(
                                                                             \
     template <                                                              \
         class LogFloat, typename Exponent, typename Scalar,                 \
-        class Enable = typename boost::enable_if_c<                         \
+        class Enable = std::enable_if_t<                                    \
             std::numeric_limits<Scalar>::is_specialized                     \
-            && !is_log_float<Scalar>::value>::type>                         \
+            && !is_log_float<Scalar>::value>>                               \
     inline signed_log_float<                                                \
         typename promote_args<Exponent, Scalar>::type,                      \
         typename LogFloat::policy_type>                                     \
@@ -764,9 +763,9 @@ MATH_LOG_FLOAT_DEFINE_BINARY_OPERATION(*)
 #define MATH_LOG_FLOAT_DEFINE_ASSIGNMENT_OPERATION(operation)                \
     template <                                                               \
         class LogFloat, typename Exponent, typename Other,                   \
-        class Enable = typename boost::enable_if_c<                          \
+        class Enable = std::enable_if_t<                                     \
             std::numeric_limits<Other>::is_specialized                       \
-            && !is_log_float<Other>::value>::type>                           \
+            && !is_log_float<Other>::value>>                                 \
     inline LogFloat & operator operation(                                    \
         detail::log_float_base<LogFloat, Exponent> & w, Other const & other) \
     {                                                                        \
@@ -831,7 +830,7 @@ Hence the spelling "exp_".
 template <
     typename Exponent,
     typename Enable =
-        typename boost::enable_if<detail::valid_exponent_type<Exponent>>::type>
+        std::enable_if_t<detail::valid_exponent_type<Exponent>::value>>
 inline log_float<Exponent> exp_(Exponent const & d)
 {
     return log_float<Exponent>(d, as_exponent());

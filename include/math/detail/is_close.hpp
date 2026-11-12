@@ -5,9 +5,10 @@
 #ifndef MATH_DETAIL_IS_CLOSE_HPP
 #define MATH_DETAIL_IS_CLOSE_HPP
 
+#include <type_traits>
+
 #include <cmath>
 
-#include "boost/utility/enable_if.hpp"
 
 #include "./log-float_fwd.hpp"
 
@@ -15,7 +16,7 @@ namespace math { namespace detail {
 
     template <
         class Type, class Tolerance,
-        class Enable = typename boost::disable_if<is_log_float<Type>>::type>
+        class Enable = std::enable_if_t<!is_log_float<Type>::value>>
     inline bool is_close(
         Type const & left, Type const & right, Tolerance const & tolerance)
     {
@@ -32,7 +33,7 @@ namespace math { namespace detail {
     // log_float: compare exponents.
     template <
         class Type, class Tolerance,
-        class Enable = typename boost::enable_if<is_log_float<Type>>::type>
+        class Enable = std::enable_if_t<is_log_float<Type>::value>>
     inline bool is_close(
         Type const & left, Type const & right, Tolerance const & tolerance,
         // Dummy argument to distinguish this overloads from the one above.

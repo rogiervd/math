@@ -11,7 +11,6 @@ Define helpers for magmas that consist of other magmas.
 
 #include <type_traits>
 
-#include "boost/utility/enable_if.hpp"
 
 #include "boost/mpl/and.hpp"
 #include "boost/mpl/not.hpp"
@@ -139,8 +138,8 @@ namespace operation { namespace tuple_helper {
 
     template <class Reassemble, class... Operations> struct nullary_operation<
         Reassemble, meta::vector<Operations...>,
-        typename boost::enable_if<
-            meta::all_of_c<is_implemented<Operations>::value...>>::type>
+        std::enable_if_t<
+            meta::all_of_c<is_implemented<Operations>::value...>::value>>
     : approximate_if<meta::any_of_c<is_approximate<Operations>::value...>>
     {
         typename std::invoke_result<
@@ -178,8 +177,8 @@ namespace operation { namespace tuple_helper {
     template <class Reassemble, class... Operations, class... Indices>
     struct unary_operation<
         Reassemble, meta::vector<Operations...>, meta::vector<Indices...>,
-        typename boost::enable_if<
-            meta::all_of_c<is_implemented<Operations>::value...>>::type>
+        std::enable_if_t<
+            meta::all_of_c<is_implemented<Operations>::value...>::value>>
     : approximate_if<meta::any_of_c<is_approximate<Operations>::value...>>
     {
     private:
@@ -237,8 +236,8 @@ namespace operation { namespace tuple_helper {
     template <class Reassemble, class... Operations, class... Indices>
     struct binary_operation<
         Reassemble, meta::vector<Operations...>, meta::vector<Indices...>,
-        typename boost::enable_if<
-            meta::all_of_c<is_implemented<Operations>::value...>>::type>
+        std::enable_if_t<
+            meta::all_of_c<is_implemented<Operations>::value...>::value>>
     : approximate_if<meta::any_of_c<is_approximate<Operations>::value...>>,
       associative_if<meta::all_of_c<is_associative<Operations>::value...>>,
       commutative_if<meta::all_of_c<is_commutative<Operations>::value...>>,
@@ -281,8 +280,8 @@ namespace operation { namespace tuple_helper {
 
     template <class... ComponentTags> class print_components<
         meta::vector<ComponentTags...>,
-        typename boost::enable_if<meta::all_of_c<
-            is_implemented<operation::print<ComponentTags>>::value...>>::type>
+        std::enable_if_t<meta::all_of_c<
+            is_implemented<operation::print<ComponentTags>>::value...>::value>>
     {
         // Known to be empty.
         template <

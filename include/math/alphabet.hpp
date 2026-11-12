@@ -436,8 +436,8 @@ namespace detail {
         template <
             class SuspectedSymbol,
             /// \cond DONT_DOCUMENT
-            class Enable = typename boost::enable_if<
-                std::is_same<SuspectedSymbol, symbol_type>>::type
+            class Enable =
+                std::enable_if_t<std::is_same_v<SuspectedSymbol, symbol_type>>
             /// \endcond
             >
         bool is_symbol_type(
@@ -452,8 +452,8 @@ namespace detail {
         template <
             class SuspectedSymbol,
             /// \cond DONT_DOCUMENT
-            class Enable = typename boost::enable_if<
-                std::is_same<SuspectedSymbol, symbol_type>>::type
+            class Enable =
+                std::enable_if_t<std::is_same_v<SuspectedSymbol, symbol_type>>
             /// \endcond
             >
         rime::true_type is_symbol_type(dense_symbol_type const &) const
@@ -466,8 +466,8 @@ namespace detail {
         template <
             class SuspectedSymbol,
             /// \cond DONT_DOCUMENT
-            class Enable = typename boost::disable_if<
-                std::is_same<SuspectedSymbol, symbol_type>>::type
+            class Enable =
+                std::enable_if_t<!std::is_same_v<SuspectedSymbol, symbol_type>>
             /// \endcond
             >
         rime::false_type is_symbol_type(dense_symbol_type const &) const
@@ -484,8 +484,8 @@ namespace detail {
         template <
             class SuspectedSymbol, class DenseSymbol2,
             /// \cond DONT_DOCUMENT
-            class Enable = typename boost::enable_if<
-                std::is_same<SuspectedSymbol, symbol_type>>::type
+            class Enable =
+                std::enable_if_t<std::is_same_v<SuspectedSymbol, symbol_type>>
             /// \endcond
             >
         SuspectedSymbol get_symbol(
@@ -713,8 +713,8 @@ public:
     template <
         class SuspectedSymbol,
         /// \cond DONT_DOCUMENT
-        class Enable = typename boost::enable_if<
-            std::is_same<SuspectedSymbol, NormalSymbol>>::type
+        class Enable =
+            std::enable_if_t<std::is_same_v<SuspectedSymbol, NormalSymbol>>
         /// \endcond
         >
     bool is_symbol_type(dense_symbol_type const & dense) const
@@ -735,8 +735,8 @@ public:
     template <
         class SuspectedSymbol,
         /// \cond DONT_DOCUMENT
-        class Enable = typename boost::enable_if<
-            std::is_same<SuspectedSymbol, NormalSymbol>>::type
+        class Enable =
+            std::enable_if_t<std::is_same_v<SuspectedSymbol, NormalSymbol>>
         /// \endcond
         >
     SuspectedSymbol const & get_symbol(dense_symbol_type const & dense) const
