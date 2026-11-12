@@ -32,89 +32,89 @@ BOOST_AUTO_TEST_SUITE(test_suite_lexicographical)
 BOOST_AUTO_TEST_CASE(test_lexicographical_static)
 {
     // Basic requirements for the component types.
-    BOOST_MPL_ASSERT((math::is::monoid<math::callable::choose, cost>) );
-    BOOST_MPL_ASSERT(
-        (math::is::monoid<math::callable::choose, math::sequence<char>>) );
+    static_assert(math::is::monoid<math::callable::choose, cost>::value);
+    static_assert(
+        math::is::monoid<math::callable::choose, math::sequence<char>>::value);
 
-    BOOST_MPL_ASSERT((math::is::semiring<
-                      math::left, math::callable::times, math::callable::plus,
-                      lexicographical>) );
+    static_assert(math::is::semiring<
+                  math::left, math::callable::times, math::callable::plus,
+                  lexicographical>::value);
 
-    BOOST_MPL_ASSERT((math::is::distributive<
-                      math::left, math::callable::times, math::callable::plus,
-                      lexicographical>) );
-    BOOST_MPL_ASSERT((math::is::distributive<
-                      math::right, math::callable::times, math::callable::plus,
-                      lexicographical>) );
-    BOOST_MPL_ASSERT((math::is::distributive<
-                      math::either, math::callable::times, math::callable::plus,
-                      lexicographical>) );
+    static_assert(math::is::distributive<
+                  math::left, math::callable::times, math::callable::plus,
+                  lexicographical>::value);
+    static_assert(math::is::distributive<
+                  math::right, math::callable::times, math::callable::plus,
+                  lexicographical>::value);
+    static_assert(math::is::distributive<
+                  math::either, math::callable::times, math::callable::plus,
+                  lexicographical>::value);
 
-    BOOST_MPL_ASSERT((math::is::distributive<
-                      math::left, math::callable::times, math::callable::choose,
-                      lexicographical>) );
-    BOOST_MPL_ASSERT(
-        (math::is::distributive<
-            math::left, math::callable::times, math::callable::choose, cost>) );
-    BOOST_MPL_ASSERT((math::is::distributive<
-                      math::left, math::callable::times, math::callable::choose,
-                      math::sequence<char>>) );
+    static_assert(math::is::distributive<
+                  math::left, math::callable::times, math::callable::choose,
+                  lexicographical>::value);
+    static_assert(math::is::distributive<
+                  math::left, math::callable::times, math::callable::choose,
+                  cost>::value);
+    static_assert(math::is::distributive<
+                  math::left, math::callable::times, math::callable::choose,
+                  math::sequence<char>>::value);
 
-    BOOST_MPL_ASSERT((math::is::distributive<
-                      math::left, math::callable::times, math::callable::choose,
-                      lexicographical>) );
+    static_assert(math::is::distributive<
+                  math::left, math::callable::times, math::callable::choose,
+                  lexicographical>::value);
 
     {
-        BOOST_MPL_ASSERT(
-            (math::is::associative<
+        static_assert(
+            math::is::associative<
                 math::callable::times,
-                math::lexicographical<math::over<math::cost<float>>>>) );
-        BOOST_MPL_ASSERT(
-            (math::is::associative<
-                math::callable::times,
-                math::lexicographical<math::over<math::sequence<char>>>>) );
+                math::lexicographical<math::over<math::cost<float>>>>::value);
+        static_assert(math::is::associative<
+                      math::callable::times,
+                      math::lexicographical<math::over<math::sequence<char>>>>::
+                          value);
     }
     {
-        BOOST_MPL_ASSERT(
-            (math::is::commutative<
+        static_assert(
+            math::is::commutative<
                 math::callable::times,
-                math::lexicographical<math::over<math::cost<float>>>>) );
-        BOOST_MPL_ASSERT_NOT(
-            (math::is::commutative<
-                math::callable::times,
-                math::lexicographical<math::over<math::sequence<char>>>>) );
+                math::lexicographical<math::over<math::cost<float>>>>::value);
+        static_assert(!math::is::commutative<
+                      math::callable::times,
+                      math::lexicographical<math::over<math::sequence<char>>>>::
+                          value);
     }
     typedef math::lexicographical<math::over<math::cost<float>>> cost;
     typedef math::lexicographical<math::over<math::sequence<char>>> sequence;
     {
-        BOOST_MPL_ASSERT(
-            (math::is::approximate<math::callable::times(cost, cost)>) );
-        BOOST_MPL_ASSERT_NOT((
-            math::is::approximate<math::callable::times(sequence, sequence)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (math::is::approximate<math::callable::plus(cost, cost)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (math::is::approximate<math::callable::plus(sequence, sequence)>) );
+        static_assert(
+            math::is::approximate<math::callable::times(cost, cost)>::value);
+        static_assert(!math::is::approximate<math::callable::times(
+                          sequence, sequence)>::value);
+        static_assert(
+            !math::is::approximate<math::callable::plus(cost, cost)>::value);
+        static_assert(!math::is::approximate<math::callable::plus(
+                          sequence, sequence)>::value);
     }
     {
-        BOOST_MPL_ASSERT_NOT(
-            (math::is::idempotent<math::callable::times(cost, cost)>) );
-        BOOST_MPL_ASSERT_NOT(
-            (math::is::idempotent<math::callable::times(sequence, sequence)>) );
-        BOOST_MPL_ASSERT(
-            (math::is::idempotent<math::callable::plus(cost, cost)>) );
-        BOOST_MPL_ASSERT(
-            (math::is::idempotent<math::callable::plus(sequence, sequence)>) );
+        static_assert(
+            !math::is::idempotent<math::callable::times(cost, cost)>::value);
+        static_assert(!math::is::idempotent<math::callable::times(
+                          sequence, sequence)>::value);
+        static_assert(
+            math::is::idempotent<math::callable::plus(cost, cost)>::value);
+        static_assert(math::is::idempotent<math::callable::plus(
+                          sequence, sequence)>::value);
     }
     {
-        BOOST_MPL_ASSERT_NOT(
-            (math::is::path_operation<math::callable::times(cost, cost)>) );
-        BOOST_MPL_ASSERT_NOT((math::is::path_operation<math::callable::times(
-                                  sequence, sequence)>) );
-        BOOST_MPL_ASSERT(
-            (math::is::path_operation<math::callable::plus(cost, cost)>) );
-        BOOST_MPL_ASSERT((math::is::path_operation<math::callable::plus(
-                              sequence, sequence)>) );
+        static_assert(!math::is::path_operation<math::callable::times(
+                          cost, cost)>::value);
+        static_assert(!math::is::path_operation<math::callable::times(
+                          sequence, sequence)>::value);
+        static_assert(
+            math::is::path_operation<math::callable::plus(cost, cost)>::value);
+        static_assert(math::is::path_operation<math::callable::plus(
+                          sequence, sequence)>::value);
     }
 }
 
@@ -137,8 +137,7 @@ BOOST_AUTO_TEST_CASE(test_lexicographical_spot)
     {
         auto ab4_2 = math::make_lexicographical(
             math::cost<float>(4), math::sequence<char>(std::string("ab")));
-        static_assert(
-            std::is_same<decltype(ab4_2), lexicographical>::value, "");
+        static_assert(std::is_same_v<decltype(ab4_2), lexicographical>);
 
         BOOST_CHECK(ab4_2 == ab4);
     }
@@ -146,8 +145,7 @@ BOOST_AUTO_TEST_CASE(test_lexicographical_spot)
         auto components = range::make_tuple(
             math::cost<float>(4), math::sequence<char>(std::string("ab")));
         auto ab4_2 = math::make_lexicographical_over(components);
-        static_assert(
-            std::is_same<decltype(ab4_2), lexicographical>::value, "");
+        static_assert(std::is_same_v<decltype(ab4_2), lexicographical>);
 
         BOOST_CHECK(ab4_2 == ab4);
     }

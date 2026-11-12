@@ -1748,9 +1748,8 @@ namespace is {
 
         template <class Base, class... Magmas> struct derive_if_all_magma_tags
         : std::conditional<
-              !(std::is_same<
-                  typename magma_tag_all<Magmas...>::type,
-                  not_a_magma_tag>::value),
+              !(std::is_same_v<
+                  typename magma_tag_all<Magmas...>::type, not_a_magma_tag>),
               Base, operation::ignorable_base_class>::type {};
 
     }  // namespace detail

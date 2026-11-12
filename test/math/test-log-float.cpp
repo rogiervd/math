@@ -846,20 +846,20 @@ template <typename RealType, class Policy> void test_both_log_float_unary_impl()
 
 BOOST_AUTO_TEST_CASE(test_is_log_float)
 {
-    BOOST_MPL_ASSERT((math::is_log_float<math::log_float<float>>) );
-    BOOST_MPL_ASSERT((math::is_log_float<math::log_float<double> &>) );
+    static_assert(math::is_log_float<math::log_float<float>>::value);
+    static_assert(math::is_log_float<math::log_float<double> &>::value);
     // log_float on int can't be used; but is_log_float is defined for it.
-    BOOST_MPL_ASSERT((math::is_log_float<math::log_float<int> const>) );
+    static_assert(math::is_log_float<math::log_float<int> const>::value);
 
-    BOOST_MPL_ASSERT((math::is_log_float<math::log_float<float, policy0>>) );
-    BOOST_MPL_ASSERT((math::is_log_float<math::log_float<double, policy1>>) );
-    BOOST_MPL_ASSERT((math::is_log_float<math::log_float<int, policy2> &&>) );
+    static_assert(math::is_log_float<math::log_float<float, policy0>>::value);
+    static_assert(math::is_log_float<math::log_float<double, policy1>>::value);
+    static_assert(math::is_log_float<math::log_float<int, policy2> &&>::value);
 
-    BOOST_MPL_ASSERT_NOT((math::is_log_float<void>) );
-    BOOST_MPL_ASSERT_NOT((math::is_log_float<int>) );
-    BOOST_MPL_ASSERT_NOT((math::is_log_float<float>) );
-    BOOST_MPL_ASSERT_NOT((math::is_log_float<double>) );
-    BOOST_MPL_ASSERT_NOT((math::is_log_float<policy0>) );
+    static_assert(!math::is_log_float<void>::value);
+    static_assert(!math::is_log_float<int>::value);
+    static_assert(!math::is_log_float<float>::value);
+    static_assert(!math::is_log_float<double>::value);
+    static_assert(!math::is_log_float<policy0>::value);
 }
 
 BOOST_AUTO_TEST_CASE(test_log_float_unary)
@@ -1045,7 +1045,7 @@ void test_log_float_binary_exact_arithmetic_operation(
             //            result
             //                << std::endl;
             auto test = operation(w_left, w_right);
-            BOOST_MPL_ASSERT((std::is_same<decltype(test), LogFloatResult>) );
+            static_assert(std::is_same_v<decltype(test), LogFloatResult>);
             BOOST_CHECK_EQUAL(RealType(test), result);
         }
     }
@@ -1629,7 +1629,7 @@ template <typename RealType, class Policy> void test_log_float_exp_()
     typedef math::log_float<RealType /*, Policy*/> log_float;
     log_float w1(3, math::as_exponent());
     auto w2 = math::exp_(RealType(3));
-    BOOST_MPL_ASSERT((std::is_same<decltype(w1), decltype(w2)>) );
+    static_assert(std::is_same_v<decltype(w1), decltype(w2)>);
     BOOST_CHECK_EQUAL(w1, w2);
 }
 
@@ -1665,7 +1665,7 @@ template <typename RealType, class Policy> void test_log_float_pow()
     w = 2;
     auto e2 = pow(w, 2.).exponent();
     auto d2 = RealType(2) * 2.;
-    BOOST_MPL_ASSERT((std::is_same<decltype(e2), decltype(d2)>) );
+    static_assert(std::is_same_v<decltype(e2), decltype(d2)>);
 }
 
 template <typename RealType, class Policy> void test_log_float_log()
@@ -1751,20 +1751,19 @@ void test_log_float_conversion()
 {
     // *** log_float and signed_log_float
     // Implicit conversion log_float to signed_log_float.
-    BOOST_MPL_ASSERT((std::is_convertible<
-                      math::log_float<double, policy0>,
-                      math::signed_log_float<double, policy0>>) );
-    BOOST_MPL_ASSERT((std::is_convertible<
-                      math::log_float<double, policy1>,
-                      math::signed_log_float<double, policy1>>) );
-    BOOST_MPL_ASSERT((std::is_convertible<
-                      math::log_float<double, policy2>,
-                      math::signed_log_float<double, policy2>>) );
+    static_assert(std::is_convertible_v<
+                  math::log_float<double, policy0>,
+                  math::signed_log_float<double, policy0>>);
+    static_assert(std::is_convertible_v<
+                  math::log_float<double, policy1>,
+                  math::signed_log_float<double, policy1>>);
+    static_assert(std::is_convertible_v<
+                  math::log_float<double, policy2>,
+                  math::signed_log_float<double, policy2>>);
 
     // Converting signed_log_float to log_float requires explicit conversion.
-    BOOST_MPL_ASSERT_NOT(
-        (std::is_convertible<
-            math::signed_log_float<double>, math::log_float<double>>) );
+    static_assert(!std::is_convertible_v<
+                  math::signed_log_float<double>, math::log_float<double>>);
     // These two do not work.
     // math::log_float <double> w2 = sw;
     // w = sw;
@@ -1778,12 +1777,12 @@ void test_log_float_conversion()
     }
 
     // *** Different ExponentType: convertible
-    BOOST_MPL_ASSERT((std::is_convertible<
-                      math::log_float<float, policy0>,
-                      math::log_float<double, policy0>>) );
-    BOOST_MPL_ASSERT((std::is_convertible<
-                      math::signed_log_float<float, policy0>,
-                      math::signed_log_float<double, policy0>>) );
+    static_assert(
+        std::is_convertible_v<
+            math::log_float<float, policy0>, math::log_float<double, policy0>>);
+    static_assert(std::is_convertible_v<
+                  math::signed_log_float<float, policy0>,
+                  math::signed_log_float<double, policy0>>);
     {
         math::log_float<float, policy0> w1(7);
         math::log_float<double, policy0> w2 = w1;
@@ -1796,21 +1795,21 @@ void test_log_float_conversion()
     }
 
     // *** Different policies: explicitly convertible
-    BOOST_MPL_ASSERT_NOT((std::is_convertible<
-                          math::log_float<double, policy0>,
-                          math::log_float<double, policy1>>) );
-    BOOST_MPL_ASSERT_NOT((std::is_convertible<
-                          math::log_float<double, policy1>,
-                          math::log_float<double, policy0>>) );
-    BOOST_MPL_ASSERT_NOT((std::is_convertible<
-                          math::signed_log_float<double, policy0>,
-                          math::signed_log_float<double, policy1>>) );
-    BOOST_MPL_ASSERT((std::is_convertible<
-                      math::log_float<double, policy0>,
-                      math::signed_log_float<double, policy0>>) );
-    BOOST_MPL_ASSERT_NOT((std::is_convertible<
-                          math::log_float<double, policy0>,
-                          math::signed_log_float<double, policy1>>) );
+    static_assert(!std::is_convertible_v<
+                  math::log_float<double, policy0>,
+                  math::log_float<double, policy1>>);
+    static_assert(!std::is_convertible_v<
+                  math::log_float<double, policy1>,
+                  math::log_float<double, policy0>>);
+    static_assert(!std::is_convertible_v<
+                  math::signed_log_float<double, policy0>,
+                  math::signed_log_float<double, policy1>>);
+    static_assert(std::is_convertible_v<
+                  math::log_float<double, policy0>,
+                  math::signed_log_float<double, policy0>>);
+    static_assert(!std::is_convertible_v<
+                  math::log_float<double, policy0>,
+                  math::signed_log_float<double, policy1>>);
 
     {
         math::log_float<double, policy0> wp0(
@@ -1836,7 +1835,7 @@ void test_log_float_conversion()
     }
 
     // *** Conversion from ints
-    BOOST_MPL_ASSERT((std::is_convertible<int, math::log_float<double>>) );
+    static_assert(std::is_convertible_v<int, math::log_float<double>>);
     {
         math::log_float<double> w(1);
         BOOST_CHECK_EQUAL(w.exponent(), 0);
@@ -1892,71 +1891,64 @@ void test_log_float_operator_scalar()
     // Operations
     {
         auto one = w + 1;
-        BOOST_MPL_ASSERT(
-            (std::is_same<
-                decltype(one), math::signed_log_float<double, policy1>>) );
+        static_assert(std::is_same_v<
+                      decltype(one), math::signed_log_float<double, policy1>>);
         BOOST_CHECK_EQUAL(one.exponent(), 0);
     }
     {
         auto one = 1 + w;
-        BOOST_MPL_ASSERT(
-            (std::is_same<
-                decltype(one), math::signed_log_float<double, policy1>>) );
+        static_assert(std::is_same_v<
+                      decltype(one), math::signed_log_float<double, policy1>>);
         BOOST_CHECK_EQUAL(one.exponent(), 0);
     }
     w = 1;
     BOOST_CHECK_EQUAL(w.exponent(), 0);
     {
         auto zero = -1 + w;
-        BOOST_MPL_ASSERT(
-            (std::is_same<
-                decltype(zero), math::signed_log_float<double, policy1>>) );
+        static_assert(std::is_same_v<
+                      decltype(zero), math::signed_log_float<double, policy1>>);
         BOOST_CHECK(!zero);
     }
     {
         auto zero = 1 + (-w);
-        BOOST_MPL_ASSERT(
-            (std::is_same<
-                decltype(zero), math::signed_log_float<double, policy1>>) );
+        static_assert(std::is_same_v<
+                      decltype(zero), math::signed_log_float<double, policy1>>);
         BOOST_CHECK(!zero);
     }
 
     if (enable_long_double()) {
         auto zero = w - 1.l;
-        BOOST_MPL_ASSERT((std::is_same<
-                          decltype(zero),
-                          math::signed_log_float<long double, policy1>>) );
+        static_assert(
+            std::is_same_v<
+                decltype(zero), math::signed_log_float<long double, policy1>>);
         BOOST_CHECK(!zero);
     }
     {
         auto zero = 1l - w;
-        BOOST_MPL_ASSERT(
-            (std::is_same<
-                decltype(zero), math::signed_log_float<double, policy1>>) );
+        static_assert(std::is_same_v<
+                      decltype(zero), math::signed_log_float<double, policy1>>);
         BOOST_CHECK(!zero);
     }
 
     w = 3;
     if (enable_long_double()) {
         auto nine = 3.l * w;
-        BOOST_MPL_ASSERT((std::is_same<
-                          decltype(nine),
-                          math::signed_log_float<long double, policy1>>) );
+        static_assert(
+            std::is_same_v<
+                decltype(nine), math::signed_log_float<long double, policy1>>);
         using std::log;
         BOOST_CHECK_EQUAL(nine.exponent(), log(3.) + log(3.l));
     }
     {
         auto one = 3 / w;
-        BOOST_MPL_ASSERT(
-            (std::is_same<
-                decltype(one), math::signed_log_float<double, policy1>>) );
+        static_assert(std::is_same_v<
+                      decltype(one), math::signed_log_float<double, policy1>>);
         BOOST_CHECK_EQUAL(one.exponent(), 0);
     }
     {
         auto one = 3. / (-w);
-        BOOST_MPL_ASSERT(
-            (std::is_same<
-                decltype(one), math::signed_log_float<double, policy1>>) );
+        static_assert(std::is_same_v<
+                      decltype(one), math::signed_log_float<double, policy1>>);
         BOOST_CHECK_EQUAL(one.exponent(), 0);
     }
 

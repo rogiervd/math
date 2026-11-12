@@ -233,7 +233,7 @@ namespace operation {
         product_tag<
             over<ComponentTag1, ComponentTags...>, with_inverse<Operation>>,
         Operation,
-        typename std::enable_if<!std::is_same<Operation, void>::value>::type>
+        typename std::enable_if<!std::is_same_v<Operation, void>>::type>
     {
         template <class Product> auto operator()(Product const & product) const
             RETURNS(

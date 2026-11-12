@@ -67,12 +67,10 @@ template <class Inverses> void test_product_homogeneous()
                 math::callable::times)>::value,
             "An empty product cannot have an annihilator.");
 
-        static_assert(
-            std::is_assignable<
-                typename product::components_type &,
-                typename product::components_type &&>::value,
-            "");
-        static_assert(std::is_assignable<product &, product &&>::value, "");
+        static_assert(std::is_assignable<
+                      typename product::components_type &,
+                      typename product::components_type &&>::value);
+        static_assert(std::is_assignable<product &, product &&>::value);
 
         std::vector<product> unequal_examples;
         unequal_examples.push_back(

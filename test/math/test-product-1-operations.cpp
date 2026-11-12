@@ -41,7 +41,7 @@ template <class Inverses> void test_product_spot_check_without_inverses()
         auto p2 = math::make_product<Inverses>(
             2.5f, math::sequence<char>(std::string("?")));
 
-        static_assert(std::is_same<decltype(p2), product>::value, "");
+        static_assert(std::is_same_v<decltype(p2), product>);
         BOOST_CHECK_EQUAL(range::first(p2.components()), 2.5f);
         BOOST_CHECK_EQUAL(
             range::first(range::second(p2.components()).symbols()), '?');
@@ -51,7 +51,7 @@ template <class Inverses> void test_product_spot_check_without_inverses()
             4.5f, math::sequence<char>(std::string("~")));
         auto p3 = math::make_product_over<Inverses>(components);
 
-        static_assert(std::is_same<decltype(p3), product>::value, "");
+        static_assert(std::is_same_v<decltype(p3), product>);
         BOOST_CHECK_EQUAL(range::first(p3.components()), 4.5f);
         BOOST_CHECK_EQUAL(
             range::first(range::second(p3.components()).symbols()), '~');
@@ -163,14 +163,14 @@ template <class Inverses> void test_product_spot_check_without_inverses()
             math::sequence_annihilator<char>());
     }
     {
-        BOOST_MPL_ASSERT_NOT((math::has<math::callable::annihilator<
-                                  product, math::callable::plus>()>) );
+        static_assert(!math::has<math::callable::annihilator<
+                          product, math::callable::plus>()>::value);
         // auto test = math::annihilator <product, math::callable::plus>();
     }
 
     {
-        BOOST_MPL_ASSERT_NOT((
-            math::has<math::callable::invert<math::callable::plus>(product)>) );
+        static_assert(!math::has<math::callable::invert<math::callable::plus>(
+                          product)>::value);
     }
 
     product a2(2, math::sequence<char>(std::string("a")));
@@ -189,7 +189,7 @@ template <class Inverses> void test_product_spot_check_without_inverses()
         math::sequence<char>(std::string("a")));
 
     // compare.
-    BOOST_MPL_ASSERT((math::has<math::callable::compare(product, product)>) );
+    static_assert(math::has<math::callable::compare(product, product)>::value);
 
     product a4(4, math::sequence<char>(std::string("a")));
     product b2(2, math::sequence<char>(std::string("b")));
@@ -203,12 +203,11 @@ template <class Inverses> void test_product_spot_check_without_inverses()
         auto ab8_reverse = math::reverse<math::callable::times>(ab8);
         // Should be the same as ab8, except the sequence has become a right
         // sequence and is in reverse order.
-        BOOST_MPL_ASSERT(
-            (std::is_same<
-                decltype(ab8_reverse),
-                math::product<
-                    math::over<float, math::sequence<char, math::right>>,
-                    Inverses>>) );
+        static_assert(std::is_same_v<
+                      decltype(ab8_reverse),
+                      math::product<
+                          math::over<float, math::sequence<char, math::right>>,
+                          Inverses>>);
 
         BOOST_CHECK_EQUAL(range::first(ab8_reverse.components()), 8);
         BOOST_CHECK_EQUAL(
@@ -217,8 +216,8 @@ template <class Inverses> void test_product_spot_check_without_inverses()
     }
 
     // Test properties.
-    BOOST_MPL_ASSERT_NOT(
-        (math::has<math::callable::minus<math::left>(product, product)>) );
+    static_assert(
+        !math::has<math::callable::minus<math::left>(product, product)>::value);
 }
 
 BOOST_AUTO_TEST_CASE(test_product_properties)
@@ -233,63 +232,62 @@ BOOST_AUTO_TEST_CASE(test_product_properties)
 
     // approximate.
     {
-        BOOST_MPL_ASSERT(
-            (math::is::approximate<times(
-                 product<over<float, float>>, product<over<float, float>>)>) );
-        BOOST_MPL_ASSERT((math::is::approximate<times(
-                              product<over<float, sequence<char>>>,
-                              product<over<float, sequence<char>>>)>) );
-        BOOST_MPL_ASSERT_NOT((math::is::approximate<times(
-                                  product<over<sequence<char>>>,
-                                  product<over<sequence<char>>>)>) );
+        static_assert(math::is::approximate<times(
+                          product<over<float, float>>,
+                          product<over<float, float>>)>::value);
+        static_assert(math::is::approximate<times(
+                          product<over<float, sequence<char>>>,
+                          product<over<float, sequence<char>>>)>::value);
+        static_assert(!math::is::approximate<times(
+                          product<over<sequence<char>>>,
+                          product<over<sequence<char>>>)>::value);
     }
     // associative.
     {
-        BOOST_MPL_ASSERT((math::is::associative<
-                          times, product<over<float, sequence<char>>>>) );
+        static_assert(math::is::associative<
+                      times, product<over<float, sequence<char>>>>::value);
     }
     // commutative.
     {
-        BOOST_MPL_ASSERT(
-            (math::is::commutative<times, product<over<float, float>>>) );
-        BOOST_MPL_ASSERT(
-            (math::is::commutative<plus, product<over<float, float>>>) );
+        static_assert(
+            math::is::commutative<times, product<over<float, float>>>::value);
+        static_assert(
+            math::is::commutative<plus, product<over<float, float>>>::value);
 
-        BOOST_MPL_ASSERT_NOT((math::is::commutative<
-                              times, product<over<float, sequence<char>>>>) );
-        BOOST_MPL_ASSERT((math::is::commutative<
-                          plus, product<over<float, sequence<char>>>>) );
+        static_assert(!math::is::commutative<
+                      times, product<over<float, sequence<char>>>>::value);
+        static_assert(math::is::commutative<
+                      plus, product<over<float, sequence<char>>>>::value);
     }
     // idempotent.
     {
-        BOOST_MPL_ASSERT_NOT(
-            (math::is::idempotent<times, product<over<float, float>>>) );
-        BOOST_MPL_ASSERT_NOT(
-            (math::is::idempotent<plus, product<over<float, float>>>) );
+        static_assert(
+            !math::is::idempotent<times, product<over<float, float>>>::value);
+        static_assert(
+            !math::is::idempotent<plus, product<over<float, float>>>::value);
 
-        BOOST_MPL_ASSERT_NOT(
-            (math::is::idempotent<
-                times, product<over<cost<float>, sequence<char>>>>) );
-        BOOST_MPL_ASSERT((math::is::idempotent<
-                          plus, product<over<cost<float>, sequence<char>>>>) );
+        static_assert(
+            !math::is::idempotent<
+                times, product<over<cost<float>, sequence<char>>>>::value);
+        static_assert(math::is::idempotent<
+                      plus, product<over<cost<float>, sequence<char>>>>::value);
     }
     // path_operation.
     {
-        BOOST_MPL_ASSERT_NOT(
-            (math::is::path_operation<times, product<over<float, float>>>) );
-        BOOST_MPL_ASSERT_NOT(
-            (math::is::path_operation<plus, product<over<float, float>>>) );
+        static_assert(!math::is::path_operation<
+                      times, product<over<float, float>>>::value);
+        static_assert(!math::is::path_operation<
+                      plus, product<over<float, float>>>::value);
 
-        BOOST_MPL_ASSERT_NOT(
-            (math::is::path_operation<
-                times, product<over<cost<float>, sequence<char>>>>) );
-        BOOST_MPL_ASSERT_NOT(
-            (math::is::path_operation<
-                plus, product<over<cost<float>, sequence<char>>>>) );
+        static_assert(
+            !math::is::path_operation<
+                times, product<over<cost<float>, sequence<char>>>>::value);
+        static_assert(!math::is::path_operation<
+                      plus, product<over<cost<float>, sequence<char>>>>::value);
         // Sanity
-        BOOST_MPL_ASSERT((math::is::path_operation<plus, cost<float>>) );
-        BOOST_MPL_ASSERT((math::is::path_operation<
-                          plus, product<over<cost<float>, cost<float>>>>) );
+        static_assert(math::is::path_operation<plus, cost<float>>::value);
+        static_assert(math::is::path_operation<
+                      plus, product<over<cost<float>, cost<float>>>>::value);
     }
 }
 

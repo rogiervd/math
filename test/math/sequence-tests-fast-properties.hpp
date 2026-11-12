@@ -31,8 +31,7 @@ template <class Direction, class Opposite> void test_sequence_spot()
 
     // Conversion.
     {
-        BOOST_MPL_ASSERT_NOT(
-            (std::is_convertible<sequence, opposite_sequence>) );
+        static_assert(!std::is_convertible_v<sequence, opposite_sequence>);
 
         empty_sequence e;
         single_sequence s('a');
@@ -48,107 +47,102 @@ template <class Direction, class Opposite> void test_sequence_spot()
         // But these transparently wrong constructors should throw!
 
         // From empty_sequence.
-        BOOST_MPL_ASSERT(
-            (std::is_convertible<empty_sequence, empty_sequence>) );
-        BOOST_MPL_ASSERT(
-            (std::is_constructible<empty_sequence, empty_sequence>) );
+        static_assert(std::is_convertible_v<empty_sequence, empty_sequence>);
+        static_assert(
+            std::is_constructible<empty_sequence, empty_sequence>::value);
 
-        BOOST_MPL_ASSERT_NOT(
-            (std::is_convertible<empty_sequence, single_sequence>) );
+        static_assert(!std::is_convertible_v<empty_sequence, single_sequence>);
         BOOST_CHECK_THROW(single_sequence s(e), math::magma_not_convertible);
 
-        BOOST_MPL_ASSERT(
-            (std::is_convertible<empty_sequence, optional_sequence>) );
-        BOOST_MPL_ASSERT(
-            (std::is_constructible<optional_sequence, empty_sequence>) );
+        static_assert(std::is_convertible_v<empty_sequence, optional_sequence>);
+        static_assert(
+            std::is_constructible<optional_sequence, empty_sequence>::value);
 
-        BOOST_MPL_ASSERT_NOT(
-            (std::is_convertible<empty_sequence, sequence_annihilator>) );
+        static_assert(
+            !std::is_convertible_v<empty_sequence, sequence_annihilator>);
         BOOST_CHECK_THROW(
             sequence_annihilator a2(e), math::magma_not_convertible);
 
-        BOOST_MPL_ASSERT((std::is_convertible<empty_sequence, sequence>) );
-        BOOST_MPL_ASSERT((std::is_constructible<sequence, empty_sequence>) );
+        static_assert(std::is_convertible_v<empty_sequence, sequence>);
+        static_assert(std::is_constructible<sequence, empty_sequence>::value);
 
         // From single_sequence.
-        BOOST_MPL_ASSERT_NOT(
-            (std::is_convertible<single_sequence, empty_sequence>) );
+        static_assert(!std::is_convertible_v<single_sequence, empty_sequence>);
         BOOST_CHECK_THROW(empty_sequence e2(s), math::magma_not_convertible);
 
-        BOOST_MPL_ASSERT(
-            (std::is_convertible<single_sequence, single_sequence>) );
-        BOOST_MPL_ASSERT(
-            (std::is_constructible<single_sequence, single_sequence>) );
+        static_assert(std::is_convertible_v<single_sequence, single_sequence>);
+        static_assert(
+            std::is_constructible<single_sequence, single_sequence>::value);
 
-        BOOST_MPL_ASSERT(
-            (std::is_convertible<single_sequence, optional_sequence>) );
-        BOOST_MPL_ASSERT(
-            (std::is_constructible<optional_sequence, single_sequence>) );
+        static_assert(
+            std::is_convertible_v<single_sequence, optional_sequence>);
+        static_assert(
+            std::is_constructible<optional_sequence, single_sequence>::value);
 
-        BOOST_MPL_ASSERT_NOT(
-            (std::is_convertible<single_sequence, sequence_annihilator>) );
+        static_assert(
+            !std::is_convertible_v<single_sequence, sequence_annihilator>);
         BOOST_CHECK_THROW(
             sequence_annihilator e2(s), math::magma_not_convertible);
 
-        BOOST_MPL_ASSERT((std::is_convertible<single_sequence, sequence>) );
-        BOOST_MPL_ASSERT((std::is_constructible<sequence, single_sequence>) );
+        static_assert(std::is_convertible_v<single_sequence, sequence>);
+        static_assert(std::is_constructible<sequence, single_sequence>::value);
 
         // From optional_sequence.
-        BOOST_MPL_ASSERT_NOT(
-            (std::is_convertible<optional_sequence, empty_sequence>) );
-        BOOST_MPL_ASSERT(
-            (std::is_constructible<optional_sequence, empty_sequence>) );
+        static_assert(
+            !std::is_convertible_v<optional_sequence, empty_sequence>);
+        static_assert(
+            std::is_constructible<optional_sequence, empty_sequence>::value);
         {
             empty_sequence e2(o_e);
             BOOST_CHECK_THROW(
                 empty_sequence e3(o_s), math::magma_not_convertible);
         }
 
-        BOOST_MPL_ASSERT_NOT(
-            (std::is_convertible<optional_sequence, single_sequence>) );
-        BOOST_MPL_ASSERT(
-            (std::is_constructible<single_sequence, optional_sequence>) );
+        static_assert(
+            !std::is_convertible_v<optional_sequence, single_sequence>);
+        static_assert(
+            std::is_constructible<single_sequence, optional_sequence>::value);
         {
             single_sequence s2(o_s);
             BOOST_CHECK_THROW(
                 single_sequence s3(o_e), math::magma_not_convertible);
         }
 
-        BOOST_MPL_ASSERT(
-            (std::is_convertible<optional_sequence, optional_sequence>) );
-        BOOST_MPL_ASSERT(
-            (std::is_constructible<optional_sequence, optional_sequence>) );
+        static_assert(
+            std::is_convertible_v<optional_sequence, optional_sequence>);
+        static_assert(
+            std::is_constructible<optional_sequence, optional_sequence>::value);
 
-        BOOST_MPL_ASSERT_NOT(
-            (std::is_convertible<optional_sequence, sequence_annihilator>) );
+        static_assert(
+            !std::is_convertible_v<optional_sequence, sequence_annihilator>);
         BOOST_CHECK_THROW(
             sequence_annihilator e2(s), math::magma_not_convertible);
 
-        BOOST_MPL_ASSERT((std::is_convertible<optional_sequence, sequence>) );
-        BOOST_MPL_ASSERT((std::is_constructible<sequence, optional_sequence>) );
+        static_assert(std::is_convertible_v<optional_sequence, sequence>);
+        static_assert(
+            std::is_constructible<sequence, optional_sequence>::value);
         {
             sequence s_o_e(o_e);
             sequence s_o_s(o_s);
         }
 
         // From sequence_annihilator.
-        BOOST_MPL_ASSERT_NOT(
-            (std::is_convertible<sequence_annihilator, empty_sequence>) );
+        static_assert(
+            !std::is_convertible_v<sequence_annihilator, empty_sequence>);
         BOOST_CHECK_THROW(empty_sequence s(a), math::magma_not_convertible);
 
-        BOOST_MPL_ASSERT_NOT(
-            (std::is_convertible<sequence_annihilator, single_sequence>) );
+        static_assert(
+            !std::is_convertible_v<sequence_annihilator, single_sequence>);
         BOOST_CHECK_THROW(single_sequence s(a), math::magma_not_convertible);
 
-        BOOST_MPL_ASSERT(
-            (std::is_convertible<sequence_annihilator, sequence_annihilator>) );
-        BOOST_MPL_ASSERT((std::is_constructible<
-                          sequence_annihilator, sequence_annihilator>) );
+        static_assert(
+            std::is_convertible_v<sequence_annihilator, sequence_annihilator>);
+        static_assert(std::is_constructible<
+                      sequence_annihilator, sequence_annihilator>::value);
 
-        BOOST_MPL_ASSERT(
-            (std::is_convertible<sequence_annihilator, sequence>) );
-        BOOST_MPL_ASSERT(
-            (std::is_constructible<sequence, sequence_annihilator>) );
+        static_assert(std::is_convertible_v<sequence_annihilator, sequence>);
+        static_assert(
+            std::is_constructible<sequence, sequence_annihilator>::value);
 
         sequence s_e(e);
         sequence s_s(s);
@@ -157,8 +151,8 @@ template <class Direction, class Opposite> void test_sequence_spot()
 
         // Converting from a sequence into anything else: only possible if the
         // sequence contains the right number of elements.
-        BOOST_MPL_ASSERT_NOT((std::is_convertible<sequence, empty_sequence>) );
-        BOOST_MPL_ASSERT((std::is_constructible<empty_sequence, sequence>) );
+        static_assert(!std::is_convertible_v<sequence, empty_sequence>);
+        static_assert(std::is_constructible<empty_sequence, sequence>::value);
         {
             empty_sequence e1(s_e);
             BOOST_CHECK_THROW(
@@ -169,8 +163,8 @@ template <class Direction, class Opposite> void test_sequence_spot()
                 empty_sequence e4(s_m), math::magma_not_convertible);
         }
 
-        BOOST_MPL_ASSERT_NOT((std::is_convertible<sequence, single_sequence>) );
-        BOOST_MPL_ASSERT((std::is_constructible<single_sequence, sequence>) );
+        static_assert(!std::is_convertible_v<sequence, single_sequence>);
+        static_assert(std::is_constructible<single_sequence, sequence>::value);
         {
             BOOST_CHECK_THROW(
                 single_sequence e1(s_e), math::magma_not_convertible);
@@ -182,10 +176,9 @@ template <class Direction, class Opposite> void test_sequence_spot()
                 single_sequence e4(s_m), math::magma_not_convertible);
         }
 
-        BOOST_MPL_ASSERT_NOT(
-            (std::is_convertible<sequence, sequence_annihilator>) );
-        BOOST_MPL_ASSERT(
-            (std::is_constructible<sequence_annihilator, sequence>) );
+        static_assert(!std::is_convertible_v<sequence, sequence_annihilator>);
+        static_assert(
+            std::is_constructible<sequence_annihilator, sequence>::value);
         {
             BOOST_CHECK_THROW(
                 sequence_annihilator e1(s_e), math::magma_not_convertible);
@@ -196,8 +189,8 @@ template <class Direction, class Opposite> void test_sequence_spot()
                 sequence_annihilator e4(s_m), math::magma_not_convertible);
         }
 
-        BOOST_MPL_ASSERT((std::is_convertible<sequence, sequence>) );
-        BOOST_MPL_ASSERT((std::is_constructible<sequence, sequence>) );
+        static_assert(std::is_convertible_v<sequence, sequence>);
+        static_assert(std::is_constructible<sequence, sequence>::value);
         {
             sequence s1(s_e);
             sequence s2(s_s);
@@ -206,133 +199,130 @@ template <class Direction, class Opposite> void test_sequence_spot()
         }
     }
 
-    BOOST_MPL_ASSERT_NOT((math::has<math::callable::non_member<sequence>()>) );
-    BOOST_MPL_ASSERT((math::has<math::callable::is_member(sequence)>) );
+    static_assert(!math::has<math::callable::non_member<sequence>()>::value);
+    static_assert(math::has<math::callable::is_member(sequence)>::value);
 
-    BOOST_MPL_ASSERT((math::has<math::callable::equal(sequence, sequence)>) );
-    BOOST_MPL_ASSERT(
-        (math::has<math::callable::approximately_equal(sequence, sequence)>) );
+    static_assert(math::has<math::callable::equal(sequence, sequence)>::value);
+    static_assert(math::has<math::callable::approximately_equal(
+                      sequence, sequence)>::value);
 
     // Properties of times.
-    BOOST_MPL_ASSERT((math::has<math::callable::times(sequence, sequence)>) );
-    BOOST_MPL_ASSERT_NOT(
-        (math::is::approximate<math::callable::times(sequence, sequence)>) );
-    BOOST_MPL_ASSERT(
-        (math::has<
-            math::callable::identity<sequence, math::callable::times>()>) );
+    static_assert(math::has<math::callable::times(sequence, sequence)>::value);
+    static_assert(!math::is::approximate<math::callable::times(
+                      sequence, sequence)>::value);
+    static_assert(
+        math::has<math::callable::identity<sequence, math::callable::times>()>::
+            value);
     BOOST_CHECK(range::empty(math::one<sequence>().symbols()));
     // Annihilator.
-    BOOST_MPL_ASSERT(
-        (math::has<
-            math::callable::annihilator<sequence, math::callable::times>()>) );
+    static_assert(math::has<math::callable::annihilator<
+                      sequence, math::callable::times>()>::value);
     BOOST_CHECK((
         math::annihilator<sequence, math::callable::times>().is_annihilator()));
 
-    BOOST_MPL_ASSERT((math::is::associative<math::callable::times, sequence>) );
-    BOOST_MPL_ASSERT_NOT(
-        (math::is::commutative<math::callable::times, sequence>) );
+    static_assert(
+        math::is::associative<math::callable::times, sequence>::value);
+    static_assert(
+        !math::is::commutative<math::callable::times, sequence>::value);
 
-    BOOST_MPL_ASSERT((math::has<math::callable::reverse<>(
-                          math::callable::times, sequence)>) );
+    static_assert(math::has<math::callable::reverse<>(
+                      math::callable::times, sequence)>::value);
 
     // Properties of plus.
-    BOOST_MPL_ASSERT((math::has<math::callable::plus(sequence, sequence)>) );
-    BOOST_MPL_ASSERT_NOT(
-        (math::is::approximate<math::callable::plus(sequence, sequence)>) );
-    BOOST_MPL_ASSERT(
-        (math::has<
-            math::callable::identity<sequence, math::callable::plus>()>) );
-    BOOST_MPL_ASSERT((math::has<math::callable::zero<sequence>()>) );
+    static_assert(math::has<math::callable::plus(sequence, sequence)>::value);
+    static_assert(!math::is::approximate<math::callable::plus(
+                      sequence, sequence)>::value);
+    static_assert(
+        math::has<
+            math::callable::identity<sequence, math::callable::plus>()>::value);
+    static_assert(math::has<math::callable::zero<sequence>()>::value);
     BOOST_CHECK(math::zero<sequence>().is_annihilator());
-    BOOST_MPL_ASSERT_NOT(
-        (math::has<
-            math::callable::annihilator<sequence, math::callable::plus>()>) );
+    static_assert(!math::has<math::callable::annihilator<
+                      sequence, math::callable::plus>()>::value);
 
-    BOOST_MPL_ASSERT((math::is::associative<math::callable::plus, sequence>) );
-    BOOST_MPL_ASSERT((math::is::commutative<math::callable::plus, sequence>) );
+    static_assert(math::is::associative<math::callable::plus, sequence>::value);
+    static_assert(math::is::commutative<math::callable::plus, sequence>::value);
 
-    BOOST_MPL_ASSERT((math::is::idempotent<math::callable::plus, sequence>) );
-    BOOST_MPL_ASSERT_NOT(
-        (math::is::path_operation<math::callable::plus, sequence>) );
+    static_assert(math::is::idempotent<math::callable::plus, sequence>::value);
+    static_assert(
+        !math::is::path_operation<math::callable::plus, sequence>::value);
 
     // Properties of choose.
-    BOOST_MPL_ASSERT((math::has<math::callable::choose(sequence, sequence)>) );
-    BOOST_MPL_ASSERT_NOT(
-        (math::is::approximate<math::callable::choose(sequence, sequence)>) );
-    BOOST_MPL_ASSERT(
-        (math::has<
-            math::callable::identity<sequence, math::callable::choose>()>) );
+    static_assert(math::has<math::callable::choose(sequence, sequence)>::value);
+    static_assert(!math::is::approximate<math::callable::choose(
+                      sequence, sequence)>::value);
+    static_assert(math::has<math::callable::identity<
+                      sequence, math::callable::choose>()>::value);
     BOOST_CHECK(math::identity<sequence>(math::choose).is_annihilator());
-    BOOST_MPL_ASSERT_NOT(
-        (math::has<
-            math::callable::annihilator<sequence, math::callable::choose>()>) );
+    static_assert(!math::has<math::callable::annihilator<
+                      sequence, math::callable::choose>()>::value);
 
-    BOOST_MPL_ASSERT(
-        (math::is::associative<math::callable::choose, sequence>) );
-    BOOST_MPL_ASSERT(
-        (math::is::commutative<math::callable::choose, sequence>) );
+    static_assert(
+        math::is::associative<math::callable::choose, sequence>::value);
+    static_assert(
+        math::is::commutative<math::callable::choose, sequence>::value);
 
-    BOOST_MPL_ASSERT((math::is::idempotent<math::callable::choose, sequence>) );
-    BOOST_MPL_ASSERT(
-        (math::is::path_operation<math::callable::choose, sequence>) );
+    static_assert(
+        math::is::idempotent<math::callable::choose, sequence>::value);
+    static_assert(
+        math::is::path_operation<math::callable::choose, sequence>::value);
 
     // Properties of divide.
-    BOOST_MPL_ASSERT_NOT(
-        (math::has<math::callable::divide<>(sequence, sequence)>) );
-    BOOST_MPL_ASSERT(
-        (math::has<math::callable::divide<Direction>(sequence, sequence)>) );
-    BOOST_MPL_ASSERT_NOT(
-        (math::is::approximate<math::callable::divide<Direction>(
-             sequence, sequence)>) );
-    BOOST_MPL_ASSERT_NOT(
-        (math::has<math::callable::divide<Opposite>(sequence, sequence)>) );
-    BOOST_MPL_ASSERT(
-        (math::is::throw_if_undefined<math::callable::divide<Direction>(
-             sequence, sequence)>) );
+    static_assert(
+        !math::has<math::callable::divide<>(sequence, sequence)>::value);
+    static_assert(math::has<math::callable::divide<Direction>(
+                      sequence, sequence)>::value);
+    static_assert(!math::is::approximate<math::callable::divide<Direction>(
+                      sequence, sequence)>::value);
+    static_assert(!math::has<math::callable::divide<Opposite>(
+                      sequence, sequence)>::value);
+    static_assert(
+        math::is::throw_if_undefined<math::callable::divide<Direction>(
+            sequence, sequence)>::value);
 
     // Distributivity with plus: only in one direction.
-    BOOST_MPL_ASSERT_NOT((math::is::distributive<
-                          math::either, math::callable::times,
-                          math::callable::plus, sequence>) );
-    BOOST_MPL_ASSERT((math::is::distributive<
-                      Direction, math::callable::times, math::callable::plus,
-                      sequence>) );
-    BOOST_MPL_ASSERT_NOT(
-        (math::is::distributive<
-            Opposite, math::callable::times, math::callable::plus, sequence>) );
+    static_assert(!math::is::distributive<
+                  math::either, math::callable::times, math::callable::plus,
+                  sequence>::value);
+    static_assert(math::is::distributive<
+                  Direction, math::callable::times, math::callable::plus,
+                  sequence>::value);
+    static_assert(!math::is::distributive<
+                  Opposite, math::callable::times, math::callable::plus,
+                  sequence>::value);
 
     // Distributivity with choose: in either direction.
-    BOOST_MPL_ASSERT((math::is::distributive<
-                      math::either, math::callable::times,
-                      math::callable::choose, sequence>) );
-    BOOST_MPL_ASSERT((math::is::distributive<
-                      Direction, math::callable::times, math::callable::choose,
-                      sequence>) );
-    BOOST_MPL_ASSERT((math::is::distributive<
-                      Opposite, math::callable::times, math::callable::choose,
-                      sequence>) );
+    static_assert(math::is::distributive<
+                  math::either, math::callable::times, math::callable::choose,
+                  sequence>::value);
+    static_assert(math::is::distributive<
+                  Direction, math::callable::times, math::callable::choose,
+                  sequence>::value);
+    static_assert(math::is::distributive<
+                  Opposite, math::callable::times, math::callable::choose,
+                  sequence>::value);
 
     // Semiring with plus: only in one direction.
-    BOOST_MPL_ASSERT_NOT((math::is::semiring<
-                          math::either, math::callable::times,
-                          math::callable::plus, sequence>) );
-    BOOST_MPL_ASSERT((math::is::semiring<
-                      Direction, math::callable::times, math::callable::plus,
-                      sequence>) );
-    BOOST_MPL_ASSERT_NOT(
-        (math::is::semiring<
-            Opposite, math::callable::times, math::callable::plus, sequence>) );
+    static_assert(!math::is::semiring<
+                  math::either, math::callable::times, math::callable::plus,
+                  sequence>::value);
+    static_assert(math::is::semiring<
+                  Direction, math::callable::times, math::callable::plus,
+                  sequence>::value);
+    static_assert(!math::is::semiring<
+                  Opposite, math::callable::times, math::callable::plus,
+                  sequence>::value);
 
     // Semiring with choose: in either direction.
-    BOOST_MPL_ASSERT((math::is::semiring<
-                      math::either, math::callable::times,
-                      math::callable::choose, sequence>) );
-    BOOST_MPL_ASSERT((math::is::semiring<
-                      Direction, math::callable::times, math::callable::choose,
-                      sequence>) );
-    BOOST_MPL_ASSERT((math::is::semiring<
-                      Opposite, math::callable::times, math::callable::choose,
-                      sequence>) );
+    static_assert(math::is::semiring<
+                  math::either, math::callable::times, math::callable::choose,
+                  sequence>::value);
+    static_assert(math::is::semiring<
+                  Direction, math::callable::times, math::callable::choose,
+                  sequence>::value);
+    static_assert(math::is::semiring<
+                  Opposite, math::callable::times, math::callable::choose,
+                  sequence>::value);
 }
 
 #endif  // MATH_TEST_MATH_TEST_SEQUENCE_TESTS_FAST_HPP_INCLUDED

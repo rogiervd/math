@@ -279,7 +279,7 @@ void test_comparison(std::string const & ab_, std::string const & abc_)
     sequence_annihilator annihilator;
     {
         typedef decltype(annihilator.is_annihilator()) is_annihilator;
-        static_assert(is_annihilator::value, "");
+        static_assert(is_annihilator::value);
     }
     sequence annihilator2(annihilator);
     BOOST_CHECK(annihilator2.is_annihilator());
@@ -290,9 +290,9 @@ void test_comparison(std::string const & ab_, std::string const & abc_)
     empty_sequence empty;
     {
         typedef decltype(empty.is_annihilator()) is_annihilator;
-        static_assert(!is_annihilator::value, "");
+        static_assert(!is_annihilator::value);
         typedef decltype(empty.empty()) is_empty;
-        static_assert(is_empty::value, "");
+        static_assert(is_empty::value);
     }
     optional_sequence empty2;
     BOOST_CHECK(!empty2.is_annihilator());
@@ -320,9 +320,9 @@ void test_comparison(std::string const & ab_, std::string const & abc_)
     single_sequence b('b');
     {
         typedef decltype(a.is_annihilator()) is_annihilator;
-        static_assert(!is_annihilator::value, "");
+        static_assert(!is_annihilator::value);
         typedef decltype(a.empty()) is_empty;
-        static_assert(!is_empty::value, "");
+        static_assert(!is_empty::value);
     }
     BOOST_CHECK_EQUAL(range::size(a.symbols()), 1u);
     BOOST_CHECK_EQUAL(range::first(a.symbols()), 'a');
@@ -334,7 +334,7 @@ void test_comparison(std::string const & ab_, std::string const & abc_)
     optional_sequence b2('b');
     {
         typedef decltype(a2.is_annihilator()) is_annihilator;
-        static_assert(!is_annihilator::value, "");
+        static_assert(!is_annihilator::value);
     }
     BOOST_CHECK(!a2.empty());
     BOOST_CHECK_EQUAL(range::size(a2.symbols()), 1u);

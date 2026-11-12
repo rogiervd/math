@@ -96,100 +96,100 @@ template <class Type, class Examples> void test_arithmetic_magma_integer(
     using math::has;
 
     // Always available; but always true.
-    BOOST_MPL_ASSERT((has<callable::is_member(Type &)>) );
+    static_assert(has<callable::is_member(Type &)>::value);
     BOOST_CHECK(math::is_member(a));
-    BOOST_MPL_ASSERT(
-        (std::is_same<decltype(math::is_member(a)), rime::true_type>) );
+    static_assert(
+        std::is_same_v<decltype(math::is_member(a)), rime::true_type>);
 
-    BOOST_MPL_ASSERT((has<callable::equal(Type const &, Type)>) );
+    static_assert(has<callable::equal(Type const &, Type)>::value);
     BOOST_CHECK(math::equal(a, a));
     BOOST_CHECK(math::equal(b, b));
     BOOST_CHECK(!math::equal(a, b));
     BOOST_CHECK(!math::equal(b, a));
 
-    BOOST_MPL_ASSERT((has<callable::approximately_equal(Type const &, Type)>) );
+    static_assert(
+        has<callable::approximately_equal(Type const &, Type)>::value);
 
     // Produce.
-    BOOST_MPL_ASSERT_NOT((has<callable::non_member<Type const>()>) );
+    static_assert(!has<callable::non_member<Type const>()>::value);
 
-    BOOST_MPL_ASSERT((has<callable::identity<Type, callable::plus>()>) );
-    BOOST_MPL_ASSERT((has<callable::identity<Type>(callable::plus)>) );
+    static_assert(has<callable::identity<Type, callable::plus>()>::value);
+    static_assert(has<callable::identity<Type>(callable::plus)>::value);
     BOOST_CHECK_EQUAL((math::identity<Type, callable::plus>()), Type(0));
     BOOST_CHECK_EQUAL((math::identity<Type>(math::plus)), Type(0));
 
-    BOOST_MPL_ASSERT((has<callable::identity<Type, callable::times>()>) );
+    static_assert(has<callable::identity<Type, callable::times>()>::value);
     BOOST_CHECK_EQUAL((math::identity<Type, callable::times>()), Type(1));
     BOOST_CHECK_EQUAL((math::identity<Type>(math::times)), Type(1));
 
-    BOOST_MPL_ASSERT_NOT((has<callable::annihilator<Type, callable::plus>()>) );
-    BOOST_MPL_ASSERT((has<callable::annihilator<Type, callable::times>()>) );
+    static_assert(!has<callable::annihilator<Type, callable::plus>()>::value);
+    static_assert(has<callable::annihilator<Type, callable::times>()>::value);
     BOOST_CHECK_EQUAL((math::annihilator<Type, callable::times>()), Type(0));
 
     BOOST_CHECK_EQUAL(math::zero<Type>(), Type(0));
     BOOST_CHECK_EQUAL(math::one<Type>(), Type(1));
 
     // Operations.
-    BOOST_MPL_ASSERT((has<callable::compare(Type, Type)>) );
-    BOOST_MPL_ASSERT_NOT(
-        (math::is::approximate<callable::compare(Type, Type)>) );
+    static_assert(has<callable::compare(Type, Type)>::value);
+    static_assert(!math::is::approximate<callable::compare(Type, Type)>::value);
     BOOST_CHECK_EQUAL(math::compare(a, a), false);
     BOOST_CHECK_EQUAL(math::compare(a, b), true);
     BOOST_CHECK_EQUAL(math::compare(b, a), false);
 
-    static_assert(has<callable::pick(bool, Type, Type)>::value, "");
-    static_assert(has<callable::pick(rime::true_type, Type, Type)>::value, "");
-    static_assert(has<callable::pick(std::false_type, Type, Type)>::value, "");
+    static_assert(has<callable::pick(bool, Type, Type)>::value);
+    static_assert(has<callable::pick(rime::true_type, Type, Type)>::value);
+    static_assert(has<callable::pick(std::false_type, Type, Type)>::value);
 
     BOOST_CHECK_EQUAL(math::pick(true, a, b), a);
     BOOST_CHECK_EQUAL(math::pick(false, a, b), b);
     BOOST_CHECK_EQUAL(math::pick(std::true_type(), b, a), b);
     BOOST_CHECK_EQUAL(math::pick(rime::false_, b, a), a);
 
-    BOOST_MPL_ASSERT_NOT((has<callable::choose(Type, Type)>) );
+    static_assert(!has<callable::choose(Type, Type)>::value);
 
-    BOOST_MPL_ASSERT((has<callable::times(Type, Type)>) );
-    BOOST_MPL_ASSERT_NOT((math::is::approximate<callable::times(Type, Type)>) );
+    static_assert(has<callable::times(Type, Type)>::value);
+    static_assert(!math::is::approximate<callable::times(Type, Type)>::value);
     BOOST_CHECK_EQUAL(math::times(a, b), Type(15));
 
-    BOOST_MPL_ASSERT((has<callable::plus(Type, Type)>) );
-    BOOST_MPL_ASSERT_NOT((math::is::approximate<callable::plus(Type, Type)>) );
+    static_assert(has<callable::plus(Type, Type)>::value);
+    static_assert(!math::is::approximate<callable::plus(Type, Type)>::value);
     BOOST_CHECK_EQUAL(math::plus(a, b), Type(8));
 
-    BOOST_MPL_ASSERT_NOT((has<callable::divide<>(Type, Type)>) );
-    BOOST_MPL_ASSERT_NOT((has<callable::divide<math::left>(Type, Type)>) );
-    BOOST_MPL_ASSERT_NOT((has<callable::divide<math::right>(Type, Type)>) );
+    static_assert(!has<callable::divide<>(Type, Type)>::value);
+    static_assert(!has<callable::divide<math::left>(Type, Type)>::value);
+    static_assert(!has<callable::divide<math::right>(Type, Type)>::value);
 
-    BOOST_MPL_ASSERT_NOT(
-        (has<callable::invert<math::left, math::callable::times>(Type)>) );
-    BOOST_MPL_ASSERT_NOT(
-        (has<callable::invert<math::right, math::callable::times>(Type)>) );
-    BOOST_MPL_ASSERT_NOT(
-        (has<callable::invert<math::either, math::callable::times>(Type)>) );
-    BOOST_MPL_ASSERT_NOT((has<callable::invert<math::callable::times>(Type)>) );
+    static_assert(
+        !has<callable::invert<math::left, math::callable::times>(Type)>::value);
+    static_assert(!has<callable::invert<math::right, math::callable::times>(
+                      Type)>::value);
+    static_assert(!has<callable::invert<math::either, math::callable::times>(
+                      Type)>::value);
+    static_assert(!has<callable::invert<math::callable::times>(Type)>::value);
 
     // Properties
-    BOOST_MPL_ASSERT((math::is::associative<callable::times(Type, Type &)>) );
-    BOOST_MPL_ASSERT((math::is::commutative<callable::times(Type &, Type)>) );
-    BOOST_MPL_ASSERT_NOT((math::is::idempotent<callable::times(Type, Type)>) );
-    BOOST_MPL_ASSERT_NOT(
-        (math::is::path_operation<callable::times(Type &, Type const &)>) );
+    static_assert(math::is::associative<callable::times(Type, Type &)>::value);
+    static_assert(math::is::commutative<callable::times(Type &, Type)>::value);
+    static_assert(!math::is::idempotent<callable::times(Type, Type)>::value);
+    static_assert(!math::is::path_operation<callable::times(
+                      Type &, Type const &)>::value);
 
-    BOOST_MPL_ASSERT((math::is::associative<callable::plus(Type, Type &)>) );
-    BOOST_MPL_ASSERT((math::is::commutative<callable::plus(Type &, Type)>) );
-    BOOST_MPL_ASSERT_NOT((math::is::idempotent<callable::plus(Type, Type)>) );
-    BOOST_MPL_ASSERT_NOT(
-        (math::is::path_operation<callable::plus(Type &, Type const &)>) );
+    static_assert(math::is::associative<callable::plus(Type, Type &)>::value);
+    static_assert(math::is::commutative<callable::plus(Type &, Type)>::value);
+    static_assert(!math::is::idempotent<callable::plus(Type, Type)>::value);
+    static_assert(
+        !math::is::path_operation<callable::plus(Type &, Type const &)>::value);
 
-    BOOST_MPL_ASSERT((math::is::distributive<
-                      math::left, callable::times, callable::plus, Type>) );
+    static_assert(math::is::distributive<
+                  math::left, callable::times, callable::plus, Type>::value);
 
-    BOOST_MPL_ASSERT((math::is::distributive<callable::times(
-                          callable::plus(Type, Type const), Type &)>) );
-    BOOST_MPL_ASSERT((math::is::distributive<callable::times(
-                          Type, callable::plus(Type &, Type const &))>) );
+    static_assert(math::is::distributive<callable::times(
+                      callable::plus(Type, Type const), Type &)>::value);
+    static_assert(math::is::distributive<callable::times(
+                      Type, callable::plus(Type &, Type const &))>::value);
 
-    BOOST_MPL_ASSERT((math::is::semiring<
-                      math::either, callable::times, callable::plus, Type>) );
+    static_assert(math::is::semiring<
+                  math::either, callable::times, callable::plus, Type>::value);
 
     // Check for consistency.
     math::report_check_semiring<Type, math::either>(

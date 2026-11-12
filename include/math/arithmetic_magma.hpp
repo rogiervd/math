@@ -31,7 +31,7 @@ template <class Type> struct decayed_magma_tag<
     Type,
     typename boost::enable_if_c<(
         std::numeric_limits<Type>::is_specialized
-        && !std::is_same<Type, bool>::value)>::type>
+        && !std::is_same_v<Type, bool>)>::type>
 {
     typedef arithmetic_magma_tag<Type> type;
 };
