@@ -14,7 +14,6 @@ Tests for arithmetic_magma on reals.
 #include "boost/math/special_functions/next.hpp"
 #include "boost/test/tools/floating_point_comparison.hpp"
 
-#include "boost/mpl/assert.hpp"
 
 #include "range/std/vector.hpp"
 
@@ -75,16 +74,16 @@ template <class Type, class Examples> void test_arithmetic_magma_real(
     Type b(5);
     Type c(2.5);
 
-    BOOST_MPL_ASSERT((math::has<math::callable::non_member<Type const &>()>) );
-    BOOST_MPL_ASSERT((math::has<math::callable::is_member(Type const)>) );
-    BOOST_MPL_ASSERT((math::has<math::callable::equal(Type &, Type const)>) );
-    BOOST_MPL_ASSERT(
-        (math::has<math::callable::approximately_equal(Type, Type const &)>) );
+    static_assert(math::has<math::callable::non_member<Type const &>()>::value);
+    static_assert(math::has<math::callable::is_member(Type const)>::value);
+    static_assert(math::has<math::callable::equal(Type &, Type const)>::value);
+    static_assert(math::has<math::callable::approximately_equal(
+                      Type, Type const &)>::value);
 
     // compare.
-    BOOST_MPL_ASSERT((math::has<math::callable::compare(Type, Type)>) );
-    BOOST_MPL_ASSERT_NOT(
-        (math::is::approximate<math::callable::compare(Type, Type)>) );
+    static_assert(math::has<math::callable::compare(Type, Type)>::value);
+    static_assert(
+        !math::is::approximate<math::callable::compare(Type, Type)>::value);
     BOOST_CHECK_EQUAL(math::compare(a, a), false);
     BOOST_CHECK_EQUAL(math::compare(a, b), true);
     BOOST_CHECK_EQUAL(math::compare(a, c), false);
@@ -96,17 +95,18 @@ template <class Type, class Examples> void test_arithmetic_magma_real(
     BOOST_CHECK_EQUAL(math::compare(c, c), false);
 
     // times.
-    BOOST_MPL_ASSERT((math::has<math::callable::times(Type &, Type const &)>) );
-    BOOST_MPL_ASSERT(
-        (math::is::approximate<math::callable::times(Type &, Type const &)>) );
-    BOOST_MPL_ASSERT((
-        math::has<math::callable::identity<Type &, math::callable::times>()>) );
-    BOOST_MPL_ASSERT(
-        (math::has<math::callable::identity<Type &>(math::callable::times)>) );
-    BOOST_MPL_ASSERT((math::has<math::callable::one<Type const &>()>) );
-    BOOST_MPL_ASSERT(
-        (math::has<
-            math::callable::annihilator<Type &, math::callable::times>()>) );
+    static_assert(
+        math::has<math::callable::times(Type &, Type const &)>::value);
+    static_assert(math::is::approximate<math::callable::times(
+                      Type &, Type const &)>::value);
+    static_assert(
+        math::has<
+            math::callable::identity<Type &, math::callable::times>()>::value);
+    static_assert(math::has<math::callable::identity<Type &>(
+                      math::callable::times)>::value);
+    static_assert(math::has<math::callable::one<Type const &>()>::value);
+    static_assert(math::has<math::callable::annihilator<
+                      Type &, math::callable::times>()>::value);
 
     BOOST_CHECK_EQUAL(math::one<Type>(), Type(1));
     BOOST_CHECK_EQUAL((math::identity<Type, math::callable::times>()), Type(1));
@@ -115,75 +115,75 @@ template <class Type, class Examples> void test_arithmetic_magma_real(
         (math::annihilator<Type, math::callable::times>()), Type(0));
     BOOST_CHECK_EQUAL(math::annihilator<Type>(math::times), Type(0));
 
-    BOOST_MPL_ASSERT((math::is::commutative<math::callable::times, Type &>) );
-    BOOST_MPL_ASSERT(
-        (math::is::associative<math::callable::times, Type const &>) );
-    BOOST_MPL_ASSERT_NOT((math::is::idempotent<math::callable::times, Type>) );
-    BOOST_MPL_ASSERT_NOT(
-        (math::is::path_operation<math::callable::times, Type>) );
+    static_assert(math::is::commutative<math::callable::times, Type &>::value);
+    static_assert(
+        math::is::associative<math::callable::times, Type const &>::value);
+    static_assert(!math::is::idempotent<math::callable::times, Type>::value);
+    static_assert(
+        !math::is::path_operation<math::callable::times, Type>::value);
 
     // plus.
-    BOOST_MPL_ASSERT((math::has<math::callable::plus(Type const &, Type &)>) );
-    BOOST_MPL_ASSERT(
-        (math::is::approximate<math::callable::plus(Type const &, Type &)>) );
-    BOOST_MPL_ASSERT(
-        (math::has<math::callable::identity<Type &, math::callable::plus>()>) );
-    BOOST_MPL_ASSERT(
-        (math::has<math::callable::identity<Type &>(math::callable::plus)>) );
-    BOOST_MPL_ASSERT((math::has<math::callable::zero<Type const>()>) );
-    BOOST_MPL_ASSERT_NOT(
-        (math::has<
-            math::callable::annihilator<Type &, math::callable::plus>()>) );
+    static_assert(math::has<math::callable::plus(Type const &, Type &)>::value);
+    static_assert(math::is::approximate<math::callable::plus(
+                      Type const &, Type &)>::value);
+    static_assert(
+        math::has<
+            math::callable::identity<Type &, math::callable::plus>()>::value);
+    static_assert(math::has<math::callable::identity<Type &>(
+                      math::callable::plus)>::value);
+    static_assert(math::has<math::callable::zero<Type const>()>::value);
+    static_assert(!math::has<math::callable::annihilator<
+                      Type &, math::callable::plus>()>::value);
 
     BOOST_CHECK_EQUAL(math::zero<Type>(), Type(0));
     BOOST_CHECK_EQUAL((math::identity<Type, math::callable::plus>()), Type(0));
     BOOST_CHECK_EQUAL(math::identity<Type>(math::plus), Type(0));
 
-    BOOST_MPL_ASSERT((math::is::associative<math::callable::plus, Type &>) );
-    BOOST_MPL_ASSERT((math::is::commutative<math::callable::plus, Type &>) );
-    BOOST_MPL_ASSERT_NOT(
-        (math::is::path_operation<math::callable::plus, Type &>) );
-    BOOST_MPL_ASSERT_NOT((math::is::idempotent<math::callable::plus, Type &>) );
+    static_assert(math::is::associative<math::callable::plus, Type &>::value);
+    static_assert(math::is::commutative<math::callable::plus, Type &>::value);
+    static_assert(
+        !math::is::path_operation<math::callable::plus, Type &>::value);
+    static_assert(!math::is::idempotent<math::callable::plus, Type &>::value);
 
     // divide.
-    BOOST_MPL_ASSERT(
-        (math::has<math::callable::divide<>(Type &, Type const &)>) );
-    BOOST_MPL_ASSERT(
-        (math::has<math::callable::divide<math::left>(Type &, Type const &)>) );
-    BOOST_MPL_ASSERT((
-        math::has<math::callable::divide<math::right>(Type &, Type const &)>) );
-    BOOST_MPL_ASSERT((math::is::approximate<math::callable::divide<>(
-                          Type &, Type const &)>) );
-    BOOST_MPL_ASSERT((math::is::approximate<math::callable::divide<math::left>(
-                          Type &, Type const &)>) );
-    BOOST_MPL_ASSERT((math::is::approximate<math::callable::divide<math::right>(
-                          Type &, Type const &)>) );
+    static_assert(
+        math::has<math::callable::divide<>(Type &, Type const &)>::value);
+    static_assert(math::has<math::callable::divide<math::left>(
+                      Type &, Type const &)>::value);
+    static_assert(math::has<math::callable::divide<math::right>(
+                      Type &, Type const &)>::value);
+    static_assert(math::is::approximate<math::callable::divide<>(
+                      Type &, Type const &)>::value);
+    static_assert(math::is::approximate<math::callable::divide<math::left>(
+                      Type &, Type const &)>::value);
+    static_assert(math::is::approximate<math::callable::divide<math::right>(
+                      Type &, Type const &)>::value);
 
-    BOOST_MPL_ASSERT(
-        (math::has<math::callable::invert<math::left, math::callable::times>(
-             Type)>) );
-    BOOST_MPL_ASSERT(
-        (math::has<math::callable::invert<math::right, math::callable::times>(
-             Type)>) );
-    BOOST_MPL_ASSERT(
-        (math::has<math::callable::invert<math::either, math::callable::times>(
-             Type)>) );
-    BOOST_MPL_ASSERT(
-        (math::has<math::callable::invert<math::callable::times>(Type)>) );
-    BOOST_MPL_ASSERT(
-        (math::has<math::callable::invert<>(math::callable::times, Type)>) );
-    BOOST_MPL_ASSERT((math::is::approximate<
-                      math::callable::invert<math::callable::times>(Type)>) );
+    static_assert(
+        math::has<math::callable::invert<math::left, math::callable::times>(
+            Type)>::value);
+    static_assert(
+        math::has<math::callable::invert<math::right, math::callable::times>(
+            Type)>::value);
+    static_assert(
+        math::has<math::callable::invert<math::either, math::callable::times>(
+            Type)>::value);
+    static_assert(
+        math::has<math::callable::invert<math::callable::times>(Type)>::value);
+    static_assert(math::has<math::callable::invert<>(
+                      math::callable::times, Type)>::value);
+    static_assert(math::is::approximate<
+                  math::callable::invert<math::callable::times>(Type)>::value);
 
     // reverse.
-    BOOST_MPL_ASSERT(
-        (math::has<math::callable::reverse<math::callable::plus>(Type)>) );
-    BOOST_MPL_ASSERT(
-        (math::has<math::callable::reverse<>(math::callable::plus, Type)>) );
-    BOOST_MPL_ASSERT(
-        (math::has<math::callable::reverse<math::callable::times>(Type)>) );
-    BOOST_MPL_ASSERT(
-        (math::has<math::callable::reverse<>(math::callable::times, Type)>) );
+    static_assert(
+        math::has<math::callable::reverse<math::callable::plus>(Type)>::value);
+    static_assert(math::has<math::callable::reverse<>(
+                      math::callable::plus, Type)>::value);
+    static_assert(
+        math::has<math::callable::reverse<math::callable::times>(Type)>::value);
+    static_assert(math::has<math::callable::reverse<>(
+                      math::callable::times, Type)>::value);
 
     // Check for sensible results.
     {
@@ -268,34 +268,33 @@ template <class Type> void test_arithmetic_magma_real_signed()
     Type b = 5;
 
     // minus.
-    BOOST_MPL_ASSERT(
-        (math::has<math::callable::minus<>(Type &, Type const &)>) );
-    BOOST_MPL_ASSERT(
-        (math::has<math::callable::minus<math::left>(Type &, Type const &)>) );
-    BOOST_MPL_ASSERT(
-        (math::has<math::callable::minus<math::right>(Type &, Type const &)>) );
-    BOOST_MPL_ASSERT((
-        math::is::approximate<math::callable::minus<>(Type &, Type const &)>) );
-    BOOST_MPL_ASSERT((math::is::approximate<math::callable::minus<math::left>(
-                          Type &, Type const &)>) );
-    BOOST_MPL_ASSERT((math::is::approximate<math::callable::minus<math::right>(
-                          Type &, Type const &)>) );
+    static_assert(
+        math::has<math::callable::minus<>(Type &, Type const &)>::value);
+    static_assert(math::has<math::callable::minus<math::left>(
+                      Type &, Type const &)>::value);
+    static_assert(math::has<math::callable::minus<math::right>(
+                      Type &, Type const &)>::value);
+    static_assert(math::is::approximate<math::callable::minus<>(
+                      Type &, Type const &)>::value);
+    static_assert(math::is::approximate<math::callable::minus<math::left>(
+                      Type &, Type const &)>::value);
+    static_assert(math::is::approximate<math::callable::minus<math::right>(
+                      Type &, Type const &)>::value);
 
     // invert.
-    BOOST_MPL_ASSERT(
-        (math::has<math::callable::invert<math::left, math::callable::plus>(
-             Type)>) );
-    BOOST_MPL_ASSERT(
-        (math::has<math::callable::invert<math::right, math::callable::plus>(
-             Type)>) );
-    BOOST_MPL_ASSERT(
-        (math::has<math::callable::invert<math::either, math::callable::plus>(
-             Type)>) );
-    BOOST_MPL_ASSERT(
-        (math::has<math::callable::invert<math::callable::plus>(Type)>) );
-    BOOST_MPL_ASSERT_NOT(
-        (math::is::approximate<math::callable::invert<math::callable::plus>(
-             Type)>) );
+    static_assert(
+        math::has<math::callable::invert<math::left, math::callable::plus>(
+            Type)>::value);
+    static_assert(
+        math::has<math::callable::invert<math::right, math::callable::plus>(
+            Type)>::value);
+    static_assert(
+        math::has<math::callable::invert<math::either, math::callable::plus>(
+            Type)>::value);
+    static_assert(
+        math::has<math::callable::invert<math::callable::plus>(Type)>::value);
+    static_assert(!math::is::approximate<
+                  math::callable::invert<math::callable::plus>(Type)>::value);
 
     // minus.
     {

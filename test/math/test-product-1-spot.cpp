@@ -14,7 +14,6 @@ Test product.hpp.
 #include <string>
 #include <vector>
 
-#include "boost/mpl/assert.hpp"
 
 #include "range/std/string.hpp"
 
@@ -45,33 +44,33 @@ BOOST_AUTO_TEST_CASE(test_product_annihilator)
     auto cost_annihilator = math::annihilator<math::cost<double>>(math::times);
 
     // divide.
-    BOOST_MPL_ASSERT_NOT((math::has<math::callable::divide<math::left>(
-                              without_inverse, without_inverse)>) );
-    BOOST_MPL_ASSERT_NOT(
-        (math::has<math::callable::invert<math::left, math::callable::times>(
-             without_inverse)>) );
+    static_assert(!math::has<math::callable::divide<math::left>(
+                      without_inverse, without_inverse)>::value);
+    static_assert(
+        !math::has<math::callable::invert<math::left, math::callable::times>(
+            without_inverse)>::value);
 
-    BOOST_MPL_ASSERT((math::has<math::callable::divide<math::left>(
-                          with_divide, with_divide)>) );
+    static_assert(math::has<math::callable::divide<math::left>(
+                      with_divide, with_divide)>::value);
     // sequence does not have invert.
-    BOOST_MPL_ASSERT_NOT(
-        (math::has<math::callable::invert<math::left, math::callable::times>(
-             with_divide)>) );
+    static_assert(
+        !math::has<math::callable::invert<math::left, math::callable::times>(
+            with_divide)>::value);
 
-    BOOST_MPL_ASSERT_NOT((math::has<math::callable::divide<math::left>(
-                              with_minus, with_minus)>) );
-    BOOST_MPL_ASSERT_NOT(
-        (math::has<math::callable::invert<math::left, math::callable::times>(
-             with_minus)>) );
+    static_assert(!math::has<math::callable::divide<math::left>(
+                      with_minus, with_minus)>::value);
+    static_assert(
+        !math::has<math::callable::invert<math::left, math::callable::times>(
+            with_minus)>::value);
 
     // minus.
-    BOOST_MPL_ASSERT_NOT((math::has<math::callable::minus<math::left>(
-                              without_inverse, without_inverse)>) );
-    BOOST_MPL_ASSERT_NOT((math::has<math::callable::minus<math::left>(
-                              with_divide, with_divide)>) );
+    static_assert(!math::has<math::callable::minus<math::left>(
+                      without_inverse, without_inverse)>::value);
+    static_assert(!math::has<math::callable::minus<math::left>(
+                      with_divide, with_divide)>::value);
     // minus is not actually implemented, since sequence does not have it.
-    BOOST_MPL_ASSERT_NOT((
-        math::has<math::callable::minus<math::left>(with_minus, with_minus)>) );
+    static_assert(!math::has<math::callable::minus<math::left>(
+                      with_minus, with_minus)>::value);
 
     // All components annihilators.
     BOOST_CHECK(

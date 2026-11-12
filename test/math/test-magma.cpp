@@ -12,6 +12,8 @@ The following therefore end up testing the main parts of magma.hpp:
 */
 
 #define BOOST_TEST_MODULE test_magma
+#include <type_traits>
+
 #include "boost/test/unit_test.hpp"
 
 #include "math/magma.hpp"
@@ -25,26 +27,26 @@ BOOST_AUTO_TEST_CASE(test_magma)
         // Check return type: should be "divide" functor.
         // Two variants: with/without direction;
         // with the operation as compile-time/run-time argument.
-        BOOST_MPL_ASSERT(
-            (std::is_same<
+        static_assert(
+            std::is_same_v<
                 std::decay<math::result_of<math::callable::inverse_operation<>(
                     math::callable::times)>::type>::type,
-                math::callable::divide<>>) );
-        BOOST_MPL_ASSERT(
-            (std::is_same<
+                math::callable::divide<>>);
+        static_assert(
+            std::is_same_v<
                 std::decay<math::result_of<math::callable::inverse_operation<
                     math::left>(math::callable::times)>::type>::type,
-                math::callable::divide<math::left>>) );
-        BOOST_MPL_ASSERT(
-            (std::is_same<
+                math::callable::divide<math::left>>);
+        static_assert(
+            std::is_same_v<
                 std::decay<math::result_of<math::callable::inverse_operation<
                     math::callable::plus>()>::type>::type,
-                math::callable::minus<>>) );
-        BOOST_MPL_ASSERT(
-            (std::is_same<
+                math::callable::minus<>>);
+        static_assert(
+            std::is_same_v<
                 std::decay<math::result_of<math::callable::inverse_operation<
                     math::right, math::callable::plus>()>::type>::type,
-                math::callable::minus<math::right>>) );
+                math::callable::minus<math::right>>);
     }
 }
 
