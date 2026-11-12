@@ -653,12 +653,10 @@ namespace check_detail {
         type_checklist & checks, Value const & value,
         Reference const & reference, bool should_be_member = true)
     {
-        static_assert(is_magma<decltype(value)>::value, "");
-        static_assert(
-            std::is_same<
-                typename magma_tag<decltype(value)>::type,
-                typename magma_tag<Reference>::type>::value,
-            "");
+        static_assert(is_magma<decltype(value)>::value);
+        static_assert(std::is_same_v<
+                      typename magma_tag<decltype(value)>::type,
+                      typename magma_tag<Reference>::type>);
         if (checks.tick_off(type_properties::is_member)) {
             if (math::is_member(value) != should_be_member) {
                 checks.failed(
@@ -1587,10 +1585,9 @@ namespace check_detail {
             operation_checklist & checks, Operation const & operation,
             Example const & example) const
         {
-            operation_properties property =
-                std::is_same<Direction, either>::value
+            operation_properties property = std::is_same_v<Direction, either>
                 ? operation_properties::invert_either
-                : (std::is_same<Direction, left>::value
+                : (std::is_same_v<Direction, left>
                        ? operation_properties::invert_left
                        : operation_properties::invert_right);
             if (checks.tick_off(property)) {
@@ -1657,11 +1654,9 @@ namespace check_detail {
         {
             if (checks.tick_off(operation_properties::reverse)) {
                 auto result = reverse(operation, reverse(operation, example));
-                static_assert(
-                    std::is_same<
-                        typename magma_tag<decltype(result)>::type,
-                        typename magma_tag<Example>::type>::value,
-                    "");
+                static_assert(std::is_same_v<
+                              typename magma_tag<decltype(result)>::type,
+                              typename magma_tag<Example>::type>);
 
                 typedef callable::reverse<Operation> reverse_type;
                 auto correct = check_equality<
@@ -1693,11 +1688,9 @@ namespace check_detail {
                 auto result =
                     reverse(operation(reverse(example2), reverse(example1)));
 
-                static_assert(
-                    std::is_same<
-                        typename magma_tag<decltype(result)>::type,
-                        typename magma_tag<Example1>::type>::value,
-                    "");
+                static_assert(std::is_same_v<
+                              typename magma_tag<decltype(result)>::type,
+                              typename magma_tag<Example1>::type>);
 
                 auto correct =
                     check_equality<meta::vector<reverse_type(Operation(
@@ -1926,14 +1919,14 @@ namespace check_detail {
             operation_checklist & operation_checks, Operation operation,
             Examples const & examples) const
         {
-            static_assert(math::is_magma<Magma>::value, "");
-            static_assert(math::is_magma<Magma &>::value, "");
-            static_assert(math::is_magma<Magma const>::value, "");
-            static_assert(math::is_magma<Magma const &>::value, "");
+            static_assert(math::is_magma<Magma>::value);
+            static_assert(math::is_magma<Magma &>::value);
+            static_assert(math::is_magma<Magma const>::value);
+            static_assert(math::is_magma<Magma const &>::value);
 
-            static_assert(!std::is_same<tag, not_a_magma_tag>::value, "");
+            static_assert(!std::is_same_v<tag, not_a_magma_tag>);
 
-            static_assert(math::has<callable::is_member(Magma)>::value, "");
+            static_assert(math::has<callable::is_member(Magma)>::value);
 
             // Check with each example.
             range::for_each(
@@ -1950,7 +1943,7 @@ namespace check_detail {
             Examples const & examples, Example1 const & example1) const
         {
             typedef typename magma_tag<decltype(example1)>::type example_tag;
-            static_assert(std::is_same<tag, example_tag>::value, "");
+            static_assert(std::is_same_v<tag, example_tag>);
             if (type_checks.tick_off(type_properties::is_member)) {
                 // The examples must all be members.
                 if (!is_member(example1)) {
@@ -2046,7 +2039,7 @@ namespace check_detail {
                     operation_checks, example2, operation);
             }
 
-            static_assert(has<callable::equal(Magma, Magma)>::value, "");
+            static_assert(has<callable::equal(Magma, Magma)>::value);
 
             math_check_different_namespace::check_operator(
                 type_checks, equal, example1, example2);
@@ -2132,10 +2125,8 @@ namespace check_detail {
                 not_applicable(type_properties::compare_equal), type_checks,
                 example1, example2);
 
-            static_assert(
-                has<callable::equal(
-                    decltype(example1), decltype(example2))>::value,
-                "");
+            static_assert(has<callable::equal(
+                              decltype(example1), decltype(example2))>::value);
 
             // Check with each combination of three examples.
             range::for_each(

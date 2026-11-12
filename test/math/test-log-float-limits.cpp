@@ -23,23 +23,23 @@ template <class LogFloat, class Underlying> void check_limits()
     typedef std::numeric_limits<Underlying> limits_underlying;
 
     /* Static properties. */
-    static_assert(limits::is_specialized, "");
-    static_assert(!limits::is_integer, "");
-    static_assert(!limits::is_exact, "");
-    static_assert(limits::has_infinity, "");
+    static_assert(limits::is_specialized);
+    static_assert(!limits::is_integer);
+    static_assert(!limits::is_exact);
+    static_assert(limits::has_infinity);
 
-    static_assert(limits::has_quiet_NaN, "");
-    static_assert(limits::has_signaling_NaN, "");
-    static_assert(limits::has_denorm == std::denorm_absent, "");
-    static_assert(!limits::has_denorm_loss, "");
-    static_assert(limits::round_style == std::round_to_nearest, "");
+    static_assert(limits::has_quiet_NaN);
+    static_assert(limits::has_signaling_NaN);
+    static_assert(limits::has_denorm == std::denorm_absent);
+    static_assert(!limits::has_denorm_loss);
+    static_assert(limits::round_style == std::round_to_nearest);
 
-    static_assert(!limits::is_iec559, "");
-    static_assert(limits::is_bounded, "");
-    static_assert(!limits::is_modulo, "");
+    static_assert(!limits::is_iec559);
+    static_assert(limits::is_bounded);
+    static_assert(!limits::is_modulo);
 
-    static_assert(!limits::traps, "");
-    static_assert(!limits::tinyness_before, "");
+    static_assert(!limits::traps);
+    static_assert(!limits::tinyness_before);
 
     /* Functions. */
     // min.
@@ -94,7 +94,7 @@ template <class LogFloat, class Underlying> void check_limits_unsigned()
 
     typedef std::numeric_limits<LogFloat> limits;
 
-    static_assert(!limits::is_signed, "");
+    static_assert(!limits::is_signed);
 
     BOOST_CHECK_EQUAL(limits::lowest(), limits::min());
 }
@@ -105,7 +105,7 @@ template <class LogFloat, class Underlying> void check_limits_signed()
 
     typedef std::numeric_limits<LogFloat> limits;
 
-    static_assert(limits::is_signed, "");
+    static_assert(limits::is_signed);
 
     BOOST_CHECK_EQUAL(limits::lowest(), -limits::max());
 }

@@ -26,26 +26,26 @@ typedef math::cost<double> cost;
 // Test "choose", or that operation by any other name.
 template <class Choose> void test_choose(Choose const & choose)
 {
-    BOOST_MPL_ASSERT((math::has<Choose(cost, cost)>) );
-    BOOST_MPL_ASSERT_NOT((math::is::approximate<Choose(cost, cost)>) );
-    BOOST_MPL_ASSERT((math::has<math::callable::identity<cost, Choose>()>) );
-    BOOST_MPL_ASSERT((math::has<math::callable::zero<cost>()>) );
-    BOOST_MPL_ASSERT((math::is::commutative<Choose, cost>) );
-    BOOST_MPL_ASSERT((math::is::associative<Choose, cost>) );
+    static_assert(math::has<Choose(cost, cost)>::value);
+    static_assert(!math::is::approximate<Choose(cost, cost)>::value);
+    static_assert(math::has<math::callable::identity<cost, Choose>()>::value);
+    static_assert(math::has<math::callable::zero<cost>()>::value);
+    static_assert(math::is::commutative<Choose, cost>::value);
+    static_assert(math::is::associative<Choose, cost>::value);
 
-    BOOST_MPL_ASSERT((math::is::path_operation<Choose, cost>) );
-    BOOST_MPL_ASSERT((math::is::idempotent<Choose, cost>) );
+    static_assert(math::is::path_operation<Choose, cost>::value);
+    static_assert(math::is::idempotent<Choose, cost>::value);
 
-    BOOST_MPL_ASSERT_NOT((math::has<math::callable::invert<Choose>(cost)>) );
-    BOOST_MPL_ASSERT_NOT((math::has<math::callable::invert<>(Choose, cost)>) );
+    static_assert(!math::has<math::callable::invert<Choose>(cost)>::value);
+    static_assert(!math::has<math::callable::invert<>(Choose, cost)>::value);
 
     // Distributivity.
-    BOOST_MPL_ASSERT((math::is::distributive<
-                      math::either, math::callable::times, Choose, cost>) );
-    BOOST_MPL_ASSERT((math::is::distributive<
-                      math::left, math::callable::times, Choose, cost>) );
-    BOOST_MPL_ASSERT((math::is::distributive<
-                      math::right, math::callable::times, Choose, cost>) );
+    static_assert(math::is::distributive<
+                  math::either, math::callable::times, Choose, cost>::value);
+    static_assert(math::is::distributive<
+                  math::left, math::callable::times, Choose, cost>::value);
+    static_assert(math::is::distributive<
+                  math::right, math::callable::times, Choose, cost>::value);
 
     BOOST_CHECK_EQUAL(choose(cost(0), cost(0)).value(), 0.);
     BOOST_CHECK_EQUAL(choose(cost(-1), cost(0)).value(), -1.);
@@ -57,38 +57,39 @@ template <class Choose> void test_choose(Choose const & choose)
 
 BOOST_AUTO_TEST_CASE(test_cost)
 {
-    BOOST_MPL_ASSERT((math::has<math::callable::non_member<cost>()>) );
-    BOOST_MPL_ASSERT((math::has<math::callable::is_member(cost)>) );
-    BOOST_MPL_ASSERT((math::has<math::callable::equal(cost, cost)>) );
-    BOOST_MPL_ASSERT(
-        (math::has<math::callable::approximately_equal(cost, cost)>) );
+    static_assert(math::has<math::callable::non_member<cost>()>::value);
+    static_assert(math::has<math::callable::is_member(cost)>::value);
+    static_assert(math::has<math::callable::equal(cost, cost)>::value);
+    static_assert(
+        math::has<math::callable::approximately_equal(cost, cost)>::value);
 
     // "choose" and "plus" are the same.
     test_choose(math::choose);
     test_choose(math::plus);
 
     // times.
-    BOOST_MPL_ASSERT((math::has<math::callable::times(cost, cost &)>) );
-    BOOST_MPL_ASSERT(
-        (math::is::approximate<math::callable::times(cost, cost &)>) );
-    BOOST_MPL_ASSERT((math::is::approximate<math::callable::times(
-                          math::callable::times(cost, cost &), cost &)>) );
-    BOOST_MPL_ASSERT(
-        (math::has<math::callable::identity<cost, math::callable::times>()>) );
-    BOOST_MPL_ASSERT((math::has<math::callable::one<cost>()>) );
+    static_assert(math::has<math::callable::times(cost, cost &)>::value);
+    static_assert(
+        math::is::approximate<math::callable::times(cost, cost &)>::value);
+    static_assert(math::is::approximate<math::callable::times(
+                      math::callable::times(cost, cost &), cost &)>::value);
+    static_assert(
+        math::has<
+            math::callable::identity<cost, math::callable::times>()>::value);
+    static_assert(math::has<math::callable::one<cost>()>::value);
 
-    BOOST_MPL_ASSERT((math::is::commutative<math::callable::times, cost>) );
-    BOOST_MPL_ASSERT((math::is::associative<math::callable::times, cost>) );
+    static_assert(math::is::commutative<math::callable::times, cost>::value);
+    static_assert(math::is::associative<math::callable::times, cost>::value);
 
-    BOOST_MPL_ASSERT_NOT(
-        (math::is::path_operation<math::callable::times, cost>) );
-    BOOST_MPL_ASSERT_NOT((math::is::idempotent<math::callable::times, cost>) );
+    static_assert(
+        !math::is::path_operation<math::callable::times, cost>::value);
+    static_assert(!math::is::idempotent<math::callable::times, cost>::value);
 
-    BOOST_MPL_ASSERT((math::has<math::callable::divide<>(cost, cost)>) );
-    BOOST_MPL_ASSERT(
-        (math::has<math::callable::invert<math::callable::times>(cost)>) );
-    BOOST_MPL_ASSERT(
-        (math::has<math::callable::reverse<math::callable::times>(cost)>) );
+    static_assert(math::has<math::callable::divide<>(cost, cost)>::value);
+    static_assert(
+        math::has<math::callable::invert<math::callable::times>(cost)>::value);
+    static_assert(
+        math::has<math::callable::reverse<math::callable::times>(cost)>::value);
 
     BOOST_CHECK_EQUAL(
         math::zero<cost>().value(), std::numeric_limits<double>::infinity());
