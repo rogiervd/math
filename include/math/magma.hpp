@@ -51,7 +51,6 @@ Queries about operations:
 #include <string>
 #include <type_traits>
 
-#include "boost/utility/enable_if.hpp"
 
 #include "boost/mpl/and.hpp"
 #include "boost/mpl/eval_if.hpp"
@@ -264,12 +263,12 @@ namespace callable {
     template <class Direction = void, class Operation = void> struct invert
     : generic<apply::invert, Direction, Operation> {};
 
-    template <class Operation> struct invert<
-        Operation, typename boost::disable_if<is_direction<Operation>>::type>
+    template <class Operation>
+    struct invert<Operation, std::enable_if_t<!is_direction<Operation>::value>>
     : generic<apply::invert, either, Operation> {};
 
-    template <class Direction> struct invert<
-        Direction, typename boost::enable_if<is_direction<Direction>>::type>
+    template <class Direction>
+    struct invert<Direction, std::enable_if_t<is_direction<Direction>::value>>
     : generic<first_argument_as_compile_time<apply::invert>::apply, Direction> {
     };
 
@@ -293,11 +292,11 @@ namespace callable {
     : generic<apply::inverse_operation, Direction, Operation> {};
 
     template <class Operation> struct inverse_operation<
-        Operation, typename boost::disable_if<is_direction<Operation>>::type>
+        Operation, std::enable_if_t<!is_direction<Operation>::value>>
     : generic<apply::inverse_operation, either, Operation> {};
 
     template <class Direction> struct inverse_operation<
-        Direction, typename boost::enable_if<is_direction<Direction>>::type>
+        Direction, std::enable_if_t<is_direction<Direction>::value>>
     : generic<
           first_argument_as_compile_time<apply::inverse_operation>::apply,
           Direction> {};
@@ -1413,7 +1412,7 @@ Then, \a Direction can be left out, or given as math::either.
 template <
     class Direction, class Dividend, class Divisor,
     /// \cond DONT_DOCUMENT
-    class Enable = typename boost::enable_if<is_direction<Direction>>::type
+    class Enable = std::enable_if_t<is_direction<Direction>::value>
     /// \endcond
     >
 inline auto divide(Dividend && dividend, Divisor && divisor)
@@ -1429,7 +1428,7 @@ inline auto divide(Dividend && dividend, Divisor && divisor)
 /// \cond DONT_DOCUMENT
 template <
     class Dividend, class Divisor,
-    class Enable = typename boost::disable_if<is_direction<Dividend>>::type>
+    class Enable = std::enable_if_t<!is_direction<Dividend>::value>>
 inline typename std::invoke_result<
     callable::divide<either>, Dividend, Divisor>::type
     divide(Dividend && dividend, Divisor && divisor)
@@ -1458,7 +1457,7 @@ Then, \a Direction can be left out, or given as math::either.
 template <
     class Direction, class Minuend, class Subtrahend,
     /// \cond DONT_DOCUMENT
-    class Enable = typename boost::enable_if<is_direction<Direction>>::type
+    class Enable = std::enable_if_t<is_direction<Direction>::value>
     /// \endcond
     >
 inline auto minus(Minuend && minuend, Subtrahend && subtrahend)
@@ -1474,7 +1473,7 @@ inline auto minus(Minuend && minuend, Subtrahend && subtrahend)
 /// \cond DONT_DOCUMENT
 template <
     class Minuend, class Subtrahend,
-    class Enable = typename boost::disable_if<is_direction<Minuend>>::type>
+    class Enable = std::enable_if_t<!is_direction<Minuend>::value>>
 inline typename std::invoke_result<
     callable::minus<either>, Minuend, Subtrahend>::type
     minus(Minuend && minuend, Subtrahend && subtrahend)
@@ -1504,7 +1503,7 @@ The operation can be given as a type argument, or as a value argument.
 template <
     class Direction, class Operation, class Magma,
     /// \cond DONT_DOCUMENT
-    class Enable = typename boost::enable_if<is_direction<Direction>>::type
+    class Enable = std::enable_if_t<is_direction<Direction>::value>
     /// \endcond
     >
 inline auto invert(Operation const & operation, Magma const & magma)
@@ -1517,8 +1516,8 @@ template <class Operation, class Magma> inline
     // Using lazy_disable_if is necessary for GCC 4.6 to construct the
     // declaration, even if SFINAE kicks in. Don't use template <class
     // Operation, class Enable = ...>!
-    typename boost::lazy_disable_if<
-        is_direction<Operation>,
+    typename std::enable_if_t<
+        !is_direction<Operation>::value,
         std::invoke_result<callable::invert<Operation>, Magma const &>>::type
     invert(Operation const & operation, Magma const & magma)
 {
@@ -1528,7 +1527,7 @@ template <class Operation, class Magma> inline
 // With Direction, and operation as a template argument.
 template <
     class Direction, class Operation, class Magma,
-    class Enable = typename boost::enable_if<is_direction<Direction>>::type>
+    class Enable = std::enable_if_t<is_direction<Direction>::value>>
 inline auto invert(Magma const & magma)
     RETURNS(callable::invert<Direction, Operation>()(magma));
 
@@ -1537,8 +1536,8 @@ template <class Operation, class Magma> inline
     // Using lazy_disable_if is necessary for GCC 4.6 to construct the
     // declaration, even if SFINAE kicks in. Don't use template <class
     // Operation, class Enable = ...>!
-    typename boost::lazy_disable_if<
-        is_direction<Operation>,
+    typename std::enable_if_t<
+        !is_direction<Operation>::value,
         std::invoke_result<callable::invert<Operation>, Magma const &>>::type
     invert(Magma const & magma)
 {
@@ -1607,7 +1606,7 @@ The operation can be given as a type argument, or as a value argument.
 template <
     class Direction, class Operation,
     /// \cond DONT_DOCUMENT
-    class Enable = typename boost::enable_if<is_direction<Direction>>::type
+    class Enable = std::enable_if_t<is_direction<Direction>::value>
     /// \endcond
     >
 inline auto inverse_operation(Operation const & operation)
@@ -1626,8 +1625,8 @@ template <class Operation> inline
     // Using lazy_disable_if is necessary for GCC 4.6 to construct the
     // declaration, even if SFINAE kicks in. Don't use template <class
     // Operation, class Enable = ...>!
-    typename boost::lazy_disable_if<
-        is_direction<Operation>,
+    typename std::enable_if_t<
+        !is_direction<Operation>::value,
         std::invoke_result<callable::inverse_operation<>, Operation>>::type
     inverse_operation(Operation const & operation)
 {
@@ -1637,7 +1636,7 @@ template <class Operation> inline
 // Both Direction and Operation are template arguments.
 template <
     class Direction, class Operation,
-    class Enable = typename boost::enable_if<is_direction<Direction>>::type>
+    class Enable = std::enable_if_t<is_direction<Direction>::value>>
 inline typename std::invoke_result<
     callable::inverse_operation<Direction, Operation>>::type
     inverse_operation()
@@ -1650,8 +1649,8 @@ template <class Operation> inline
     // Using lazy_disable_if is necessary for GCC 4.6 to construct the
     // declaration, even if SFINAE kicks in. Don't use template <class
     // Operation, class Enable = ...>!
-    typename boost::lazy_disable_if<
-        is_direction<Operation>,
+    typename std::enable_if_t<
+        !is_direction<Operation>::value,
         std::invoke_result<callable::inverse_operation<Operation>>>::type
     inverse_operation()
 {
@@ -1690,7 +1689,7 @@ function overload using SFINAE).
 template <class... Arguments> struct result_of_or {};
 
 template <class Expression> struct result_of_or<Expression>
-: boost::lazy_enable_if<has<Expression>, result_of<Expression>> {};
+: std::enable_if_t<has<Expression>::value, result_of<Expression>> {};
 
 template <class Expression, class Otherwise>
 struct result_of_or<Expression, Otherwise>
@@ -2149,18 +2148,17 @@ public:
 
 /* Generate operators. */
 
-#define MATH_MAGMA_GENERATE_OPERATOR(tag_predicate, name, symbol)            \
-    template <class Magma1, class Magma2> inline                             \
-        typename ::boost::lazy_enable_if<                                    \
-            ::boost::mpl::and_<                                              \
-                tag_predicate<                                               \
-                    typename ::math::magma_tag_all<Magma1, Magma2>::type>,   \
-                ::math::has<::math::callable::name(Magma1, Magma2)>>,        \
-            ::math::result_of<::math::callable::name(Magma1, Magma2)>>::type \
-        operator symbol(Magma1 const & magma1, Magma2 const & magma2)        \
-    {                                                                        \
-        ::math::callable::name implementation;                               \
-        return implementation(magma1, magma2);                               \
+#define MATH_MAGMA_GENERATE_OPERATOR(tag_predicate, name, symbol)           \
+    template <class Magma1, class Magma2> inline typename std::enable_if_t< \
+        ::boost::mpl::and_<                                                 \
+            tag_predicate<                                                  \
+                typename ::math::magma_tag_all<Magma1, Magma2>::type>,      \
+            ::math::has<::math::callable::name(Magma1, Magma2)>>::value,    \
+        ::math::result_of<::math::callable::name(Magma1, Magma2)>>::type    \
+        operator symbol(Magma1 const & magma1, Magma2 const & magma2)       \
+    {                                                                       \
+        ::math::callable::name implementation;                              \
+        return implementation(magma1, magma2);                              \
     }
 
 /**
@@ -2176,25 +2174,26 @@ If <c> math::operation::generate_operators \<MagmaTag></c> evaluate to true, and
 the operation is defined in math::callable::, then switch on the operator and
 forward to the operation.
 */
-#define MATH_MAGMA_GENERATE_OPERATORS(tag_predicate)                      \
-    MATH_MAGMA_GENERATE_OPERATOR(tag_predicate, times, *)                 \
-    MATH_MAGMA_GENERATE_OPERATOR(tag_predicate, plus, +)                  \
-    MATH_MAGMA_GENERATE_OPERATOR(tag_predicate, minus<>, -)               \
-    MATH_MAGMA_GENERATE_OPERATOR(tag_predicate, divide<>, /)              \
-    MATH_MAGMA_GENERATE_OPERATOR(tag_predicate, equal, ==)                \
-    MATH_MAGMA_GENERATE_OPERATOR(tag_predicate, not_equal, !=)            \
-    MATH_MAGMA_GENERATE_OPERATOR(tag_predicate, compare, <)               \
-    /* print */                                                           \
-    template <class Magma> inline typename ::boost::enable_if<            \
-        ::boost::mpl::and_<                                               \
-            tag_predicate<typename ::math::magma_tag<Magma>::type>,       \
-            ::math::has<::math::callable::print(std::ostream &, Magma)>>, \
-        std::ostream &>::type                                             \
-        operator<<(std::ostream & stream, Magma const & magma)            \
-    {                                                                     \
-        ::math::callable::print implementation;                           \
-        implementation(stream, magma);                                    \
-        return stream;                                                    \
+#define MATH_MAGMA_GENERATE_OPERATORS(tag_predicate)                       \
+    MATH_MAGMA_GENERATE_OPERATOR(tag_predicate, times, *)                  \
+    MATH_MAGMA_GENERATE_OPERATOR(tag_predicate, plus, +)                   \
+    MATH_MAGMA_GENERATE_OPERATOR(tag_predicate, minus<>, -)                \
+    MATH_MAGMA_GENERATE_OPERATOR(tag_predicate, divide<>, /)               \
+    MATH_MAGMA_GENERATE_OPERATOR(tag_predicate, equal, ==)                 \
+    MATH_MAGMA_GENERATE_OPERATOR(tag_predicate, not_equal, !=)             \
+    MATH_MAGMA_GENERATE_OPERATOR(tag_predicate, compare, <)                \
+    /* print */                                                            \
+    template <class Magma> inline std::enable_if_t<                        \
+        ::boost::mpl::and_<                                                \
+            tag_predicate<typename ::math::magma_tag<Magma>::type>,        \
+            ::math::has<::math::callable::print(std::ostream &, Magma)>>:: \
+            value,                                                         \
+        std::ostream &>                                                    \
+        operator<<(std::ostream & stream, Magma const & magma)             \
+    {                                                                      \
+        ::math::callable::print implementation;                            \
+        implementation(stream, magma);                                     \
+        return stream;                                                     \
     }
 
 #endif  // MATH_MAGMA_HPP_INCLUDED

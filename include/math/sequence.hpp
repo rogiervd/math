@@ -5,6 +5,8 @@
 #ifndef MATH_SEQUENCE_HPP_INCLUDED
 #define MATH_SEQUENCE_HPP_INCLUDED
 
+#include <type_traits>
+
 #include <algorithm>  // for std::reverse.
 #include <list>
 #include <stdexcept>
@@ -15,7 +17,6 @@
 #include "boost/functional/hash_fwd.hpp"
 #include "boost/mpl/bool.hpp"
 #include "boost/optional.hpp"
-#include "boost/utility/enable_if.hpp"
 
 #include "utility/disable_if_same.hpp"
 #include "utility/overload_order.hpp"
@@ -158,7 +159,7 @@ public:
     */
     template <
         class Range,
-        class Enable = typename boost::enable_if<range::is_range<Range>>::type>
+        class Enable = std::enable_if_t<range::is_range<Range>::value>>
     explicit sequence(Range && range) : is_annihilator_(false)
     {
         RANGE_FOR_EACH(element, range)
@@ -246,7 +247,7 @@ public:
     */
     template <
         class Range,
-        class Enable = typename boost::enable_if<range::is_range<Range>>::type>
+        class Enable = std::enable_if_t<range::is_range<Range>::value>>
     explicit empty_sequence(Range && range)
     {
         rime::assert_(range::empty(range));
@@ -297,7 +298,7 @@ public:
     */
     template <
         class Range,
-        class Enable1 = typename boost::enable_if<range::is_range<Range>>::type,
+        class Enable1 = std::enable_if_t<range::is_range<Range>::value>,
         class Enable2 =
             typename utility::disable_if_same_or_derived<Symbol, Range>::type>
     explicit single_sequence(Range && range) : symbol_(range::first(range))
@@ -399,7 +400,7 @@ public:
     */
     template <
         class Range,
-        class Enable1 = typename boost::enable_if<range::is_range<Range>>::type,
+        class Enable1 = std::enable_if_t<range::is_range<Range>::value>,
         class Enable2 =
             typename utility::disable_if_same_or_derived<Symbol, Range>::type>
     explicit optional_sequence(Range && range)

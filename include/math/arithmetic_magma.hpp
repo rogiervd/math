@@ -16,7 +16,6 @@ Define magma properties for number types.
 #include "boost/mpl/and.hpp"
 #include "boost/mpl/bool.hpp"
 #include "boost/mpl/not.hpp"
-#include "boost/utility/enable_if.hpp"
 
 #include "magma.hpp"
 
@@ -29,9 +28,9 @@ template <class Type> struct arithmetic_magma_tag;
 
 template <class Type> struct decayed_magma_tag<
     Type,
-    typename boost::enable_if_c<(
+    std::enable_if_t<(
         std::numeric_limits<Type>::is_specialized
-        && !std::is_same<Type, bool>::value)>::type>
+        && !std::is_same<Type, bool>::value)>>
 {
     typedef arithmetic_magma_tag<Type> type;
 };
@@ -42,8 +41,7 @@ namespace operation {
 
     template <class Type> struct is_member<
         arithmetic_magma_tag<Type>,
-        typename boost::enable_if_c<
-            std::numeric_limits<Type>::has_quiet_NaN>::type>
+        std::enable_if_t<std::numeric_limits<Type>::has_quiet_NaN>>
     // Detect NaN.
     {
         bool operator()(Type const & v) const { return v == v; }
@@ -54,7 +52,7 @@ namespace operation {
 
     template <class Type> struct approximately_equal<
         arithmetic_magma_tag<Type>,
-        typename boost::enable_if_c<!std::numeric_limits<Type>::is_exact>::type>
+        std::enable_if_t<!std::numeric_limits<Type>::is_exact>>
     {
         bool operator()(Type const & left, Type const & right) const
         {
@@ -122,28 +120,26 @@ namespace operation {
 
     template <class Type> struct divide<
         arithmetic_magma_tag<Type>, either,
-        typename boost::enable_if_c<
-            !std::numeric_limits<Type>::is_integer>::type>
+        std::enable_if_t<!std::numeric_limits<Type>::is_integer>>
     : operator_divide<Type>, approximate {};
 
     template <class Type> struct minus<
         arithmetic_magma_tag<Type>, either,
-        typename boost::enable_if_c<std::numeric_limits<Type>::is_signed>::type>
+        std::enable_if_t<std::numeric_limits<Type>::is_signed>>
     : operator_minus<Type>,
       approximate_if<boost::mpl::bool_<!std::numeric_limits<Type>::is_exact>> {
     };
 
     template <class Type> struct invert<
         arithmetic_magma_tag<Type>, either, callable::plus,
-        typename boost::enable_if_c<std::numeric_limits<Type>::is_signed>::type>
+        std::enable_if_t<std::numeric_limits<Type>::is_signed>>
     {
         Type operator()(Type const & v) const { return Type(-v); }
     };
 
     template <class Type> struct invert<
         arithmetic_magma_tag<Type>, either, callable::times,
-        typename boost::disable_if_c<
-            std::numeric_limits<Type>::is_integer>::type>
+        std::enable_if_t<!(std::numeric_limits<Type>::is_integer)>>
     : approximate_if<boost::mpl::bool_<!std::numeric_limits<Type>::is_exact>>
     {
         Type operator()(Type const & v) const { return Type(Type(1) / v); }
