@@ -16,6 +16,7 @@
 
 #include "boost/bimap.hpp"
 #include "boost/functional/hash_fwd.hpp"
+#include "boost/hash2/hash_append_fwd.hpp"
 
 #include "utility/returns.hpp"
 
@@ -133,7 +134,7 @@ The ordering is not meaningful: all it does is provide a strict weak ordering
 (which corresponds to the strict weak ordering on the underlying id's).
 There is no relation to the ordering of the normal symbols.
 
-This class also supports boost::hash.
+This class also supports boost::hash and Boost.Hash2.
 
 \tparam Value
     The integer type that the symbol is mapped to.
@@ -245,6 +246,16 @@ inline std::size_t hash_value(dense_symbol<Value, Tag> const & symbol)
 {
     boost::hash<typename rime::value<Value>::type> hasher;
     return hasher(symbol.id());
+}
+
+// Boost.Hash2 support.
+template <class Provider, class Hash, class Flavor, class Value, class Tag>
+inline void tag_invoke(
+    boost::hash2::hash_append_tag const &, Provider const &, Hash & hash,
+    Flavor const & flavor, dense_symbol<Value, Tag> const * symbol)
+{
+    boost::hash2::hash_append(
+        hash, flavor, typename rime::value<Value>::type(symbol->id()));
 }
 
 namespace detail {

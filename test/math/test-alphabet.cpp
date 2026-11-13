@@ -7,9 +7,12 @@
 
 #include "math/alphabet.hpp"
 
+#include <cstdint>
 #include <string>
 
 #include "boost/functional/hash.hpp"
+#include "boost/hash2/fnv1a.hpp"
+#include "boost/hash2/hash_append.hpp"
 #include "boost/mpl/assert.hpp"
 
 #define CHECK_CONSTANT(expression) \
@@ -56,6 +59,13 @@ struct rho
     rime::true_type operator==(rho const & other) const { return rime::true_; }
 };
 
+template <class Symbol> std::uint64_t hash2_value(Symbol const & symbol)
+{
+    boost::hash2::fnv1a_64 hash;
+    boost::hash2::hash_append(hash, boost::hash2::default_flavor(), symbol);
+    return hash.result();
+}
+
 template <class Symbol1, class Symbol2>
 inline void check_comparison(Symbol1 const & symbol1, Symbol2 const & symbol2)
 {
@@ -64,6 +74,7 @@ inline void check_comparison(Symbol1 const & symbol1, Symbol2 const & symbol2)
 
         BOOST_CHECK_EQUAL(
             boost::hash<Symbol1>()(symbol1), boost::hash<Symbol2>()(symbol2));
+        BOOST_CHECK_EQUAL(hash2_value(symbol1), hash2_value(symbol2));
 
         BOOST_CHECK(!(symbol1 < symbol2));
         BOOST_CHECK(symbol1 <= symbol2);
@@ -76,6 +87,7 @@ inline void check_comparison(Symbol1 const & symbol1, Symbol2 const & symbol2)
         // that they are not.
         BOOST_CHECK(
             boost::hash<Symbol1>()(symbol1) != boost::hash<Symbol2>()(symbol2));
+        BOOST_CHECK(hash2_value(symbol1) != hash2_value(symbol2));
 
         if (symbol1 < symbol2) {
             BOOST_CHECK(symbol1 <= symbol2);

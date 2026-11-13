@@ -9,10 +9,13 @@ Define a Cartesian product of magmas.
 #ifndef MATH_PRODUCT_HPP_INCLUDED
 #define MATH_PRODUCT_HPP_INCLUDED
 
+#include <cstdint>
+
 #include "boost/mpl/and.hpp"
 #include "boost/mpl/not.hpp"
 
 #include "boost/functional/hash_fwd.hpp"
+#include "boost/hash2/hash_append_fwd.hpp"
 #include "boost/utility/enable_if.hpp"
 
 #include "meta/all_of_c.hpp"
@@ -29,6 +32,7 @@ Define a Cartesian product of magmas.
 #include "range/call_unpack.hpp"
 #include "range/core.hpp"
 #include "range/equal.hpp"
+#include "range/hash_append.hpp"
 #include "range/hash_range.hpp"
 #include "range/less_lexicographical.hpp"
 #include "range/transform.hpp"
@@ -66,7 +70,8 @@ Operations on this product are associative, commutative, idempotent,
 distributive, and the product is a semiring, if and only if each of the
 components is.
 
-Products supports Boost.Hash, if \c boost/functional/hash.hpp is included.
+Products supports Boost.Hash, if \c boost/functional/hash.hpp is included, and
+Boost.Hash2.
 If the hash values of the components of two products are the same, then the hash
 value of the two products will be the same.
 
@@ -418,6 +423,9 @@ namespace product_detail {
     static std::size_t constexpr annihilator_hash =
         std::size_t(0xcba51c150183b7f1 & std::size_t(-1));
 
+    // The same, for Boost.Hash2.
+    static std::uint64_t constexpr annihilator_hash2 = 0xcba51c150183b7f1;
+
 }  // namespace product_detail
 
 // Without an inverse: just combine the hash values of the components.
@@ -435,6 +443,33 @@ template <class Components, class Operation> inline std::size_t hash_value(
         return product_detail::annihilator_hash;
     }
     return range::hash_range(p.components());
+}
+
+// Boost.Hash2 support.
+
+// Without an inverse: just append the components.
+template <class Provider, class Hash, class Flavor, class Components>
+inline void tag_invoke(
+    boost::hash2::hash_append_tag const &, Provider const &, Hash & hash,
+    Flavor const & flavor, product<Components, with_inverse<>> const * p)
+{
+    range::hash_append(hash, flavor, p->components());
+}
+
+// With an inverse: if p is an annihilator, then append a special value.
+template <
+    class Provider, class Hash, class Flavor, class Components, class Operation>
+inline void tag_invoke(
+    boost::hash2::hash_append_tag const &, Provider const &, Hash & hash,
+    Flavor const & flavor,
+    product<Components, with_inverse<Operation>> const * p)
+{
+    if (is_annihilator<Operation>(*p)) {
+        boost::hash2::hash_append(
+            hash, flavor, product_detail::annihilator_hash2);
+    } else {
+        range::hash_append(hash, flavor, p->components());
+    }
 }
 
 }  // namespace math
