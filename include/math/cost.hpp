@@ -11,6 +11,7 @@
 #include <limits>
 
 #include "boost/functional/hash_fwd.hpp"
+#include "boost/hash2/hash_append_fwd.hpp"
 #include "boost/utility/enable_if.hpp"
 
 #include "magma.hpp"
@@ -25,7 +26,8 @@ It is also known as the "tropical" semiring.
 
 \ref times adds costs; \ref plus and \ref choose pick the lowest-cost argument.
 
-This type supports Boost.Hash, if \c boost/functional/hash.hpp is included.
+This type supports Boost.Hash, if \c boost/functional/hash.hpp is included,
+and Boost.Hash2, if \c boost/hash2/hash_append.hpp is included.
 
 \tparam Type
     Arithmetic type that represents the cost.
@@ -73,6 +75,14 @@ public:
 template <class Type> inline std::size_t hash_value(cost<Type> const & c)
 {
     return boost::hash<Type>()(c.value());
+}
+
+template <class Provider, class Hash, class Flavor, class Type>
+inline void tag_invoke(
+    boost::hash2::hash_append_tag const &, Provider const &, Hash & hash,
+    Flavor const & flavor, cost<Type> const * c)
+{
+    boost::hash2::hash_append(hash, flavor, c->value());
 }
 
 namespace detail {

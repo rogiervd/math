@@ -21,6 +21,7 @@ Define the log_float and signed_log_float classes.
 #include <utility>
 
 #include "boost/functional/hash_fwd.hpp"
+#include "boost/hash2/hash_append_fwd.hpp"
 #include "boost/utility/enable_if.hpp"
 
 #include "detail/log-float_arithmetic.hpp"
@@ -69,7 +70,8 @@ Unlike for floating-point numbers, functions that use a break-down in
 integer and fractional parts are not available, nor are trigonometric
 functions.
 
-log_float supports Boost.Hash if \c boost/functional/hash.hpp is included.
+log_float supports Boost.Hash if \c boost/functional/hash.hpp is included, and
+Boost.Hash2 if \c boost/hash2/hash_append.hpp is included.
 The hash value for a log_float is the same as the hash value of the
 signed_log_float with the same value.
 
@@ -889,6 +891,22 @@ template <class LogFloat, typename Exponent> inline std::size_t hash_value(
         boost::hash_combine(seed, 1);
     }
     return seed;
+}
+
+/** \brief
+Support Boost.Hash2 for a log_float or signed_log_float.
+*/
+template <
+    class Provider, class Hash, class Flavor, class LogFloat, typename Exponent>
+inline void tag_invoke(
+    boost::hash2::hash_append_tag const &, Provider const &, Hash & hash,
+    Flavor const & flavor, detail::log_float_base<LogFloat, Exponent> const * p)
+{
+    boost::hash2::hash_append(hash, flavor, p->exponent());
+    // Make the hash depend on the sign but only if p is not -0.
+    if (p->sign() == -1 && *p) {
+        boost::hash2::hash_append(hash, flavor, true);
+    }
 }
 
 /**

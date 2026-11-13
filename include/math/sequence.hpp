@@ -6,6 +6,7 @@
 #define MATH_SEQUENCE_HPP_INCLUDED
 
 #include <algorithm>  // for std::reverse.
+#include <cstdint>
 #include <list>
 #include <stdexcept>
 #include <vector>
@@ -13,6 +14,7 @@
 #include <iosfwd>
 
 #include "boost/functional/hash_fwd.hpp"
+#include "boost/hash2/hash_append_fwd.hpp"
 #include "boost/mpl/bool.hpp"
 #include "boost/optional.hpp"
 #include "boost/utility/enable_if.hpp"
@@ -24,6 +26,7 @@
 #include "range/empty_view.hpp"
 #include "range/equal.hpp"
 #include "range/for_each_macro.hpp"
+#include "range/hash_append.hpp"
 #include "range/hash_range.hpp"
 #include "range/less_lexicographical.hpp"
 #include "range/std/vector.hpp"
@@ -57,7 +60,8 @@ from \a Direction as a tie-breaker.
 This makes the sequence a semiring with \ref times and \ref choose in both
 directions, whatever the value of \a Direction
 
-Sequences support Boost.Hash, if \c boost/functional/hash.hpp is included.
+Sequences support Boost.Hash, if \c boost/functional/hash.hpp is included, and
+Boost.Hash2.
 Sequences of different types that compare equal have the same hash value.
 The details of how the hashes are computed (in what direction, for example) are
 not defined, and likely to change in future versions.
@@ -1653,6 +1657,9 @@ namespace sequence_detail {
     static std::size_t constexpr annihilator_hash =
         std::size_t(0x84c8fa43d5283350 & std::size_t(-1));
 
+    // The same, for Boost.Hash2.
+    static std::uint64_t constexpr annihilator_hash2 = 0x84c8fa43d5283350;
+
 }  // namespace sequence_detail
 
 template <class Symbol, class Direction>
@@ -1688,6 +1695,62 @@ template <class Symbol, class Direction>
 inline std::size_t hash_value(optional_sequence<Symbol, Direction> const & s)
 {
     return range::hash_range(s.symbols());
+}
+
+/*
+Hash support for Boost.Hash2.
+Values that compare equal, even of different types, append the same message:
+the symbols and their number, or, for annihilators, a fixed value.
+*/
+
+template <
+    class Provider, class Hash, class Flavor, class Symbol, class Direction>
+inline void tag_invoke(
+    boost::hash2::hash_append_tag const &, Provider const &, Hash & hash,
+    Flavor const & flavor, sequence_annihilator<Symbol, Direction> const * s)
+{
+    boost::hash2::hash_append(hash, flavor, sequence_detail::annihilator_hash2);
+}
+
+template <
+    class Provider, class Hash, class Flavor, class Symbol, class Direction>
+inline void tag_invoke(
+    boost::hash2::hash_append_tag const &, Provider const &, Hash & hash,
+    Flavor const & flavor, sequence<Symbol, Direction> const * s)
+{
+    if (s->is_annihilator()) {
+        boost::hash2::hash_append(
+            hash, flavor, sequence_detail::annihilator_hash2);
+    } else {
+        range::hash_append(hash, flavor, s->symbols());
+    }
+}
+
+template <
+    class Provider, class Hash, class Flavor, class Symbol, class Direction>
+inline void tag_invoke(
+    boost::hash2::hash_append_tag const &, Provider const &, Hash & hash,
+    Flavor const & flavor, empty_sequence<Symbol, Direction> const * s)
+{
+    range::hash_append(hash, flavor, s->symbols());
+}
+
+template <
+    class Provider, class Hash, class Flavor, class Symbol, class Direction>
+inline void tag_invoke(
+    boost::hash2::hash_append_tag const &, Provider const &, Hash & hash,
+    Flavor const & flavor, single_sequence<Symbol, Direction> const * s)
+{
+    range::hash_append(hash, flavor, s->symbols());
+}
+
+template <
+    class Provider, class Hash, class Flavor, class Symbol, class Direction>
+inline void tag_invoke(
+    boost::hash2::hash_append_tag const &, Provider const &, Hash & hash,
+    Flavor const & flavor, optional_sequence<Symbol, Direction> const * s)
+{
+    range::hash_append(hash, flavor, s->symbols());
 }
 
 }  // namespace math

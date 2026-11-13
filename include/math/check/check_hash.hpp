@@ -5,10 +5,13 @@
 #ifndef MATH_CHECK_CHECK_HASH_HPP_INCLUDED
 #define MATH_CHECK_CHECK_HASH_HPP_INCLUDED
 
+#include <cstdint>
 #include <functional>
 #include <utility>
 
 #include "boost/functional/hash.hpp"
+#include "boost/hash2/fnv1a.hpp"
+#include "boost/hash2/hash_append.hpp"
 
 #include "range/all_of.hpp"
 #include "range/core.hpp"
@@ -21,6 +24,16 @@ namespace check_detail {
     using std::bind;
     using std::ref;
     using std::placeholders::_1;
+
+    /// Compute a Boost.Hash2 hash value.
+    template <class Example>
+    inline std::uint64_t hash2_value(Example const & example)
+    {
+        boost::hash2::fnv1a_64 hash;
+        boost::hash2::hash_append(
+            hash, boost::hash2::default_flavor(), example);
+        return hash.result();
+    }
 
     struct check_hash_base
     {
@@ -35,6 +48,12 @@ namespace check_detail {
             bool hash_equal = (hasher1(example1) == hasher2(example2));
             if (equal != hash_equal) {
                 report_hash_mismatch(example1, example2, equal, hash_equal);
+                return false;
+            }
+            // Also check Boost.Hash2 support.
+            bool hash2_equal = (hash2_value(example1) == hash2_value(example2));
+            if (equal != hash2_equal) {
+                report_hash_mismatch(example1, example2, equal, hash2_equal);
                 return false;
             }
             return true;
@@ -94,6 +113,7 @@ Check hash values using a range of examples.
 
 For each pair of examples it is check whether the hash compares equal iff the
 values compare equal.
+This checks both Boost.Hash and Boost.Hash2 (using its FNV-1a algorithm).
 It might be possible that you have legitimately clashing hash values, but this
 is exceedingly unlikely.
 If that happens, though, it is best to use slightly different values to test on

@@ -10,11 +10,13 @@ the two values according to a lexicographical ordering.
 #ifndef MATH_LEXICOGRAPHICAL_HPP_INCLUDED
 #define MATH_LEXICOGRAPHICAL_HPP_INCLUDED
 
+#include <cstdint>
 #include <type_traits>
 
 #include "boost/mpl/and.hpp"
 
 #include "boost/functional/hash_fwd.hpp"
+#include "boost/hash2/hash_append_fwd.hpp"
 #include "boost/utility/enable_if.hpp"
 
 #include "meta/all_of_c.hpp"
@@ -25,6 +27,7 @@ the two values according to a lexicographical ordering.
 #include "range/all_of.hpp"
 #include "range/call_unpack.hpp"
 #include "range/equal.hpp"
+#include "range/hash_append.hpp"
 #include "range/hash_range.hpp"
 #include "range/less_lexicographical.hpp"
 #include "range/transform.hpp"
@@ -89,7 +92,7 @@ It has a member function \c components() which returns the range with the
 components in order.
 
 The lexicographical semiring supports Boost.Hash, if
-\c boost/functional/hash.hpp is included.
+\c boost/functional/hash.hpp is included, and Boost.Hash2.
 If the hash values of the components of two lexicographical semirings are the
 same, then the hash value of the two semirings will be the same.
 
@@ -439,6 +442,9 @@ namespace lexicographical_detail {
     static std::size_t constexpr annihilator_hash =
         std::size_t(0xa5e33b35c473015b & std::size_t(-1));
 
+    // The same, for Boost.Hash2.
+    static std::uint64_t constexpr annihilator_hash2 = 0xa5e33b35c473015b;
+
 }  // namespace lexicographical_detail
 
 // Without an inverse: just combine the hash values of the components.
@@ -449,6 +455,20 @@ inline std::size_t hash_value(lexicographical<Components> const & l)
         return lexicographical_detail::annihilator_hash;
     } else {
         return range::hash_range(l.components());
+    }
+}
+
+// Boost.Hash2 support.
+template <class Provider, class Hash, class Flavor, class Components>
+inline void tag_invoke(
+    boost::hash2::hash_append_tag const &, Provider const &, Hash & hash,
+    Flavor const & flavor, lexicographical<Components> const * l)
+{
+    if (is_annihilator<callable::times>(*l)) {
+        boost::hash2::hash_append(
+            hash, flavor, lexicographical_detail::annihilator_hash2);
+    } else {
+        range::hash_append(hash, flavor, l->components());
     }
 }
 

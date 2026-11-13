@@ -12,6 +12,7 @@
 #include "boost/mpl/bool.hpp"
 
 #include "boost/functional/hash_fwd.hpp"
+#include "boost/hash2/hash_append_fwd.hpp"
 
 #include "magma.hpp"
 
@@ -30,7 +31,8 @@ The multiplicative identity has value 1.
 
 Division is only implemented for non-integer types.
 
-This type supports Boost.Hash, if \c boost/functional/hash.hpp is included.
+This type supports Boost.Hash, if \c boost/functional/hash.hpp is included,
+and Boost.Hash2, if \c boost/hash2/hash_append.hpp is included.
 
 \tparam Type
     Underlying type that represents the value.
@@ -232,6 +234,14 @@ template <class Type>
 inline std::size_t hash_value(max_semiring<Type> const & m)
 {
     return boost::hash<Type>()(m.value());
+}
+
+template <class Provider, class Hash, class Flavor, class Type>
+inline void tag_invoke(
+    boost::hash2::hash_append_tag const &, Provider const &, Hash & hash,
+    Flavor const & flavor, max_semiring<Type> const * m)
+{
+    boost::hash2::hash_append(hash, flavor, m->value());
 }
 
 }  // namespace math
