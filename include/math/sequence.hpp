@@ -7,6 +7,7 @@
 
 #include <algorithm>  // for std::reverse.
 #include <list>
+#include <optional>
 #include <stdexcept>
 #include <vector>
 
@@ -14,7 +15,6 @@
 
 #include "boost/functional/hash_fwd.hpp"
 #include "boost/mpl/bool.hpp"
-#include "boost/optional.hpp"
 #include "boost/utility/enable_if.hpp"
 
 #include "utility/disable_if_same.hpp"
@@ -140,7 +140,7 @@ public:
     : is_annihilator_(false)
     {
         if (!s.empty()) {
-            symbols_.push_back(s.symbol().get());
+            symbols_.push_back(*s.symbol());
         }
         assert(s.empty() == this->empty());
     }
@@ -330,20 +330,20 @@ Sequence that is known at compile time to be of length zero or one.
 template <class Symbol, class Direction> class optional_sequence
 {
 private:
-    boost::optional<Symbol> symbol_;
+    std::optional<Symbol> symbol_;
 
     /**
     Extract an optional element from a range of length zero or one.
     */
     template <class Range>
-    static boost::optional<Symbol> extract_from_range(Range && range)
+    static std::optional<Symbol> extract_from_range(Range && range)
     {
         if (range::empty(range)) {
-            return boost::optional<Symbol>();
+            return std::optional<Symbol>();
         } else {
             auto chopped = range::chop(range);
             assert(range::empty(chopped.rest()));
-            return boost::optional<Symbol>(chopped.move_first());
+            return std::optional<Symbol>(chopped.move_first());
         }
     }
 
@@ -409,10 +409,10 @@ public:
     rime::false_type is_annihilator() const { return rime::false_; }
     bool empty() const { return !symbol_; }
 
-    boost::optional<Symbol> const & symbol() const { return symbol_; }
+    std::optional<Symbol> const & symbol() const { return symbol_; }
 
     typename range::result_of<
-        range::callable::view_optional(boost::optional<Symbol> const &)>::type
+        range::callable::view_optional(std::optional<Symbol> const &)>::type
         symbols() const
     {
         return range::view_optional(symbol_);
@@ -1019,7 +1019,7 @@ namespace operation {
                 std::vector<Symbol> & symbols, optional_type const & s) const
             {
                 if (!s.empty()) {
-                    symbols.push_back(s.symbol().get());
+                    symbols.push_back(*s.symbol());
                 }
             }
 
@@ -1168,7 +1168,7 @@ namespace operation {
             }
             static Symbol const & first_symbol(optional_type const & s)
             {
-                return s.symbol().get();
+                return *s.symbol();
             }
 
             static Symbol const & first_symbol(sequence<Symbol, left> const & s)
@@ -1369,7 +1369,7 @@ namespace operation {
                 if (divisor.empty()) {
                     return dividend;
                 }
-                if (dividend.symbol() == divisor.symbol().get()) {
+                if (dividend.symbol() == *divisor.symbol()) {
                     return empty_sequence_type();
                 }
                 throw operation_undefined();
@@ -1402,7 +1402,7 @@ namespace operation {
                 utility::overload_order<4> *) const
             {
                 if (!dividend.empty()
-                    && dividend.symbol().get() == divisor.symbol()) {
+                    && *dividend.symbol() == divisor.symbol()) {
                     return empty_sequence_type();
                 }
                 throw operation_undefined();
@@ -1487,7 +1487,7 @@ namespace operation {
                 if (dividend.empty()) {
                     throw operation_undefined();
                 }
-                if (first_symbol(dividend) != divisor.symbol().get()) {
+                if (first_symbol(dividend) != *divisor.symbol()) {
                     throw operation_undefined();
                 }
 
