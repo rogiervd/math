@@ -15,6 +15,7 @@
 
 #include "boost/hash2/hash_append_fwd.hpp"
 
+#include "meta/contains.hpp"
 #include "meta/range.hpp"
 #include "meta/vector.hpp"
 
@@ -389,6 +390,9 @@ template <class Value, class SpecialSymbols> struct sparse_alphabet_definition
  * Symbol from an alphabet: either a normal symbol, which has a run-time value,
  * or one of a compile-time list of special symbols.
  * Special symbols must be empty, default-constructible types.
+ * The special symbol \c not_a_symbol must be one of the symbols.
+ * A default-constructed symbol is equivalent to a symbol constructed from
+ * \c not_a_symbol.
  */
 template <class AlphabetDefinition> class symbol
 : public detail::symbol_special_impl<
@@ -401,6 +405,11 @@ template <class AlphabetDefinition> class symbol
 
 public:
     using base_type::base_type;
+
+    static_assert(
+        meta::contains<
+            not_a_symbol, typename AlphabetDefinition::special_symbols>::value,
+        "not_a_symbol must be in the alphabet");
 
     /**
      * Initialise with \c not_a_symbol.
