@@ -13,6 +13,8 @@
 #include <utility>
 #include <variant>
 
+#include "boost/hash2/hash_append_fwd.hpp"
+
 #include "meta/range.hpp"
 #include "meta/vector.hpp"
 
@@ -55,6 +57,8 @@ namespace detail {
     - is_normal() and normal_value();
     - a protected is_special_at(special_position<Position>);
     - a protected less_than(other), which implements a strict weak ordering;
+    - a protected hash_append(provider, hash, flavor), for Boost.Hash2, which
+      gives equal symbols equal hashes;
     - a protected member underlying_value_, which compares equal exactly when
       the symbols are equal.
     */
@@ -139,6 +143,13 @@ namespace detail {
             return underlying_value_ < other.underlying_value_;
         }
 
+        template <class Provider, class Hash, class Flavor>
+        constexpr void hash_append(
+            Provider const & provider, Hash & hash, Flavor const & flavor) const
+        {
+            provider.hash_append(hash, flavor, underlying_value_);
+        }
+
         underlying_type underlying_value_;
     };
 
@@ -210,6 +221,22 @@ namespace detail {
                     < std::get<0>(other.underlying_value_);
             }
             return false;
+        }
+
+        /**
+         * Hash the index into the variant, and then the normal value, if any.
+         * Special symbols are empty, so the index identifies them completely
+         * and they need not be hashable themselves.
+         */
+        template <class Provider, class Hash, class Flavor>
+        constexpr void hash_append(
+            Provider const & provider, Hash & hash, Flavor const & flavor) const
+        {
+            provider.hash_append_size(hash, flavor, underlying_value_.index());
+            if (is_normal()) {
+                provider.hash_append(
+                    hash, flavor, std::get<0>(underlying_value_));
+            }
         }
 
         variant_type underlying_value_;
@@ -418,6 +445,17 @@ public:
     friend bool operator>=(symbol const & left, symbol const & right)
     {
         return !left.less_than(right);
+    }
+
+    /**
+     * Support hashing with Boost.Hash2.
+     */
+    template <class Provider, class Hash, class Flavor>
+    friend constexpr void tag_invoke(
+        boost::hash2::hash_append_tag const &, Provider const & provider,
+        Hash & hash, Flavor const & flavor, symbol const * s)
+    {
+        s->hash_append(provider, hash, flavor);
     }
 
     /**

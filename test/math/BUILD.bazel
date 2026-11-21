@@ -42,6 +42,7 @@ load("@rules_cc//cc:defs.bzl", "cc_test")
         srcs = [test_name + ".cpp"],
         deps = [
             "//:math",
+            "@boost.hash2",
             "@boost.unordered",
             "@googletest//:gtest_main",
         ],

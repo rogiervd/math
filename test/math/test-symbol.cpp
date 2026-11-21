@@ -6,6 +6,9 @@
 
 #include "gtest/gtest.h"
 
+#include "boost/hash2/fnv1a.hpp"
+#include "boost/hash2/hash_append.hpp"
+
 #include <cstdint>
 #include <ostream>
 #include <string>
@@ -230,6 +233,41 @@ TYPED_TEST(SymbolTest, Ordering)
                     EXPECT_TRUE(incomparable(a, c));
                 }
             }
+        }
+    }
+}
+
+template <class Value> std::uint64_t get_hash(Value const & value)
+{
+    boost::hash2::fnv1a_64 hash;
+    boost::hash2::hash_append(hash, {}, value);
+    return hash.result();
+}
+
+TYPED_TEST(SymbolTest, Hash)
+{
+    using symbol = TypeParam;
+
+    // The special symbols (empty_symbol and end_of_sentence) do not support
+    // hashing themselves, so this compiling shows they are not hashed.
+    std::vector<symbol> const symbols {
+        symbol {},
+        symbol {0u},
+        symbol {1u},
+        symbol {10u},
+        symbol {10u},
+        symbol {0xffffff7fu},
+        symbol {not_a_symbol {}},
+        symbol {empty_symbol {}},
+        symbol {end_of_sentence {}},
+        symbol {end_of_sentence {}},
+    };
+
+    for (symbol const & a : symbols) {
+        for (symbol const & b : symbols) {
+            // Equal symbols must have equal hashes; for these few distinct
+            // symbols, the hashes should all differ.
+            EXPECT_EQ(get_hash(a) == get_hash(b), a == b);
         }
     }
 }
