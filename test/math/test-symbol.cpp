@@ -8,6 +8,7 @@
 
 #include <cstdint>
 #include <ostream>
+#include <string>
 #include <type_traits>
 
 #include "meta/vector.hpp"
@@ -149,4 +150,28 @@ TYPED_TEST(SymbolTest, Basics)
         EXPECT_NE_BOTH(s, empty_symbol {});
         EXPECT_NE_BOTH(s, symbol(empty_symbol {}));
     }
+}
+
+struct describe
+{
+    std::string operator()(std::uint32_t value) const
+    {
+        return std::to_string(value);
+    }
+    std::string operator()(not_a_symbol) const { return "not_a_symbol"; }
+    std::string operator()(empty_symbol) const { return "empty_symbol"; }
+    std::string operator()(end_of_sentence) const { return "end_of_sentence"; }
+};
+
+TYPED_TEST(SymbolTest, Visit)
+{
+    using symbol = TypeParam;
+
+    EXPECT_EQ(visit(describe {}, symbol {}), "not_a_symbol");
+    EXPECT_EQ(visit(describe {}, symbol {0u}), "0");
+    EXPECT_EQ(visit(describe {}, symbol {10u}), "10");
+    EXPECT_EQ(visit(describe {}, symbol {not_a_symbol {}}), "not_a_symbol");
+    EXPECT_EQ(visit(describe {}, symbol {empty_symbol {}}), "empty_symbol");
+    EXPECT_EQ(
+        visit(describe {}, symbol {end_of_sentence {}}), "end_of_sentence");
 }

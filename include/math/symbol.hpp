@@ -6,6 +6,7 @@
 #define MATH_SYMBOL_HPP_INCLUDED
 
 #include <cassert>
+#include <cstddef>
 #include <ostream>
 #include <stdexcept>
 #include <type_traits>
@@ -42,28 +43,71 @@ namespace detail {
     struct as_special_symbol {};
 
     /**
-     * Implement the basic behaviour for dense_symbol, mostly related to normal
-     * symbols.
+     * Position of a special symbol in the alphabet's list of special symbols.
      */
-    template <class AlphabetDefinition> class dense_symbol_base
+    template <std::size_t Position> using special_position =
+        std::integral_constant<std::size_t, Position>;
+
+    /*
+    Storage for symbols.
+    There are two implementations: dense_symbol_storage and
+    sparse_symbol_storage.
+    Each provides the following, and the rest of the implementation of symbol
+    is shared:
+    - a public explicit constructor from a normal value;
+    - a protected constructor
+      (as_special_symbol, special_position<Position>, SpecialSymbol const &);
+    - is_normal() and normal_value();
+    - is_special_at(special_position<Position>);
+    - a protected member underlying_value_, which compares equal exactly when
+      the symbols are equal.
+    */
+
+    /**
+     * Store a symbol as a single integer.
+     * Normal symbols are stored as themselves; special symbols are stored as
+     * values counting down from the maximum value of the underlying type.
+     */
+    template <class AlphabetDefinition> class dense_symbol_storage
     {
     public:
         using alphabet_definition = AlphabetDefinition;
         using underlying_type = typename AlphabetDefinition::underlying_type;
+        using value_type = underlying_type;
+
+    private:
+        /**
+         * The underlying value that represents the special symbol at
+         * \a Position in the alphabet's list of special symbols.
+         * The first special symbol (Position 0) is represented by the maximum
+         * value of the underlying type, the second by the maximum minus one,
+         * and so on.
+         * These values are all at or above
+         * \c alphabet_definition::special_symbol_start, so they never coincide
+         * with normal values; the constructor checks this with a
+         * static_assert.
+         */
+        template <std::size_t Position>
+        static constexpr underlying_type special_value =
+            static_cast<underlying_type>(underlying_type(-1) - Position);
 
     protected:
-        dense_symbol_base(
-            detail::as_special_symbol, underlying_type const & value)
-        : underlying_value_(value)
+        template <std::size_t Position, class SpecialSymbol>
+        constexpr dense_symbol_storage(
+            as_special_symbol, special_position<Position>,
+            SpecialSymbol const &)
+        : underlying_value_(special_value<Position>)
         {
-            assert(is_special());
+            static_assert(
+                special_value<Position>
+                >= alphabet_definition::special_symbol_start);
         }
 
     public:
         /**
          * Construct with a normal symbol.
          */
-        explicit dense_symbol_base(underlying_type const & value)
+        explicit dense_symbol_storage(underlying_type const & value)
         : underlying_value_(value)
         {
             if (!is_normal()) {
@@ -78,119 +122,170 @@ namespace detail {
                 < alphabet_definition::special_symbol_start;
         }
 
-        constexpr bool is_special() const
-        {
-            return underlying_value_
-                >= alphabet_definition::special_symbol_start;
-        }
-
-        underlying_type normal_value() const
+        value_type normal_value() const
         {
             assert(is_normal());
             return underlying_value_;
         }
 
-        bool operator==(dense_symbol_base const & other) const
+        template <std::size_t Position>
+        constexpr bool is_special_at(special_position<Position>) const
         {
-            return this->underlying_value_ == other.underlying_value_;
-        }
-
-        bool operator!=(dense_symbol_base const & other) const
-        {
-            return this->underlying_value_ != other.underlying_value_;
-        }
-
-        template <class Function> friend auto visit(
-            Function && function, dense_symbol_base const & symbol)
-        {
-            if (symbol.is_normal()) {
-                return std::forward<Function>(function)(symbol.normal_value());
-            }
-            alphabet_definition::visit(
-                std::forward<Function>(function), symbol.underlying_value_);
+            return underlying_value_ == special_value<Position>;
         }
 
     protected:
         underlying_type underlying_value_;
     };
 
-    template <class Base, class Type, Type index, class SpecialSymbols>
-    struct dense_symbol_special_impl;
-
-    // No more special symbols: derive from Base.
-    template <class Base, class Type, Type index>
-    struct dense_symbol_special_impl<Base, Type, index, meta::vector<>> : Base
+    /**
+     * Store a symbol as a std::variant of the normal value type and the
+     * special symbol types.
+     */
+    template <class AlphabetDefinition> class sparse_symbol_storage
     {
-        using Base::Base;
+    public:
+        using alphabet_definition = AlphabetDefinition;
+        using value_type = typename AlphabetDefinition::value_type;
+
+    private:
+        using variant_type = typename AlphabetDefinition::variant_type;
+
+    protected:
+        template <std::size_t Position, class SpecialSymbol>
+        constexpr sparse_symbol_storage(
+            as_special_symbol, special_position<Position>,
+            SpecialSymbol const & symbol)
+        : underlying_value_(std::in_place_index<Position + 1>, symbol)
+        {}
+
+    public:
+        /**
+         * Construct with a normal symbol.
+         */
+        explicit sparse_symbol_storage(value_type const & value)
+        : underlying_value_(std::in_place_index<0>, value)
+        {}
+
+        constexpr bool is_normal() const
+        {
+            return underlying_value_.index() == 0;
+        }
+
+        value_type normal_value() const
+        {
+            assert(is_normal());
+            return std::get<0>(underlying_value_);
+        }
+
+        template <std::size_t Position>
+        constexpr bool is_special_at(special_position<Position>) const
+        {
+            return underlying_value_.index() == Position + 1;
+        }
+
+    protected:
+        variant_type underlying_value_;
+    };
+
+    /**
+     * Implement the interaction of a symbol with the special symbols, with
+     * telescoping inheritance.
+     * Each level adds a constructor and comparison operators for one special
+     * symbol.
+     * Ultimately, derive from \c Storage.
+     */
+    template <class Storage, std::size_t Position, class SpecialSymbols>
+    struct symbol_special_impl;
+
+    // No more special symbols: derive from Storage.
+    template <class Storage, std::size_t Position>
+    struct symbol_special_impl<Storage, Position, meta::vector<>> : Storage
+    {
+        using Storage::Storage;
     };
 
     // Otherwise: implement overloads for the constructor and comparison.
     template <
-        class Base, class Type, Type index, class FirstSymbol,
+        class Storage, std::size_t Position, class FirstSymbol,
         class... OtherSymbols>
-    struct dense_symbol_special_impl<
-        Base, Type, index, meta::vector<FirstSymbol, OtherSymbols...>>
-    : dense_symbol_special_impl<
-          Base, Type, Type(index - 1), meta::vector<OtherSymbols...>>
+    struct symbol_special_impl<
+        Storage, Position, meta::vector<FirstSymbol, OtherSymbols...>>
+    : symbol_special_impl<Storage, Position + 1, meta::vector<OtherSymbols...>>
     {
-        using base_type = dense_symbol_special_impl<
-            Base, Type, Type(index - 1), meta::vector<OtherSymbols...>>;
+    private:
+        using base_type = symbol_special_impl<
+            Storage, Position + 1, meta::vector<OtherSymbols...>>;
+        using position = special_position<Position>;
 
+    public:
         // Inherit constructors.
         using base_type::base_type;
 
         // Define a new constructor for FirstSymbol.
-        explicit dense_symbol_special_impl(FirstSymbol)
-        : base_type(as_special_symbol {}, index)
+        explicit constexpr symbol_special_impl(FirstSymbol const & symbol)
+        : base_type(as_special_symbol {}, position {}, symbol)
         {}
 
         // Define new comparison operators with FirstSymbol.
         friend constexpr bool operator==(
-            dense_symbol_special_impl const & left, FirstSymbol)
+            symbol_special_impl const & left, FirstSymbol const &)
         {
-            return left.underlying_value_ == index;
+            return left.is_special_at(position {});
         }
 
         friend constexpr bool operator!=(
-            dense_symbol_special_impl const & left, FirstSymbol)
+            symbol_special_impl const & left, FirstSymbol const &)
         {
-            return left.underlying_value_ != index;
+            return !left.is_special_at(position {});
         }
 
-        friend bool operator==(
-            FirstSymbol, dense_symbol_special_impl const & right)
+        friend constexpr bool operator==(
+            FirstSymbol const &, symbol_special_impl const & right)
         {
-            return right.underlying_value_ == index;
+            return right.is_special_at(position {});
         }
 
         friend constexpr bool operator!=(
-            FirstSymbol, dense_symbol_special_impl const & right)
+            FirstSymbol const &, symbol_special_impl const & right)
         {
-            return right.underlying_value_ != index;
+            return !right.is_special_at(position {});
+        }
+
+    protected:
+        /**
+         * Call \a function with the special symbol this holds.
+         * This must hold FirstSymbol or one of OtherSymbols.
+         */
+        template <class Function> auto visit_special(Function && function) const
+        {
+            if constexpr (sizeof...(OtherSymbols) == 0) {
+                assert(this->is_special_at(position {}));
+                return std::forward<Function>(function)(FirstSymbol {});
+            } else {
+                if (this->is_special_at(position {})) {
+                    return std::forward<Function>(function)(FirstSymbol {});
+                }
+                return base_type::visit_special(
+                    std::forward<Function>(function));
+            }
         }
     };
 
-    /**
-     * Implement behaviour for dense_symbol for its interaction with the special
-     * symbols, with telescoping inheritance.
-     * Ultimately, derive from \c Base.
-     */
-    template <class Base, class AlphabetDefinition>
-    class implement_dense_special
-    : public dense_symbol_special_impl<
-          Base, typename AlphabetDefinition::underlying_type,
-          typename AlphabetDefinition::underlying_type(-1),
-          typename AlphabetDefinition::special_symbols>
+    template <class Value, class SpecialSymbols> struct define_variant_type;
+
+    template <class Value, class... SpecialSymbols>
+    struct define_variant_type<Value, meta::vector<SpecialSymbols...>>
     {
-        using base_type =
-            typename implement_dense_special::dense_symbol_special_impl;
-
-    public:
-        using base_type::base_type;
+        using variant_type = std::variant<Value, SpecialSymbols...>;
     };
+
+    template <class AlphabetDefinition>
+    using symbol_storage = std::conditional_t<
+        AlphabetDefinition::is_dense, dense_symbol_storage<AlphabetDefinition>,
+        sparse_symbol_storage<AlphabetDefinition>>;
 
 }  // namespace detail
-
 
 template <
     class Underlying, class SpecialSymbols,
@@ -212,153 +307,6 @@ struct dense_alphabet_definition
         static_cast<underlying_type>(0 - max_num_special_symbols);
 };
 
-
-/* sparse */
-
-namespace detail {
-
-    template <class AlphabetDefinition> class sparse_symbol_base
-    {
-        using variant_type = typename AlphabetDefinition::variant_type;
-
-    public:
-    public:
-        using alphabet_definition = AlphabetDefinition;
-        using value_type = typename AlphabetDefinition::value_type;
-
-        // /**
-        //  * Initialise with \c not_a_symbol.
-        //  */
-        // sparse_symbol_base() : underlying_value_(not_a_symbol {}) {}
-
-    protected:
-        template <class SpecialSymbol>
-        sparse_symbol_base(detail::as_special_symbol, SpecialSymbol symbol)
-        : underlying_value_(symbol)
-        {
-            assert(is_special());
-        }
-
-    public:
-        /**
-         * Construct with a normal .
-         */
-        template <class Value> explicit sparse_symbol_base(Value const & value)
-        : underlying_value_(value)
-        {}
-
-        bool is_normal() const { return underlying_value_.index() == 0; }
-
-        bool is_special() const { return underlying_value_.index() != 0; }
-
-        value_type normal_value() const
-        {
-            assert(is_normal());
-            return std::get<value_type>(underlying_value_);
-        }
-
-        bool operator==(sparse_symbol_base const & other) const
-        {
-            return this->underlying_value_ == other.underlying_value_;
-        }
-
-        bool operator!=(sparse_symbol_base const & other) const
-        {
-            return this->underlying_value_ != other.underlying_value_;
-        }
-
-        template <class Function> friend auto visit(
-            Function && function, sparse_symbol_base const & symbol)
-        {
-            std::visit(
-                std::forward<Function>(function), symbol.underlying_value_);
-        }
-
-    protected:
-        variant_type underlying_value_;
-    };
-
-
-    template <class Base, class SpecialSymbols>
-    struct sparse_symbol_special_impl;
-
-    // No more special symbols: derive from Base.
-    template <class Base>
-    struct sparse_symbol_special_impl<Base, meta::vector<>> : Base
-    {
-        using Base::Base;
-    };
-
-    template <class Base, class FirstSymbol, class... OtherSymbols>
-    struct sparse_symbol_special_impl<
-        Base, meta::vector<FirstSymbol, OtherSymbols...>>
-    : sparse_symbol_special_impl<Base, meta::vector<OtherSymbols...>>
-    {
-        using base_type =
-            sparse_symbol_special_impl<Base, meta::vector<OtherSymbols...>>;
-
-        // Inherit constructors.
-        using base_type::base_type;
-
-        // Define a new constructor for FirstSymbol.
-        explicit sparse_symbol_special_impl(FirstSymbol symbol)
-        : base_type(as_special_symbol {}, symbol)
-        {}
-
-        // Define new comparison operators with FirstSymbol.
-        friend constexpr bool operator==(
-            sparse_symbol_special_impl const & left, FirstSymbol)
-        {
-            return std::holds_alternative<FirstSymbol>(left.underlying_value_);
-        }
-
-        friend constexpr bool operator!=(
-            sparse_symbol_special_impl const & left, FirstSymbol)
-        {
-            return !std::holds_alternative<FirstSymbol>(left.underlying_value_);
-        }
-
-        friend bool operator==(
-            FirstSymbol, sparse_symbol_special_impl const & right)
-        {
-            return std::holds_alternative<FirstSymbol>(right.underlying_value_);
-        }
-
-        friend constexpr bool operator!=(
-            FirstSymbol, sparse_symbol_special_impl const & right)
-        {
-            return !std::holds_alternative<FirstSymbol>(
-                right.underlying_value_);
-        }
-    };
-
-    /**
-     * Implement behaviour for sparse_symbol for its interaction with the
-     * special symbols, with telescoping inheritance. Ultimately, derive from \c
-     * Base.
-     */
-    template <class Base, class AlphabetDefinition>
-    class implement_sparse_special
-    : public sparse_symbol_special_impl<
-          Base, typename AlphabetDefinition::special_symbols>
-    {
-        using base_type =
-            typename implement_sparse_special::sparse_symbol_special_impl;
-
-    public:
-        using base_type::base_type;
-    };
-
-    template <class Value, class SpecialSymbols> struct define_variant_type;
-
-    template <class Value, class... SpecialSymbols>
-    struct define_variant_type<Value, meta::vector<SpecialSymbols...>>
-    {
-        using variant_type = std::variant<Value, SpecialSymbols...>;
-    };
-
-}  // namespace detail
-
 template <class Value, class SpecialSymbols> struct sparse_alphabet_definition
 : detail::define_variant_type<Value, SpecialSymbols>
 {
@@ -369,22 +317,19 @@ template <class Value, class SpecialSymbols> struct sparse_alphabet_definition
     using special_symbols = SpecialSymbols;
 };
 
+/**
+ * Symbol from an alphabet: either a normal symbol, which has a run-time value,
+ * or one of a compile-time list of special symbols.
+ * Special symbols must be empty, default-constructible types.
+ */
 template <class AlphabetDefinition> class symbol
-: public std::conditional<
-      AlphabetDefinition::is_dense,
-      detail::implement_dense_special<
-          detail::dense_symbol_base<AlphabetDefinition>, AlphabetDefinition>,
-      detail::implement_sparse_special<
-          detail::sparse_symbol_base<AlphabetDefinition>,
-          AlphabetDefinition>>::type
+: public detail::symbol_special_impl<
+      detail::symbol_storage<AlphabetDefinition>, 0,
+      typename AlphabetDefinition::special_symbols>
 {
-    using base_type = typename std::conditional<
-        AlphabetDefinition::is_dense,
-        detail::implement_dense_special<
-            detail::dense_symbol_base<AlphabetDefinition>, AlphabetDefinition>,
-        detail::implement_sparse_special<
-            detail::sparse_symbol_base<AlphabetDefinition>,
-            AlphabetDefinition>>::type;
+    using base_type = detail::symbol_special_impl<
+        detail::symbol_storage<AlphabetDefinition>, 0,
+        typename AlphabetDefinition::special_symbols>;
 
 public:
     using base_type::base_type;
@@ -393,6 +338,37 @@ public:
      * Initialise with \c not_a_symbol.
      */
     symbol() : base_type(not_a_symbol {}) {}
+
+    constexpr bool is_special() const { return !this->is_normal(); }
+
+    friend bool operator==(symbol const & left, symbol const & right)
+    {
+        return left.underlying_value_ == right.underlying_value_;
+    }
+
+    friend bool operator!=(symbol const & left, symbol const & right)
+    {
+        return left.underlying_value_ != right.underlying_value_;
+    }
+
+    /**
+     * Call \a function with the normal value or the special symbol that
+     * \a symbol holds.
+     */
+    template <class Function>
+    friend auto visit(Function && function, symbol const & s)
+    {
+        if constexpr (
+            meta::size<typename AlphabetDefinition::special_symbols>::value
+            == 0) {
+            return std::forward<Function>(function)(s.normal_value());
+        } else {
+            if (s.is_normal()) {
+                return std::forward<Function>(function)(s.normal_value());
+            }
+            return s.visit_special(std::forward<Function>(function));
+        }
+    }
 };
 
 }  // namespace math
