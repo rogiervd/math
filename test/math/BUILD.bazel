@@ -35,6 +35,24 @@ load("@rules_cc//cc:defs.bzl", "cc_test")
     ]
 ]
 
+[
+    cc_test(
+        name = test_name,
+        size = "small",
+        srcs = [test_name + ".cpp"],
+        deps = [
+            "//:math",
+            "@boost.hash2",
+            "@boost.unordered",
+            "@googletest//:gtest_main",
+        ],
+    )
+    for test_name in [
+        # "test-alphabet-new",
+        "test-symbol",
+    ]
+]
+
 # This test does not use Boost.Test, and defines its own main function.
 cc_test(
     name = "test-log-float-alone",
