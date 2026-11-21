@@ -70,6 +70,8 @@ using symbol_types = ::testing::Types<
 
 TYPED_TEST_SUITE(SymbolTest, symbol_types);
 
+
+// TODO generalise this test
 TYPED_TEST(SymbolTest, Basics)
 {
     using symbol = TypeParam;

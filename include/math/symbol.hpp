@@ -35,11 +35,6 @@ inline std::ostream & operator<<(std::ostream & os, not_a_symbol)
 
 namespace detail {
 
-    struct unusable_type
-    {
-        unusable_type() = delete;
-    };
-
     struct as_special_symbol {};
 
     /**
@@ -72,10 +67,13 @@ namespace detail {
     {
     public:
         using alphabet_definition = AlphabetDefinition;
-        using underlying_type = typename AlphabetDefinition::underlying_type;
-        using value_type = underlying_type;
+        /** \brief
+         * The type of normal symbols.
+         */
+        using normal_type = typename AlphabetDefinition::underlying_type;
 
     private:
+        using underlying_type = normal_type;
         /**
          * The underlying value that represents the special symbol at
          * \a Position in the alphabet's list of special symbols.
@@ -122,7 +120,7 @@ namespace detail {
                 < alphabet_definition::special_symbol_start;
         }
 
-        value_type normal_value() const
+        normal_type normal_value() const
         {
             assert(is_normal());
             return underlying_value_;
@@ -146,7 +144,10 @@ namespace detail {
     {
     public:
         using alphabet_definition = AlphabetDefinition;
-        using value_type = typename AlphabetDefinition::value_type;
+        /**
+         * The type used for normal values.
+         */
+        using normal_type = typename AlphabetDefinition::normal_type;
 
     private:
         using variant_type = typename AlphabetDefinition::variant_type;
@@ -163,7 +164,7 @@ namespace detail {
         /**
          * Construct with a normal symbol.
          */
-        explicit sparse_symbol_storage(value_type const & value)
+        explicit sparse_symbol_storage(normal_type const & value)
         : underlying_value_(std::in_place_index<0>, value)
         {}
 
@@ -172,7 +173,7 @@ namespace detail {
             return underlying_value_.index() == 0;
         }
 
-        value_type normal_value() const
+        normal_type normal_value() const
         {
             assert(is_normal());
             return std::get<0>(underlying_value_);
@@ -217,6 +218,12 @@ namespace detail {
         using base_type = symbol_special_impl<
             Storage, Position + 1, meta::vector<OtherSymbols...>>;
         using position = special_position<Position>;
+
+        // The value of a special symbol is not stored (for dense symbols), and
+        // visit passes FirstSymbol {}, so special symbols must be empty.
+        static_assert(
+            std::is_empty_v<FirstSymbol>,
+            "Special symbols must be empty classes");
 
     public:
         // Inherit constructors.
@@ -294,7 +301,15 @@ struct dense_alphabet_definition
 {
     static constexpr bool is_dense = true;
 
+    /**
+     * The type used to store the value of this object.
+     */
     using underlying_type = Underlying;
+
+    /**
+     * The type used for normal values.
+     */
+    using normal_type = Underlying;
 
     using special_symbols = SpecialSymbols;
 
@@ -312,7 +327,7 @@ template <class Value, class SpecialSymbols> struct sparse_alphabet_definition
 {
     static constexpr bool is_dense = false;
 
-    using value_type = Value;
+    using normal_type = Value;
 
     using special_symbols = SpecialSymbols;
 };
