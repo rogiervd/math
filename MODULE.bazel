@@ -31,6 +31,9 @@ bazel_dep(name = "boost.format", version = "1.90.0.bcr.1")
 bazel_dep(name = "boost.math", version = "1.90.0.bcr.1")
 bazel_dep(name = "boost.units", version = "1.90.0.bcr.1")
 bazel_dep(name = "boost.test", version = "1.90.0.bcr.1")
+bazel_dep(name = "boost.unordered", version = "1.90.0.bcr.1")
+
+bazel_dep(name = "googletest", version = "1.18.0.bcr.1", dev_dependency = True)
 
 # IDEs as well as other tools can use a compile_commands.json databse to know
 # how files are compiled.
