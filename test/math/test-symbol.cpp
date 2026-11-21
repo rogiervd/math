@@ -1,0 +1,152 @@
+// SPDX-FileCopyrightText: Copyright 2026 Rogier van Dalen
+//
+// SPDX-License-Identifier: Apache-2.0
+
+#include "math/symbol.hpp"
+
+#include "gtest/gtest.h"
+
+#include <cstdint>
+#include <ostream>
+#include <type_traits>
+
+#include "meta/vector.hpp"
+#include "rime/core.hpp"
+
+using math::not_a_symbol;
+
+/* Test */
+
+struct empty_symbol {};
+
+inline auto operator==(empty_symbol, empty_symbol) { return rime::true_; }
+inline auto operator!=(empty_symbol, empty_symbol) { return rime::false_; }
+
+std::ostream & operator<<(std::ostream & os, empty_symbol)
+{
+    return os << "(empty symbol)";
+}
+
+struct end_of_sentence {};
+
+inline auto operator==(end_of_sentence, end_of_sentence) { return rime::true_; }
+inline auto operator!=(end_of_sentence, end_of_sentence)
+{
+    return rime::false_;
+}
+
+std::ostream & operator<<(std::ostream & os, end_of_sentence)
+{
+    return os << "(end of sentence)";
+}
+
+
+struct example_alphabet_definition
+: math::dense_alphabet_definition<
+      std::uint32_t,
+      meta::vector<not_a_symbol, empty_symbol, end_of_sentence>> {};
+
+struct example_alphabet_definition_2
+: math::sparse_alphabet_definition<
+      std::uint32_t,
+      meta::vector<not_a_symbol, empty_symbol, end_of_sentence>> {};
+
+
+#define EXPECT_EQ_BOTH(left, right) \
+    EXPECT_EQ(left, right);         \
+    EXPECT_EQ(right, left)
+
+#define EXPECT_NE_BOTH(left, right) \
+    EXPECT_NE(left, right);         \
+    EXPECT_NE(right, left)
+
+
+template <class Symbol> class SymbolTest : public ::testing::Test {};
+
+using symbol_types = ::testing::Types<
+    math::symbol<example_alphabet_definition>,
+    math::symbol<example_alphabet_definition_2>>;
+
+TYPED_TEST_SUITE(SymbolTest, symbol_types);
+
+TYPED_TEST(SymbolTest, Basics)
+{
+    using symbol = TypeParam;
+
+    static_assert(!std::is_convertible_v<std::uint32_t, symbol>);
+    static_assert(!std::is_convertible_v<not_a_symbol, symbol>);
+
+    // Default-construct.
+    {
+        symbol s;
+        EXPECT_TRUE(s.is_special());
+        EXPECT_TRUE(!s.is_normal());
+        EXPECT_NE_BOTH(s, symbol {0u});
+        EXPECT_NE_BOTH(s, symbol {10u});
+        EXPECT_EQ_BOTH(s, not_a_symbol {});
+        EXPECT_NE_BOTH(s, empty_symbol {});
+        EXPECT_NE_BOTH(s, end_of_sentence {});
+        EXPECT_NE_BOTH(s, symbol(empty_symbol {}));
+    }
+
+    // Construct as normal symbol.
+    {
+        symbol s(0u);
+        EXPECT_TRUE(!s.is_special());
+        EXPECT_TRUE(s.is_normal());
+        EXPECT_EQ_BOTH(s.normal_value(), 0);
+        EXPECT_EQ_BOTH(s, symbol {0u});
+        EXPECT_NE_BOTH(s, symbol {10u});
+        EXPECT_NE_BOTH(s, not_a_symbol {});
+        EXPECT_NE_BOTH(s, empty_symbol {});
+        EXPECT_NE_BOTH(s, end_of_sentence {});
+        EXPECT_NE_BOTH(s, symbol(empty_symbol {}));
+    }
+    {
+        symbol s(10u);
+        EXPECT_TRUE(!s.is_special());
+        EXPECT_TRUE(s.is_normal());
+        EXPECT_EQ_BOTH(s.normal_value(), 10);
+        EXPECT_NE_BOTH(s, symbol {0u});
+        EXPECT_EQ_BOTH(s, symbol {10u});
+        EXPECT_NE_BOTH(s, not_a_symbol {});
+        EXPECT_NE_BOTH(s, empty_symbol {});
+        EXPECT_NE_BOTH(s, end_of_sentence {});
+        EXPECT_NE_BOTH(s, symbol(empty_symbol {}));
+    }
+
+    // Construct with special symbols.
+    {
+        symbol s {not_a_symbol {}};
+        EXPECT_TRUE(s.is_special());
+        EXPECT_TRUE(!s.is_normal());
+        EXPECT_NE_BOTH(s, symbol {0u});
+        EXPECT_NE_BOTH(s, symbol {10u});
+        EXPECT_EQ_BOTH(s, not_a_symbol {});
+        EXPECT_NE_BOTH(s, empty_symbol {});
+        EXPECT_NE_BOTH(s, end_of_sentence {});
+        EXPECT_NE_BOTH(s, symbol(empty_symbol {}));
+    }
+    {
+        symbol s {empty_symbol {}};
+        EXPECT_TRUE(s.is_special());
+        EXPECT_TRUE(!s.is_normal());
+        EXPECT_NE_BOTH(s, symbol {0u});
+        EXPECT_NE_BOTH(s, symbol {10u});
+        EXPECT_EQ_BOTH(s, empty_symbol {});
+        EXPECT_NE_BOTH(s, not_a_symbol {});
+        EXPECT_NE_BOTH(s, end_of_sentence {});
+        EXPECT_EQ_BOTH(s, symbol(empty_symbol {}));
+    }
+    {
+        symbol s {end_of_sentence {}};
+        EXPECT_TRUE(s.is_special());
+        EXPECT_TRUE(!s.is_normal());
+        EXPECT_NE_BOTH(s, symbol {0u});
+        EXPECT_NE_BOTH(s, symbol {10u});
+        EXPECT_EQ_BOTH(s, end_of_sentence {});
+        EXPECT_NE_BOTH(s, not_a_symbol {});
+        EXPECT_NE_BOTH(s, empty_symbol {});
+        EXPECT_NE_BOTH(s, symbol(empty_symbol {}));
+    }
+}
