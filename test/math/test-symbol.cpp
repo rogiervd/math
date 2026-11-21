@@ -10,6 +10,7 @@
 #include <ostream>
 #include <string>
 #include <type_traits>
+#include <vector>
 
 #include "meta/vector.hpp"
 #include "rime/core.hpp"
@@ -176,4 +177,59 @@ TYPED_TEST(SymbolTest, Visit)
     EXPECT_EQ(visit(describe {}, symbol {empty_symbol {}}), "empty_symbol");
     EXPECT_EQ(
         visit(describe {}, symbol {end_of_sentence {}}), "end_of_sentence");
+}
+
+TYPED_TEST(SymbolTest, Ordering)
+{
+    using symbol = TypeParam;
+
+    // Include duplicates, to check equivalence, and the largest normal value
+    // that dense_alphabet_definition<std::uint32_t, ...> allows.
+    std::vector<symbol> const symbols {
+        symbol {},
+        symbol {0u},
+        symbol {1u},
+        symbol {10u},
+        symbol {10u},
+        symbol {0xffffff7fu},  // The maximum non-special symbol.
+        symbol {not_a_symbol {}},
+        symbol {empty_symbol {}},
+        symbol {end_of_sentence {}},
+        symbol {end_of_sentence {}},
+    };
+
+    auto incomparable = [](symbol const & a, symbol const & b) {
+        return !(a < b) && !(b < a);
+    };
+
+    for (symbol const & a : symbols) {
+        // Irreflexivity.
+        EXPECT_FALSE(a < a);
+
+        for (symbol const & b : symbols) {
+            // Asymmetry.
+            if (a < b) {
+                EXPECT_FALSE(b < a);
+            }
+
+            // Equivalence is equality.
+            EXPECT_EQ(incomparable(a, b), a == b);
+
+            // The other operators are consistent with <.
+            EXPECT_EQ(a > b, b < a);
+            EXPECT_EQ(a <= b, !(b < a));
+            EXPECT_EQ(a >= b, !(a < b));
+
+            for (symbol const & c : symbols) {
+                // Transitivity.
+                if (a < b && b < c) {
+                    EXPECT_TRUE(a < c);
+                }
+                // Transitivity of incomparability.
+                if (incomparable(a, b) && incomparable(b, c)) {
+                    EXPECT_TRUE(incomparable(a, c));
+                }
+            }
+        }
+    }
 }

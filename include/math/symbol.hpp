@@ -53,7 +53,8 @@ namespace detail {
     - a protected constructor
       (as_special_symbol, special_position<Position>, SpecialSymbol const &);
     - is_normal() and normal_value();
-    - is_special_at(special_position<Position>);
+    - a protected is_special_at(special_position<Position>);
+    - a protected less_than(other), which implements a strict weak ordering;
     - a protected member underlying_value_, which compares equal exactly when
       the symbols are equal.
     */
@@ -126,13 +127,18 @@ namespace detail {
             return underlying_value_;
         }
 
+    protected:
         template <std::size_t Position>
         constexpr bool is_special_at(special_position<Position>) const
         {
             return underlying_value_ == special_value<Position>;
         }
 
-    protected:
+        constexpr bool less_than(dense_symbol_storage const & other) const
+        {
+            return underlying_value_ < other.underlying_value_;
+        }
+
         underlying_type underlying_value_;
     };
 
@@ -179,13 +185,33 @@ namespace detail {
             return std::get<0>(underlying_value_);
         }
 
+    protected:
         template <std::size_t Position>
         constexpr bool is_special_at(special_position<Position>) const
         {
             return underlying_value_.index() == Position + 1;
         }
 
-    protected:
+        /**
+         * Order by the index into the variant first, and then by the normal
+         * value.
+         * Special symbols are not compared with each other: they need not
+         * define operator<, and two of the same type are always equivalent.
+         */
+        constexpr bool less_than(sparse_symbol_storage const & other) const
+        {
+            auto const index = underlying_value_.index();
+            auto const other_index = other.underlying_value_.index();
+            if (index != other_index) {
+                return index < other_index;
+            }
+            if (index == 0) {
+                return std::get<0>(underlying_value_)
+                    < std::get<0>(other.underlying_value_);
+            }
+            return false;
+        }
+
         variant_type underlying_value_;
     };
 
@@ -364,6 +390,34 @@ public:
     friend bool operator!=(symbol const & left, symbol const & right)
     {
         return left.underlying_value_ != right.underlying_value_;
+    }
+
+    /*
+    Ordering.
+    This is a strict weak ordering (if the normal type of a sparse alphabet has
+    one), but it is otherwise arbitrary: it can differ between dense and sparse
+    symbols, and the position of special symbols relative to normal symbols is
+    unspecified.
+    */
+
+    friend bool operator<(symbol const & left, symbol const & right)
+    {
+        return left.less_than(right);
+    }
+
+    friend bool operator<=(symbol const & left, symbol const & right)
+    {
+        return !right.less_than(left);
+    }
+
+    friend bool operator>(symbol const & left, symbol const & right)
+    {
+        return right.less_than(left);
+    }
+
+    friend bool operator>=(symbol const & left, symbol const & right)
+    {
+        return !left.less_than(right);
     }
 
     /**
